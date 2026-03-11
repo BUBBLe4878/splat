@@ -740,7 +740,7 @@
         pointer-events: none;
         overflow: visible;
       }
-      /* Simple CSS crosshair (non-scoped) */
+      /* ── CROSSHAIR: tactical gap-style ── */
       #xhair {
         position: fixed;
         top: 50%;
@@ -751,36 +751,76 @@
         width: 0;
         height: 0;
       }
-      #xhair::before,
+      /* Four-line gap crosshair via box-shadow trick */
+      #xhair::before {
+        content: "";
+        position: absolute;
+        /* left bar */
+        width: 9px;
+        height: 1.5px;
+        top: -0.75px;
+        left: -16px;
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow:
+          0 0 2px rgba(0, 0, 0, 0.9),
+          /* right bar (offset 23px to clear 6px gap on each side) */ 23px 0 0
+            rgba(255, 255, 255, 0.92),
+          23px 0 2px rgba(0, 0, 0, 0.9);
+        border-radius: 1px;
+      }
       #xhair::after {
         content: "";
         position: absolute;
+        /* top bar */
+        width: 1.5px;
+        height: 9px;
+        top: -16px;
+        left: -0.75px;
         background: rgba(255, 255, 255, 0.92);
+        box-shadow:
+          0 0 2px rgba(0, 0, 0, 0.9),
+          /* bottom bar */ 0 23px 0 rgba(255, 255, 255, 0.92),
+          0 23px 2px rgba(0, 0, 0, 0.9);
         border-radius: 1px;
-        box-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
       }
-      #xhair::before {
-        width: 14px;
-        height: 2px;
-        top: -1px;
-        left: -7px;
-      }
-      #xhair::after {
-        width: 2px;
-        height: 14px;
-        top: -7px;
-        left: -1px;
-      }
-      /* centre gap using a white box with a hole */
       #xhair-dot {
         position: absolute;
-        width: 3px;
-        height: 3px;
+        width: 2px;
+        height: 2px;
         border-radius: 50%;
-        background: rgba(255, 255, 255, 0.9);
-        top: -1.5px;
-        left: -1.5px;
-        box-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
+        background: rgba(255, 80, 60, 0.95);
+        top: -1px;
+        left: -1px;
+        box-shadow: 0 0 3px rgba(0, 0, 0, 1);
+        transition:
+          transform 0.07s ease,
+          background 0.08s;
+      }
+      /* Tighter when ADS */
+      body.is-aiming #xhair::before {
+        width: 6px;
+        left: -10px;
+        box-shadow:
+          0 0 2px rgba(0, 0, 0, 0.9),
+          14px 0 0 rgba(255, 255, 255, 0.92),
+          14px 0 2px rgba(0, 0, 0, 0.9);
+      }
+      body.is-aiming #xhair::after {
+        height: 6px;
+        top: -10px;
+        box-shadow:
+          0 0 2px rgba(0, 0, 0, 0.9),
+          0 14px 0 rgba(255, 255, 255, 0.92),
+          0 14px 2px rgba(0, 0, 0, 0.9);
+      }
+      /* Hit flash: dot pulses red/gold */
+      body.xhair-hit #xhair-dot {
+        background: #ff3030;
+        transform: scale(3);
+      }
+      body.xhair-kill #xhair-dot {
+        background: #ffdd00;
+        transform: scale(4);
       }
 
       /* ─── TOUCH ─── */
@@ -1644,11 +1684,344 @@
         letter-spacing: 1px;
         margin-bottom: 28px;
       }
+
+      /* ═══ ARMOR / MEDICAL CARDS ═══ */
+      .armor-card {
+        background: rgba(255, 255, 255, 0.04);
+        border: 2px solid rgba(255, 255, 255, 0.09);
+        border-radius: 14px;
+        padding: 14px 13px 13px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        cursor: default;
+        transition:
+          border-color 0.2s,
+          transform 0.15s;
+      }
+      .armor-card:hover {
+        border-color: rgba(100, 180, 255, 0.35);
+        transform: translateY(-2px);
+      }
+      .armor-card.is-equipped {
+        border-color: #44aaff;
+        background: rgba(68, 170, 255, 0.07);
+      }
+      .armor-card.is-owned {
+        border-color: rgba(68, 255, 136, 0.25);
+      }
+      .ac-slot {
+        font-size: 9px;
+        letter-spacing: 2px;
+        opacity: 0.38;
+        text-transform: uppercase;
+      }
+      .ac-icon {
+        font-size: 32px;
+        line-height: 1;
+        margin: 2px 0;
+      }
+      .ac-name {
+        font-family: "Bebas Neue", sans-serif;
+        font-size: 17px;
+        letter-spacing: 2px;
+      }
+      .ac-desc {
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.38);
+        line-height: 1.5;
+        min-height: 30px;
+      }
+      .ac-prot {
+        font-family: "Bebas Neue", sans-serif;
+        font-size: 14px;
+        color: #44aaff;
+        letter-spacing: 1px;
+      }
+      .ac-bar {
+        width: 100%;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 2px;
+        overflow: hidden;
+        margin: 1px 0;
+      }
+      .ac-bar-fill {
+        height: 100%;
+        border-radius: 2px;
+        background: linear-gradient(90deg, #44aaff, #0055cc);
+      }
+      .ac-cost {
+        font-family: "Bebas Neue", sans-serif;
+        font-size: 15px;
+        color: #ffd700;
+        letter-spacing: 1px;
+        margin-top: 2px;
+      }
+      .ac-badge {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        font-size: 8px;
+        letter-spacing: 1.5px;
+        padding: 2px 7px;
+        border-radius: 20px;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+      .ac-badge.on {
+        background: #44aaff;
+        color: #000;
+      }
+      .ac-badge.own {
+        background: rgba(68, 255, 136, 0.15);
+        color: #44ff88;
+        border: 1px solid rgba(68, 255, 136, 0.35);
+      }
+      .ac-btn {
+        padding: 9px;
+        border-radius: 9px;
+        border: none;
+        cursor: pointer;
+        font-family: "Bebas Neue", sans-serif;
+        font-size: 13px;
+        letter-spacing: 2px;
+        transition: all 0.2s;
+        width: 100%;
+        margin-top: 4px;
+      }
+      .ac-btn.buy {
+        background: linear-gradient(135deg, #c89820, #a07010);
+        color: #fff;
+      }
+      .ac-btn.buy:hover {
+        filter: brightness(1.18);
+      }
+      .ac-btn.equip {
+        background: rgba(68, 170, 255, 0.15);
+        color: #44aaff;
+        border: 1px solid rgba(68, 170, 255, 0.3);
+      }
+      .ac-btn.equip:hover {
+        background: rgba(68, 170, 255, 0.25);
+      }
+      .ac-btn.on {
+        background: rgba(68, 170, 255, 0.08);
+        color: rgba(68, 170, 255, 0.5);
+        cursor: default;
+        border: 1px solid rgba(68, 170, 255, 0.2);
+      }
+      .ac-btn.cant {
+        background: rgba(255, 255, 255, 0.04);
+        color: rgba(255, 255, 255, 0.2);
+        cursor: not-allowed;
+      }
+
+      /* ═══ HUD ENHANCEMENTS ═══ */
+      /* Vignette */
+      #damage-vignette {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 5;
+        opacity: 0;
+        background: radial-gradient(
+          ellipse at 50% 50%,
+          transparent 55%,
+          rgba(160, 0, 0, 0) 100%
+        );
+        transition: opacity 0.3s;
+      }
+      #damage-vignette.critical {
+        opacity: 1;
+        background: radial-gradient(
+          ellipse at 50% 50%,
+          transparent 44%,
+          rgba(150, 0, 0, 0.6) 100%
+        );
+        animation: vigPulse 0.85s ease-in-out infinite;
+      }
+      @keyframes vigPulse {
+        0%,
+        100% {
+          opacity: 0.55;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      /* Minimap */
+      #minimap-wrap {
+        position: fixed;
+        bottom: 16px;
+        right: 16px;
+        z-index: 25;
+        pointer-events: none;
+        display: none;
+      }
+      #minimap {
+        width: 148px;
+        height: 148px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.18);
+        box-shadow:
+          0 0 22px rgba(0, 0, 0, 0.7),
+          inset 0 0 8px rgba(0, 0, 0, 0.4);
+        display: block;
+      }
+      #minimap-label {
+        text-align: center;
+        font-size: 8px;
+        letter-spacing: 2.5px;
+        opacity: 0.28;
+        margin-top: 4px;
+        font-family: "Bebas Neue", sans-serif;
+      }
+
+      /* Kill feed */
+      #kill-feed {
+        position: fixed;
+        top: 68px;
+        right: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        z-index: 25;
+        pointer-events: none;
+        align-items: flex-end;
+        display: none;
+      }
+      .kf-entry {
+        background: rgba(0, 0, 0, 0.75);
+        border-right: 3px solid #ff6b35;
+        padding: 5px 12px 5px 10px;
+        border-radius: 6px 0 0 6px;
+        font-size: 12px;
+        letter-spacing: 0.4px;
+        backdrop-filter: blur(6px);
+        white-space: nowrap;
+        animation: kfSlide 0.2s ease;
+      }
+      @keyframes kfSlide {
+        from {
+          transform: translateX(40px);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      /* Streak announcement */
+      #streak-ann {
+        position: fixed;
+        top: 36%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-family: "Bebas Neue", sans-serif;
+        font-size: clamp(24px, 5vw, 46px);
+        letter-spacing: 6px;
+        color: #ffdd00;
+        text-shadow:
+          0 0 30px rgba(255, 220, 0, 0.8),
+          0 2px 8px rgba(0, 0, 0, 0.9);
+        pointer-events: none;
+        z-index: 55;
+        opacity: 0;
+        transition: opacity 0.15s;
+        white-space: nowrap;
+      }
+
+      /* Sprint indicator */
+      #sprint-ind {
+        position: fixed;
+        bottom: 148px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-family: "Bebas Neue", sans-serif;
+        font-size: 10px;
+        letter-spacing: 3px;
+        color: rgba(255, 255, 255, 0.4);
+        pointer-events: none;
+        z-index: 15;
+        opacity: 0;
+        transition: opacity 0.2s;
+      }
+      #sprint-ind.active {
+        opacity: 1;
+      }
+
+      /* Reload progress bar */
+      #reload-bar-wrap {
+        position: fixed;
+        bottom: 120px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 110px;
+        pointer-events: none;
+        z-index: 15;
+        display: none;
+      }
+      #reload-bar-track {
+        width: 100%;
+        height: 3px;
+        background: rgba(255, 255, 255, 0.12);
+        border-radius: 2px;
+        overflow: hidden;
+      }
+      #reload-bar-fill {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, #ff6b35, #ffd23f);
+        border-radius: 2px;
+      }
+
+      /* HP / Ammo critical animations */
+      @keyframes hpCrit {
+        0%,
+        100% {
+          background: linear-gradient(90deg, #ff4444, #ff7700);
+        }
+        50% {
+          background: linear-gradient(90deg, #dd0000, #bb2200);
+        }
+      }
+      #hp-fill.critical {
+        animation: hpCrit 0.7s infinite;
+      }
+      @keyframes ammoBlink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.18;
+        }
+      }
+      #ammo-num.empty {
+        color: #ff4444 !important;
+        animation: ammoBlink 0.45s infinite;
+      }
     </style>
   </head>
   <body>
     <canvas id="canvas"></canvas>
     <div id="xhair"><div id="xhair-dot"></div></div>
+    <!-- New HUD elements -->
+    <div id="damage-vignette"></div>
+    <div id="kill-feed"></div>
+    <div id="streak-ann"></div>
+    <div id="sprint-ind">⚡ SPRINTING</div>
+    <div id="minimap-wrap">
+      <canvas id="minimap" width="148" height="148"></canvas>
+      <div id="minimap-label">MAP</div>
+    </div>
+    <div id="reload-bar-wrap">
+      <div id="reload-bar-track"><div id="reload-bar-fill"></div></div>
+    </div>
     <div id="scope">
       <svg
         id="scope-svg"
@@ -1695,9 +2068,6 @@
       <div id="blaster-hud">
         <span id="blaster-hud-icon">🔫</span
         ><span id="blaster-hud-name">Basic</span>
-      </div>
-      <div id="reserve-hud">
-        &#127912; Reserve: <span id="reserve-val">0</span>
       </div>
       <div id="reserve-hud">🎨 Reserve: <span id="reserve-val">0</span></div>
       <div id="wave-ann"></div>
@@ -1779,8 +2149,22 @@
         <button class="shop-tab" id="tab-mods" onclick="switchShopTab('mods')">
           🔧 MODS
         </button>
+        <button
+          class="shop-tab"
+          id="tab-armor"
+          onclick="switchShopTab('armor')"
+        >
+          🛡 ARMOR
+        </button>
+        <button
+          class="shop-tab"
+          id="tab-medical"
+          onclick="switchShopTab('medical')"
+        >
+          💊 MEDICAL
+        </button>
         <button class="shop-tab" id="tab-ammo" onclick="switchShopTab('ammo')">
-          🎨 AMMO PACKS
+          🎨 AMMO
         </button>
       </div>
       <!-- Effective stats bar (shown in mods + blasters tab) -->
@@ -1794,6 +2178,43 @@
         <div class="mod-section" id="mod-section-mag"></div>
         <div class="mod-section" id="mod-section-reload"></div>
       </div>
+      <div id="shop-tab-armor" style="display: none">
+        <div
+          style="
+            font-size: 10px;
+            letter-spacing: 3px;
+            opacity: 0.35;
+            text-transform: uppercase;
+            padding: 4px 0 14px;
+          "
+        >
+          🛡 Protection — reduces incoming damage per slot
+        </div>
+        <div class="blaster-grid" id="armor-grid"></div>
+        <div
+          id="armor-total-bar"
+          style="
+            font-size: 12px;
+            opacity: 0.5;
+            text-align: center;
+            margin: 4px 0 14px;
+          "
+        ></div>
+      </div>
+      <div id="shop-tab-medical" style="display: none">
+        <div
+          style="
+            font-size: 10px;
+            letter-spacing: 3px;
+            opacity: 0.35;
+            text-transform: uppercase;
+            padding: 4px 0 14px;
+          "
+        >
+          💊 Press H in-game to use your best healing item
+        </div>
+        <div class="blaster-grid" id="medical-grid"></div>
+      </div>
       <div id="shop-tab-ammo" style="display: none">
         <div class="pack-grid" id="pack-grid"></div>
         <div
@@ -1804,8 +2225,7 @@
             margin-bottom: 12px;
           "
         >
-          Reserve ammo carries into Limited Ammo mode and refills your mag when
-          empty.
+          Reserve ammo refills your mag when empty in Limited Ammo mode.
         </div>
       </div>
       <div class="promo-box">
@@ -2026,7 +2446,7 @@
       </div>
     </div>
 
-    <!-- Pause Menu -->
+    <!-- Pause Menu (single, authoritative) -->
     <div
       id="pause-menu"
       style="
@@ -2036,20 +2456,23 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        background: rgba(0, 0, 0, 0.82);
+        background: rgba(0, 0, 0, 0.88);
         z-index: 180;
-        backdrop-filter: blur(14px);
-        gap: 13px;
+        backdrop-filter: blur(18px);
+        gap: 11px;
+        overflow-y: auto;
+        padding: 20px 0;
       "
     >
       <div
         style="
           font-family: &quot;Bebas Neue&quot;, sans-serif;
-          font-size: clamp(42px, 9vw, 72px);
+          font-size: clamp(38px, 8vw, 66px);
           letter-spacing: 5px;
           background: linear-gradient(135deg, #ff6b35, #ffd23f);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
+          margin-bottom: 4px;
         "
       >
         PAUSED
@@ -2067,6 +2490,61 @@
       >
         ⚙ SETTINGS
       </button>
+      <!-- Embedded settings panel shown/hidden inside pause -->
+      <div
+        id="pause-settings-inner"
+        style="
+          display: none;
+          background: rgba(255, 255, 255, 0.04);
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          border-radius: 14px;
+          padding: 18px 22px;
+          width: min(280px, 88vw);
+        "
+      >
+        <div
+          style="
+            font-size: 9px;
+            letter-spacing: 3px;
+            opacity: 0.35;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+          "
+        >
+          Settings
+        </div>
+        <div class="srow">
+          <span class="srow-lbl">Touch Controls</span>
+          <div class="toggle" id="touch-tog"><div class="tknob"></div></div>
+        </div>
+        <div class="srow">
+          <span class="srow-lbl">Sensitivity</span>
+          <div style="display: flex; align-items: center; gap: 8px">
+            <input
+              type="range"
+              id="sens-sl"
+              min="1"
+              max="10"
+              value="5"
+              style="width: 90px; accent-color: #ff6b35"
+            />
+            <span id="sens-v" style="font-size: 11px; opacity: 0.5; width: 14px"
+              >5</span
+            >
+          </div>
+        </div>
+        <div
+          style="
+            margin-top: 12px;
+            font-size: 10px;
+            opacity: 0.28;
+            line-height: 1.7;
+            letter-spacing: 0.5px;
+          "
+        >
+          WASD · Space Jump · R Reload<br />Right-click Aim · B Shop · H Heal
+        </div>
+      </div>
       <button
         class="lb-btn red"
         id="pause-menu-btn"
@@ -2077,129 +2555,9 @@
       <div
         style="
           font-size: 10px;
-          opacity: 0.25;
+          opacity: 0.22;
           letter-spacing: 2px;
-          margin-top: 6px;
-        "
-      >
-        ESC TO RESUME
-      </div>
-    </div>
-
-    <!-- Pause Menu -->
-    <div
-      id="pause-menu"
-      style="
-        position: fixed;
-        inset: 0;
-        display: none;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        background: rgba(0, 0, 0, 0.82);
-        z-index: 180;
-        backdrop-filter: blur(14px);
-        gap: 13px;
-      "
-    >
-      <div
-        style="
-          font-family: &quot;Bebas Neue&quot;, sans-serif;
-          font-size: clamp(42px, 9vw, 72px);
-          letter-spacing: 5px;
-          background: linear-gradient(135deg, #ff6b35, #ffd23f);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-        "
-      >
-        PAUSED
-      </div>
-      <button class="lb-btn orange" id="pause-resume" style="max-width: 240px">
-        ▶ RESUME
-      </button>
-      <button class="lb-btn gold" id="pause-shop" style="max-width: 240px">
-        🏪 BLASTER SHOP
-      </button>
-      <button
-        class="lb-btn ghost"
-        id="pause-settings-btn"
-        style="max-width: 240px; font-size: 14px; padding: 11px"
-      >
-        ⚙ SETTINGS
-      </button>
-      <button
-        class="lb-btn red"
-        id="pause-menu-btn"
-        style="max-width: 240px; font-size: 14px; padding: 11px"
-      >
-        ✕ MAIN MENU
-      </button>
-      <div
-        style="
-          font-size: 10px;
-          opacity: 0.25;
-          letter-spacing: 2px;
-          margin-top: 6px;
-        "
-      >
-        ESC TO RESUME
-      </div>
-    </div>
-
-    <!-- Pause Menu -->
-    <div
-      id="pause-menu"
-      style="
-        position: fixed;
-        inset: 0;
-        display: none;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        background: rgba(0, 0, 0, 0.82);
-        z-index: 180;
-        backdrop-filter: blur(14px);
-        gap: 13px;
-      "
-    >
-      <div
-        style="
-          font-family: &quot;Bebas Neue&quot;, sans-serif;
-          font-size: clamp(42px, 9vw, 72px);
-          letter-spacing: 5px;
-          background: linear-gradient(135deg, #ff6b35, #ffd23f);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-        "
-      >
-        PAUSED
-      </div>
-      <button class="lb-btn orange" id="pause-resume" style="max-width: 240px">
-        &#9654; RESUME
-      </button>
-      <button class="lb-btn gold" id="pause-shop" style="max-width: 240px">
-        &#127978; BLASTER SHOP
-      </button>
-      <button
-        class="lb-btn ghost"
-        id="pause-settings-btn"
-        style="max-width: 240px; font-size: 14px; padding: 11px"
-      >
-        &#9881; SETTINGS
-      </button>
-      <button
-        class="lb-btn red"
-        id="pause-menu-btn"
-        style="max-width: 240px; font-size: 14px; padding: 11px"
-      >
-        &#10005; MAIN MENU
-      </button>
-      <div
-        style="
-          font-size: 10px;
-          opacity: 0.25;
-          letter-spacing: 2px;
-          margin-top: 6px;
+          margin-top: 2px;
         "
       >
         ESC TO RESUME
@@ -3714,6 +4072,31 @@
           }
           const sr = localStorage.getItem("splat_reserve");
           if (sr !== null) reserveAmmo = Math.max(0, parseInt(sr) || 0);
+          // Armor & medical — loaded after those vars are defined (deferred below)
+        } catch (e) {}
+      }
+      function loadPersistExtended() {
+        // Called after ARMOR_ITEMS / MEDICAL_ITEMS are defined
+        try {
+          const sar = localStorage.getItem("splat_armor_owned");
+          if (sar) {
+            const a = JSON.parse(sar);
+            if (Array.isArray(a)) purchasedArmor = a;
+          }
+          const sae = localStorage.getItem("splat_armor_eq");
+          if (sae) {
+            const o = JSON.parse(sae);
+            if (o && typeof o === "object") ownedArmor = o;
+          }
+          const smed = localStorage.getItem("splat_consumables");
+          if (smed) {
+            const o = JSON.parse(smed);
+            if (o && typeof o === "object") consumables = o;
+          }
+          const shpu = localStorage.getItem("splat_hp_up");
+          if (shpu !== null) hpUpgrades = Math.min(3, parseInt(shpu) || 0);
+          const sregen = localStorage.getItem("splat_regen");
+          if (sregen) hasRegenChip = sregen === "1";
         } catch (e) {}
       }
       function savePersist() {
@@ -3728,6 +4111,20 @@
           localStorage.setItem("splat_mods_owned", JSON.stringify(ownedMods));
           localStorage.setItem("splat_mods_eq", JSON.stringify(equippedMods));
           localStorage.setItem("splat_reserve", reserveAmmo);
+          // Armor & medical
+          if (typeof purchasedArmor !== "undefined") {
+            localStorage.setItem(
+              "splat_armor_owned",
+              JSON.stringify(purchasedArmor),
+            );
+            localStorage.setItem("splat_armor_eq", JSON.stringify(ownedArmor));
+            localStorage.setItem(
+              "splat_consumables",
+              JSON.stringify(consumables),
+            );
+            localStorage.setItem("splat_hp_up", hpUpgrades);
+            localStorage.setItem("splat_regen", hasRegenChip ? "1" : "0");
+          }
         } catch (e) {}
       }
       loadPersist();
@@ -4302,7 +4699,16 @@
       }
 
       function shoot() {
-        if (gs.ammo <= 0 || gs.isReloading) return;
+        if (gs.isReloading) return;
+        // Empty mag — play dry click, no flash, auto-reload
+        if (gs.ammo <= 0) {
+          const now2 = performance.now() / 1000;
+          if (now2 - (lastShotTime || 0) > 0.35) {
+            lastShotTime = now2;
+            sndDryFire();
+          }
+          return;
+        }
         const now = performance.now() / 1000;
         const bl = equippedBlaster;
         if (now - lastShotTime < (bl.rateLimit || 0)) return;
@@ -4310,24 +4716,7 @@
         const ammoToUse = hostSettings.infiniteAmmo ? 0 : 1;
         gs.ammo = Math.max(0, gs.ammo - ammoToUse);
         if (!hostSettings.infiniteAmmo) updateAmmoUI();
-        if (
-          hostSettings.limitedAmmo &&
-          !hostSettings.infiniteAmmo &&
-          gs.ammo === 0 &&
-          reserveAmmo > 0
-        ) {
-          const refill = Math.min(gs.maxAmmo, reserveAmmo);
-          reserveAmmo -= refill;
-          setTimeout(() => {
-            if (gs.running) {
-              gs.ammo = refill;
-              updateAmmoUI();
-              updateReserveHUD();
-            }
-          }, getEffectiveStats().reloadMs);
-        }
-        updateReserveHUD();
-        // Limited ammo mode: auto-reload from reserve when mag empty
+        // Limited ammo: auto-reload from reserve when mag runs dry
         if (
           hostSettings.limitedAmmo &&
           !hostSettings.infiniteAmmo &&
@@ -4378,10 +4767,11 @@
             vz: dir.z * bl.speed,
             color: col,
           });
+        // Shoot flash only on actual shot
         const sf = document.getElementById("shoot-flash");
-        sf.style.opacity = "1";
-        setTimeout(() => (sf.style.opacity = "0"), 60);
-        // Recoil: bl.recoil is ~0.01–0.09, *14 gives ~0.15–1.3 rad/s kick
+        sf.style.opacity = "0.55";
+        setTimeout(() => (sf.style.opacity = "0"), 45);
+        // Recoil
         const recoilKick = (bl.recoil || 0.02) * (isAiming ? 0.4 : 1.0) * 14;
         recoilVel += recoilKick;
         gs.paintColor =
@@ -4422,11 +4812,31 @@
         const el = document.getElementById("reload-ann");
         el.style.opacity = "1";
         const _re = getEffectiveStats();
+        // Reload progress bar
+        const barWrap = document.getElementById("reload-bar-wrap");
+        const barFill = document.getElementById("reload-bar-fill");
+        if (barWrap && barFill) {
+          barWrap.style.display = "block";
+          barFill.style.transition = "none";
+          barFill.style.width = "0%";
+          requestAnimationFrame(() => {
+            barFill.style.transition = `width ${_re.reloadMs}ms linear`;
+            barFill.style.width = "100%";
+          });
+        }
+        sndReload();
         setTimeout(() => {
           gs.ammo = gs.maxAmmo;
           gs.isReloading = false;
           updateAmmoUI();
           el.style.opacity = "0";
+          if (barWrap) {
+            barWrap.style.display = "none";
+            if (barFill) {
+              barFill.style.width = "0%";
+            }
+          }
+          sndReloadDone();
         }, _re.reloadMs);
       }
 
@@ -4542,7 +4952,6 @@
       }
       function setAim(on) {
         isAiming = on;
-        // FOV depends on blaster
         const fovMap = {
           sniper: 25,
           basic: 55,
@@ -4560,6 +4969,7 @@
         if (on) renderScopeOverlay(sightType);
         document.getElementById("xhair").style.display = on ? "none" : "block";
         document.getElementById("aim-btn").classList.toggle("active", on);
+        document.body.classList.toggle("is-aiming", on);
       }
 
       function doJump() {
@@ -4974,12 +5384,11 @@
       let _shopTab = "blasters";
       function switchShopTab(tab) {
         _shopTab = tab;
-        ["blasters", "mods", "ammo"].forEach((t) => {
-          document.getElementById("shop-tab-" + t).style.display =
-            t === tab ? "block" : "none";
-          document
-            .getElementById("tab-" + t)
-            .classList.toggle("active", t === tab);
+        ["blasters", "mods", "armor", "medical", "ammo"].forEach((t) => {
+          const c = document.getElementById("shop-tab-" + t);
+          if (c) c.style.display = t === tab ? "block" : "none";
+          const b = document.getElementById("tab-" + t);
+          if (b) b.classList.toggle("active", t === tab);
         });
         renderShopTab();
       }
@@ -4987,6 +5396,8 @@
         renderEffPanel();
         if (_shopTab === "blasters") renderBlasters();
         else if (_shopTab === "mods") renderMods();
+        else if (_shopTab === "armor") renderArmorShop();
+        else if (_shopTab === "medical") renderMedicalShop();
         else renderAmmoPacks();
       }
       function renderEffPanel() {
@@ -5139,13 +5550,563 @@
           card.appendChild(btn);
           grid.appendChild(card);
         });
-        // Show current reserve
         const info = document.createElement("div");
         info.style =
           "width:100%;text-align:center;font-size:13px;color:#44aaff;margin-top:8px";
         info.textContent = `Current Reserve: ${reserveAmmo} 🎨 paintballs`;
         document.getElementById("pack-grid").after(info);
       }
+
+      // ── ARMOR & MEDICAL DATA ──────────────────────────────────────────
+      const ARMOR_ITEMS = [
+        {
+          id: "helmet_basic",
+          slot: "head",
+          name: "Basic Helmet",
+          icon: "⛑",
+          cost: 200,
+          protection: 5,
+          desc: "Light foam padding. Reduces head damage by 5%.",
+          tier: 1,
+        },
+        {
+          id: "helmet_tactical",
+          slot: "head",
+          name: "Tac Helmet",
+          icon: "🪖",
+          cost: 800,
+          protection: 15,
+          desc: "Hard shell tactical helmet. Serious head coverage.",
+          tier: 2,
+        },
+        {
+          id: "helmet_pro",
+          slot: "head",
+          name: "Pro Helmet",
+          icon: "🎖",
+          cost: 2000,
+          protection: 28,
+          desc: "Military-grade ballistic helmet. Maximum head protection.",
+          tier: 3,
+        },
+        {
+          id: "vest_basic",
+          slot: "chest",
+          name: "Chest Pad",
+          icon: "🦺",
+          cost: 300,
+          protection: 8,
+          desc: "Soft chest protector. Basic torso coverage.",
+          tier: 1,
+        },
+        {
+          id: "vest_tactical",
+          slot: "chest",
+          name: "Tac Vest",
+          icon: "🛡",
+          cost: 1000,
+          protection: 20,
+          desc: "Multi-panel tactical vest. Strong chest and back coverage.",
+          tier: 2,
+        },
+        {
+          id: "vest_pro",
+          slot: "chest",
+          name: "Combat Plate",
+          icon: "🔰",
+          cost: 2500,
+          protection: 35,
+          desc: "Full ballistic plate carrier. The ultimate chest armor.",
+          tier: 3,
+        },
+        {
+          id: "arms_basic",
+          slot: "arms",
+          name: "Arm Guards",
+          icon: "🦾",
+          cost: 150,
+          protection: 4,
+          desc: "Elbow and forearm protectors. Light arm coverage.",
+          tier: 1,
+        },
+        {
+          id: "arms_tactical",
+          slot: "arms",
+          name: "Tac Sleeves",
+          icon: "💪",
+          cost: 600,
+          protection: 12,
+          desc: "Full arm tactical sleeves with rigid panels.",
+          tier: 2,
+        },
+        {
+          id: "arms_pro",
+          slot: "arms",
+          name: "Combat Arms",
+          icon: "🦿",
+          cost: 1500,
+          protection: 22,
+          desc: "Heavy-duty arm armor. Nearly impenetrable arm defense.",
+          tier: 3,
+        },
+        {
+          id: "legs_basic",
+          slot: "legs",
+          name: "Shin Guards",
+          icon: "🦵",
+          cost: 150,
+          protection: 4,
+          desc: "Classic shin guards. Lower leg protection.",
+          tier: 1,
+        },
+        {
+          id: "legs_tactical",
+          slot: "legs",
+          name: "Tac Pants",
+          icon: "👖",
+          cost: 600,
+          protection: 12,
+          desc: "Padded tactical pants with knee armor.",
+          tier: 2,
+        },
+        {
+          id: "legs_pro",
+          slot: "legs",
+          name: "Combat Greaves",
+          icon: "🩱",
+          cost: 1500,
+          protection: 22,
+          desc: "Full leg armor. Thigh to ankle protection.",
+          tier: 3,
+        },
+        {
+          id: "boots_basic",
+          slot: "feet",
+          name: "Padded Boots",
+          icon: "👟",
+          cost: 100,
+          protection: 2,
+          desc: "Rubber-soled padded boots. Minor foot coverage.",
+          tier: 1,
+        },
+        {
+          id: "boots_pro",
+          slot: "feet",
+          name: "Combat Boots",
+          icon: "🥾",
+          cost: 500,
+          protection: 8,
+          desc: "Heavy-duty tactical boots. Full foot and ankle armor.",
+          tier: 2,
+        },
+        {
+          id: "gloves_basic",
+          slot: "hands",
+          name: "Padded Gloves",
+          icon: "🧤",
+          cost: 80,
+          protection: 2,
+          desc: "Knuckle-padded gloves. Light hand protection.",
+          tier: 1,
+        },
+        {
+          id: "gloves_pro",
+          slot: "hands",
+          name: "Combat Gloves",
+          icon: "🥊",
+          cost: 400,
+          protection: 7,
+          desc: "Full-finger tactical gloves with hard knuckle guards.",
+          tier: 2,
+        },
+      ];
+      const SLOT_LABELS = {
+        head: "🪖 HEAD",
+        chest: "🛡 CHEST",
+        arms: "🦾 ARMS",
+        legs: "🦵 LEGS",
+        feet: "👟 FEET",
+        hands: "🧤 HANDS",
+      };
+      const MEDICAL_ITEMS = [
+        {
+          id: "bandage",
+          type: "consumable",
+          name: "Bandage",
+          icon: "🩹",
+          cost: 50,
+          hp: 15,
+          count: 1,
+          effect: "+15 HP",
+          desc: "Basic bandage. Restores 15 HP on use.",
+        },
+        {
+          id: "medkit",
+          type: "consumable",
+          name: "Med Kit",
+          icon: "🩺",
+          cost: 200,
+          hp: 40,
+          count: 1,
+          effect: "+40 HP",
+          desc: "Full medical kit. Restores 40 HP on use.",
+        },
+        {
+          id: "trauma_kit",
+          type: "consumable",
+          name: "Trauma Kit",
+          icon: "🏥",
+          cost: 500,
+          hp: 100,
+          count: 1,
+          effect: "+100 HP",
+          desc: "Emergency trauma kit. Full health restore.",
+        },
+        {
+          id: "bandage_x3",
+          type: "consumable",
+          name: "Bandage × 3",
+          icon: "🩹",
+          cost: 130,
+          hp: 15,
+          count: 3,
+          effect: "+15 HP × 3",
+          desc: "Three bandages. Stock up.",
+        },
+        {
+          id: "medkit_x3",
+          type: "consumable",
+          name: "Med Kit × 3",
+          icon: "🩺",
+          cost: 550,
+          hp: 40,
+          count: 3,
+          effect: "+40 HP × 3",
+          desc: "Three med kits. Great value.",
+        },
+        {
+          id: "adrenaline",
+          type: "consumable",
+          name: "Adrenaline Shot",
+          icon: "💉",
+          cost: 350,
+          hp: 25,
+          count: 1,
+          effect: "+25 HP + Speed↑",
+          desc: "Restores HP and boosts movement speed for 10s.",
+        },
+        {
+          id: "painkillers",
+          type: "consumable",
+          name: "Painkillers",
+          icon: "💊",
+          cost: 180,
+          hp: 0,
+          count: 1,
+          effect: "Regen 3HP/s × 20s",
+          desc: "Slow health regeneration over 20 seconds.",
+        },
+        {
+          id: "stim_pack",
+          type: "passive",
+          name: "Stim Pack",
+          icon: "⚡",
+          cost: 600,
+          hp: 0,
+          count: 1,
+          effect: "Auto-heal at 30HP",
+          desc: "Auto-activates at 30 HP. Restores 30 HP instantly.",
+        },
+        {
+          id: "repair_spray",
+          type: "passive",
+          name: "Repair Spray",
+          icon: "🔧",
+          cost: 400,
+          hp: 0,
+          count: 1,
+          effect: "Armor repair x1",
+          desc: "Restores all equipped armor once mid-match.",
+        },
+        {
+          id: "max_hp_up",
+          type: "upgrade",
+          name: "HP Upgrade",
+          icon: "❤",
+          cost: 1500,
+          hp: 0,
+          count: 1,
+          effect: "+25 Max HP",
+          desc: "Permanently increases max HP by 25. Up to 3 times.",
+        },
+        {
+          id: "regen_chip",
+          type: "upgrade",
+          name: "Regen Chip",
+          icon: "🫀",
+          cost: 3000,
+          hp: 0,
+          count: 1,
+          effect: "1HP/3s passive",
+          desc: "Passive health regeneration between hits.",
+        },
+      ];
+      let ownedArmor = {}; // slot -> item id
+      let purchasedArmor = [];
+      let consumables = {}; // item id -> count
+      let hpUpgrades = 0;
+      let hasRegenChip = false;
+      let regenTimer = 0;
+      let adrenalineTimer = 0;
+
+      function getTotalArmorProtection() {
+        let total = 0;
+        for (const slot in ownedArmor) {
+          const item = ARMOR_ITEMS.find((a) => a.id === ownedArmor[slot]);
+          if (item) total += item.protection;
+        }
+        return Math.min(80, total);
+      }
+
+      function renderArmorShop() {
+        const grid = document.getElementById("armor-grid");
+        if (!grid) return;
+        grid.innerHTML = "";
+        // Remove old summary if present
+        const oldSum = document.getElementById("armor-summary");
+        if (oldSum) oldSum.remove();
+        const slots = ["head", "chest", "arms", "legs", "feet", "hands"];
+        slots.forEach((slot) => {
+          ARMOR_ITEMS.filter((a) => a.slot === slot).forEach((item) => {
+            const owned = purchasedArmor.includes(item.id);
+            const equipped = ownedArmor[slot] === item.id;
+            const canAfford = pb >= item.cost;
+            const card = document.createElement("div");
+            card.className =
+              "armor-card" +
+              (equipped ? " c-equipped" : owned ? " c-owned" : "");
+            if (equipped)
+              card.innerHTML += `<div class="armor-slot-badge equipped-badge">✓ ON</div>`;
+            else if (owned)
+              card.innerHTML += `<div class="armor-slot-badge owned-badge">Owned</div>`;
+            card.innerHTML += `
+              <div class="armor-slot">${SLOT_LABELS[slot] || slot}</div>
+              <div class="armor-icon">${item.icon}</div>
+              <div class="armor-name">${item.name}</div>
+              <div class="armor-desc">${item.desc}</div>
+              <div class="armor-prot">🛡 ${item.protection}% protection</div>
+              <div class="armor-bar"><div class="armor-bar-fill" style="width:${(item.protection / 35) * 100}%"></div></div>`;
+            if (!owned) {
+              card.innerHTML += `<div class="armor-cost">💰 ${item.cost.toLocaleString()} PB</div>`;
+              const btn = document.createElement("button");
+              btn.className = "armor-btn " + (canAfford ? "buy" : "cant");
+              btn.textContent = canAfford
+                ? "BUY & EQUIP"
+                : `Need ${(item.cost - pb).toLocaleString()} more`;
+              if (canAfford) btn.onclick = () => buyArmor(item.id);
+              card.appendChild(btn);
+            } else if (!equipped) {
+              const btn = document.createElement("button");
+              btn.className = "armor-btn equip";
+              btn.textContent = "EQUIP";
+              btn.onclick = () => equipArmor(item.id);
+              card.appendChild(btn);
+            } else {
+              const btn = document.createElement("button");
+              btn.className = "armor-btn equipped";
+              btn.textContent = "✓ EQUIPPED";
+              card.appendChild(btn);
+            }
+            grid.appendChild(card);
+          });
+        });
+        const prot = getTotalArmorProtection();
+        const sumEl = document.createElement("div");
+        sumEl.id = "armor-summary";
+        sumEl.style.cssText =
+          "width:100%;text-align:center;font-size:13px;color:#44aaff;margin:8px 0 16px;";
+        sumEl.innerHTML = `Total protection: <strong>${prot}%</strong> damage reduction${prot >= 80 ? ' <span style="color:#ffdd00">⚠ MAXED</span>' : ""}`;
+        grid.after(sumEl);
+      }
+
+      function buyArmor(id) {
+        const item = ARMOR_ITEMS.find((a) => a.id === id);
+        if (!item || pb < item.cost || purchasedArmor.includes(id)) return;
+        pb -= item.cost;
+        purchasedArmor.push(id);
+        savePersist();
+        equipArmor(id);
+      }
+      function equipArmor(id) {
+        const item = ARMOR_ITEMS.find((a) => a.id === id);
+        if (!item || !purchasedArmor.includes(id)) return;
+        ownedArmor[item.slot] = id;
+        savePersist();
+        renderShop();
+      }
+
+      function renderMedicalShop() {
+        const grid = document.getElementById("medical-grid");
+        if (!grid) return;
+        grid.innerHTML = "";
+        const oldSum = document.getElementById("med-summary");
+        if (oldSum) oldSum.remove();
+        MEDICAL_ITEMS.forEach((item) => {
+          const count = consumables[item.id] || 0;
+          const isMaxed =
+            item.id === "max_hp_up"
+              ? hpUpgrades >= 3
+              : item.id === "regen_chip"
+                ? hasRegenChip
+                : false;
+          const canAfford = pb >= item.cost;
+          const card = document.createElement("div");
+          card.className =
+            "armor-card" +
+            (isMaxed
+              ? " c-equipped"
+              : count > 0 && item.type !== "consumable"
+                ? " c-owned"
+                : "");
+          if (count > 0)
+            card.innerHTML += `<div class="armor-slot-badge owned-badge">×${count}</div>`;
+          const typeLabel =
+            item.type === "consumable"
+              ? "🍬 CONSUMABLE"
+              : item.type === "upgrade"
+                ? "⬆ UPGRADE"
+                : "🔩 PASSIVE";
+          const effectColor =
+            item.type === "consumable"
+              ? "#44ff88"
+              : item.type === "upgrade"
+                ? "#ff6b35"
+                : "#ffdd00";
+          card.innerHTML += `
+            <div class="armor-slot">${typeLabel}</div>
+            <div class="armor-icon">${item.icon}</div>
+            <div class="armor-name">${item.name}</div>
+            <div class="armor-desc">${item.desc}</div>
+            <div class="armor-prot" style="color:${effectColor}">${item.effect}</div>`;
+          if (!isMaxed) {
+            card.innerHTML += `<div class="armor-cost">💰 ${item.cost.toLocaleString()} PB</div>`;
+            const btn = document.createElement("button");
+            btn.className = "armor-btn " + (canAfford ? "buy" : "cant");
+            btn.textContent = canAfford
+              ? "BUY"
+              : `Need ${(item.cost - pb).toLocaleString()} more`;
+            if (canAfford) btn.onclick = () => buyMedical(item.id);
+            card.appendChild(btn);
+          } else {
+            const btn = document.createElement("button");
+            btn.className = "armor-btn equipped";
+            btn.textContent =
+              item.id === "max_hp_up"
+                ? hpUpgrades >= 3
+                  ? "✓ MAX LEVEL"
+                  : "✓ ACTIVE"
+                : "✓ ACTIVE";
+            card.appendChild(btn);
+          }
+          grid.appendChild(card);
+        });
+        const hasItems = Object.entries(consumables).filter(([, c]) => c > 0);
+        const sumEl = document.createElement("div");
+        sumEl.id = "med-summary";
+        sumEl.style.cssText =
+          "width:100%;text-align:center;font-size:12px;color:rgba(255,255,255,0.4);margin:8px 0 16px;";
+        sumEl.textContent = hasItems.length
+          ? "Inventory: " +
+            hasItems
+              .map(([id, c]) => {
+                const it = MEDICAL_ITEMS.find((m) => m.id === id);
+                return it ? `${it.icon}×${c}` : "";
+              })
+              .filter(Boolean)
+              .join(" ")
+          : "No consumables. Press H in-game to use best available item.";
+        grid.after(sumEl);
+      }
+
+      function buyMedical(id) {
+        const item = MEDICAL_ITEMS.find((m) => m.id === id);
+        if (!item || pb < item.cost) return;
+        pb -= item.cost;
+        if (item.id === "max_hp_up" && hpUpgrades < 3) {
+          hpUpgrades++;
+        } else if (item.id === "regen_chip") {
+          hasRegenChip = true;
+        } else {
+          consumables[id] = (consumables[id] || 0) + item.count;
+        }
+        savePersist();
+        renderShop();
+      }
+
+      function useConsumable(id) {
+        const item = MEDICAL_ITEMS.find((m) => m.id === id);
+        if (!item || !consumables[id] || consumables[id] <= 0) return false;
+        const maxHp = 100 + hpUpgrades * 25;
+        consumables[id]--;
+        if (
+          item.id === "bandage" ||
+          item.id === "medkit" ||
+          item.id === "trauma_kit" ||
+          item.id === "bandage_x3" ||
+          item.id === "medkit_x3"
+        ) {
+          gs.health = Math.min(maxHp, gs.health + item.hp);
+          updateHealthUI();
+          showHudAnnounce(`${item.icon} +${item.hp} HP`);
+        } else if (item.id === "adrenaline") {
+          gs.health = Math.min(maxHp, gs.health + 25);
+          updateHealthUI();
+          adrenalineTimer = 10;
+          showHudAnnounce("💉 ADRENALINE!");
+        } else if (item.id === "painkillers") {
+          regenTimer = 20;
+          showHudAnnounce("💊 REGEN ACTIVE");
+        } else if (item.id === "stim_pack") {
+          consumables[id]++; // re-add, it's auto-use only
+          showHudAnnounce("⚡ STIM READY");
+        } else if (item.id === "repair_spray") {
+          showHudAnnounce("🔧 ARMOR REPAIRED");
+        }
+        savePersist();
+        return true;
+      }
+
+      function showHudAnnounce(msg) {
+        const el = document.getElementById("wave-ann");
+        if (!el) return;
+        el.textContent = msg;
+        el.style.opacity = "1";
+        setTimeout(() => (el.style.opacity = "0"), 1800);
+      }
+
+      // H key = use best available consumable
+      document.addEventListener("keydown", (e) => {
+        if (e.code === "KeyH" && gs.running) {
+          const priority = [
+            "trauma_kit",
+            "medkit_x3",
+            "medkit",
+            "bandage_x3",
+            "bandage",
+            "adrenaline",
+            "painkillers",
+          ];
+          for (const id of priority) {
+            if ((consumables[id] || 0) > 0) {
+              useConsumable(id);
+              break;
+            }
+          }
+        }
+      });
+
+      // Load armor/medical save data now that the vars exist
+      loadPersistExtended();
       function buyMod(id) {
         const mod = MODS[id];
         if (!mod || pb < mod.cost || ownedMods.includes(id)) return;
@@ -6154,10 +7115,13 @@
       document
         .getElementById("pause-settings-btn")
         .addEventListener("click", () => {
-          document.getElementById("settings-panel").style.display =
-            document.getElementById("settings-panel").style.display === "block"
-              ? "none"
-              : "block";
+          const inner = document.getElementById("pause-settings-inner");
+          if (!inner) return;
+          const open = inner.style.display !== "block";
+          inner.style.display = open ? "block" : "none";
+          document.getElementById("pause-settings-btn").textContent = open
+            ? "▲ HIDE SETTINGS"
+            : "⚙ SETTINGS";
         });
       document
         .getElementById("pause-menu-btn")
@@ -6166,6 +7130,8 @@
           document.getElementById("gameover").style.display = "none";
           document.getElementById("hud").style.display = "none";
           document.getElementById("lobby").style.display = "flex";
+          document.getElementById("minimap-wrap").style.display = "none";
+          document.getElementById("kill-feed").style.display = "none";
           gs.running = false;
           setAim(false);
           fireHeld = false;
@@ -6573,6 +7539,1058 @@
 
       renderer.render(scene, camera);
       requestAnimationFrame(loop);
+
+      // ════════════════════════════════════════════════════════════════
+      //  ▓▓ SPLAT! ENHANCEMENT PACK ▓▓
+      //  Audio · Muzzle flash · Particles · Minimap · Kill feed
+      //  Streaks · Damage numbers · Crosshair hit flash
+      //  Low-health vignette · Reload bar · Sprint indicator
+      //  Armor shop · Medical shop · Regen · Adrenaline
+      // ════════════════════════════════════════════════════════════════
+
+      // ── WEB AUDIO ────────────────────────────────────────────────
+      let _ac = null;
+      function _getAC() {
+        if (!_ac)
+          _ac = new (window.AudioContext || window.webkitAudioContext)();
+        if (_ac.state === "suspended") _ac.resume();
+        return _ac;
+      }
+      function _tone(freq, type, gain, dur, delay) {
+        try {
+          const ac = _getAC(),
+            t = ac.currentTime + (delay || 0) / 1000;
+          const o = ac.createOscillator(),
+            g = ac.createGain();
+          o.type = type || "sine";
+          o.frequency.value = freq;
+          g.gain.setValueAtTime(gain || 0.08, t);
+          g.gain.exponentialRampToValueAtTime(0.0001, t + (dur || 0.15));
+          o.connect(g);
+          g.connect(ac.destination);
+          o.start(t);
+          o.stop(t + (dur || 0.15) + 0.01);
+        } catch (e) {}
+      }
+      function _noise(gain, dur, cutoff, delay) {
+        try {
+          const ac = _getAC(),
+            t = ac.currentTime + (delay || 0) / 1000;
+          const sr = ac.sampleRate,
+            buf = ac.createBuffer(1, Math.ceil(sr * dur), sr);
+          const d = buf.getChannelData(0);
+          for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+          const src = ac.createBufferSource();
+          src.buffer = buf;
+          const fi = ac.createBiquadFilter();
+          fi.type = "lowpass";
+          fi.frequency.value = cutoff || 2000;
+          const g = ac.createGain();
+          g.gain.setValueAtTime(gain || 0.1, t);
+          g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+          src.connect(fi);
+          fi.connect(g);
+          g.connect(ac.destination);
+          src.start(t);
+          src.stop(t + dur + 0.01);
+        } catch (e) {}
+      }
+      function sndShoot() {
+        _noise(0.15, 0.065, 3200);
+        _tone(100, "square", 0.05, 0.055);
+      }
+      function sndDryFire() {
+        _noise(0.045, 0.04, 600);
+        _tone(150, "square", 0.025, 0.03);
+      }
+      function sndReload() {
+        _noise(0.09, 0.1, 3800);
+        _tone(260, "sine", 0.04, 0.12);
+      }
+      function sndReloadEnd() {
+        _tone(500, "sine", 0.09, 0.1);
+        _tone(680, "sine", 0.07, 0.09, 90);
+      }
+      function sndHit() {
+        _noise(0.05, 0.13, 800);
+        _tone(420, "square", 0.04, 0.09);
+      }
+      function sndKill() {
+        _tone(880, "sine", 0.12, 0.18);
+        _tone(1320, "sine", 0.1, 0.16, 80);
+      }
+      function sndDamage() {
+        _noise(0.17, 0.2, 200);
+      }
+      function sndJump() {
+        _tone(190, "sine", 0.08, 0.08);
+      }
+      function sndPickup() {
+        _tone(640, "sine", 0.08, 0.16);
+        _tone(860, "sine", 0.09, 0.14, 160);
+      }
+      function sndStreak(n) {
+        const notes =
+          n >= 6
+            ? [880, 1100, 1320, 1760]
+            : n >= 4
+              ? [660, 880, 1100]
+              : [440, 660];
+        notes.forEach((f, i) => _tone(f, "sine", 0.12, 0.2, i * 70));
+      }
+
+      // ── PATCH CORE FUNCTIONS ─────────────────────────────────────
+      const _origShoot = shoot;
+      window.shoot = function () {
+        if (gs.ammo <= 0 && !gs.isReloading && !hostSettings.infiniteAmmo) {
+          const n = performance.now() / 1000;
+          if (n - (shoot._dry || 0) > 0.32) {
+            shoot._dry = n;
+            sndDryFire();
+          }
+          return;
+        }
+        const prev = gs.ammo;
+        _origShoot();
+        const fired = hostSettings.infiniteAmmo || gs.ammo < prev;
+        if (fired) {
+          sndShoot();
+          _muzzleFlash();
+        }
+      };
+
+      const _origDoReload = doReload;
+      window.doReload = function () {
+        const was = gs.isReloading;
+        _origDoReload();
+        if (!was && gs.isReloading) {
+          sndReload();
+          const wrap = document.getElementById("reload-bar-wrap");
+          const fill = document.getElementById("reload-bar-fill");
+          const ms = getEffectiveStats().reloadMs;
+          if (wrap && fill) {
+            wrap.style.display = "block";
+            fill.style.transition = "none";
+            fill.style.width = "0%";
+            requestAnimationFrame(() => {
+              fill.style.transition = `width ${ms}ms linear`;
+              fill.style.width = "100%";
+            });
+            setTimeout(() => {
+              wrap.style.display = "none";
+              fill.style.width = "0%";
+              sndReloadEnd();
+            }, ms);
+          }
+        }
+      };
+
+      const _origTakeDmg = takeDmg;
+      window.takeDmg = function (n) {
+        const prot = _armorProt() / 100;
+        _origTakeDmg(Math.max(1, Math.round(n * (1 - prot))));
+        sndDamage();
+        _shake = Math.max(_shake, 0.011);
+      };
+
+      const _origHitEnemy = hitEnemy;
+      window.hitEnemy = function (e, dmg) {
+        const was = e.alive;
+        _origHitEnemy(e, dmg);
+        sndHit();
+        _hitParticles(e.x, 1.2, e.z, e.color || 0xff3399);
+        _dmgNum(e.x, 2.0, e.z, dmg);
+        if (was && !e.alive) {
+          sndKill();
+          _shake = Math.max(_shake, 0.015);
+          _xhairFlash("kill");
+          _kfAdd(playerName, e.name || "Bot");
+          _streakCheck();
+        } else _xhairFlash("hit");
+      };
+
+      const _origDoJump = doJump;
+      window.doJump = function () {
+        _origDoJump();
+        sndJump();
+      };
+
+      // ── SCREEN SHAKE ─────────────────────────────────────────────
+      let _shake = 0;
+
+      // ── MUZZLE FLASH ─────────────────────────────────────────────
+      const _mfl = [];
+      function _muzzleFlash() {
+        const pos = camera.getWorldPosition(new THREE.Vector3());
+        const dir = new THREE.Vector3();
+        camera.getWorldDirection(dir);
+        const lgt = new THREE.PointLight(0xffaa22, 5, 4);
+        lgt.position.copy(pos.clone().addScaledVector(dir, 0.85));
+        scene.add(lgt);
+        _mfl.push({ lgt, life: 0.055, max: 0.055 });
+      }
+      function _mflTick(dt) {
+        for (let i = _mfl.length - 1; i >= 0; i--) {
+          const f = _mfl[i];
+          f.life -= dt;
+          if (f.life <= 0) {
+            scene.remove(f.lgt);
+            _mfl.splice(i, 1);
+          } else f.lgt.intensity = (f.life / f.max) * 5;
+        }
+      }
+
+      // ── PARTICLES (pooled) ───────────────────────────────────────
+      const _pGeo = new THREE.SphereGeometry(0.042, 4, 3);
+      const _pts = [];
+      function _spawnPts(x, y, z, color, n, spd, life) {
+        for (let i = 0; i < n; i++) {
+          const mat = new THREE.MeshBasicMaterial({
+            color,
+            transparent: true,
+            opacity: 1,
+          });
+          const mesh = new THREE.Mesh(_pGeo, mat);
+          mesh.position.set(
+            x + (Math.random() - 0.5) * 0.18,
+            y,
+            z + (Math.random() - 0.5) * 0.18,
+          );
+          const a = Math.random() * Math.PI * 2,
+            el = (Math.random() - 0.5) * Math.PI,
+            sp = spd * (0.5 + Math.random());
+          _pts.push({
+            mesh,
+            mat,
+            vx: Math.cos(a) * Math.cos(el) * sp,
+            vy: Math.abs(Math.sin(el)) * sp + 1.2 + Math.random(),
+            vz: Math.sin(a) * Math.cos(el) * sp,
+            life: life * (0.6 + Math.random() * 0.4),
+            max: life,
+          });
+          scene.add(mesh);
+        }
+      }
+      function _hitParticles(x, y, z, col) {
+        _spawnPts(x, y, z, col, 7, 5, 0.4);
+      }
+      function _ptsTick(dt) {
+        for (let i = _pts.length - 1; i >= 0; i--) {
+          const p = _pts[i];
+          p.life -= dt;
+          if (p.life <= 0) {
+            scene.remove(p.mesh);
+            p.mat.dispose();
+            _pts.splice(i, 1);
+            continue;
+          }
+          p.mesh.position.x += p.vx * dt;
+          p.mesh.position.y += p.vy * dt;
+          p.mesh.position.z += p.vz * dt;
+          p.vy -= 13 * dt;
+          p.mat.opacity = p.life / p.max;
+        }
+      }
+
+      // ── DAMAGE NUMBERS ───────────────────────────────────────────
+      const _dns = [];
+      function _dmgNum(x, y, z, dmg) {
+        const div = document.createElement("div"),
+          kill = dmg >= 100;
+        div.textContent = kill ? "SPLAT!" : "-" + dmg;
+        div.style.cssText = `position:fixed;pointer-events:none;z-index:60;font-family:"Bebas Neue",sans-serif;font-size:${kill ? 25 : 18}px;color:${kill ? "#ffdd00" : "#ff6b35"};text-shadow:0 2px 5px rgba(0,0,0,.9);`;
+        document.body.appendChild(div);
+        _dns.push({
+          div,
+          wp: new THREE.Vector3(x, y, z),
+          t0: performance.now(),
+          dur: 920,
+        });
+      }
+      function _dnsTick() {
+        const now = performance.now();
+        for (let i = _dns.length - 1; i >= 0; i--) {
+          const n = _dns[i],
+            t = (now - n.t0) / n.dur;
+          if (t >= 1) {
+            n.div.remove();
+            _dns.splice(i, 1);
+            continue;
+          }
+          const p = n.wp.clone().project(camera);
+          n.div.style.left = (p.x * 0.5 + 0.5) * innerWidth + "px";
+          n.div.style.top = (-0.5 * p.y + 0.5) * innerHeight - t * 52 + "px";
+          n.div.style.opacity = 1 - t * t;
+        }
+      }
+
+      // ── CROSSHAIR FLASH ──────────────────────────────────────────
+      let _xt = null;
+      function _xhairFlash(type) {
+        document.body.classList.remove("xhair-hit", "xhair-kill");
+        clearTimeout(_xt);
+        document.body.classList.add("xhair-" + type);
+        _xt = setTimeout(
+          () => document.body.classList.remove("xhair-hit", "xhair-kill"),
+          type === "kill" ? 380 : 190,
+        );
+      }
+
+      // ── KILL FEED ────────────────────────────────────────────────
+      const _kfEl = document.getElementById("kill-feed");
+      function _kfAdd(shooter, victim) {
+        if (!_kfEl) return;
+        const e = document.createElement("div");
+        e.className = "kf-entry";
+        e.innerHTML = `<span style="color:#ff6b35;font-weight:700">${shooter}</span> 🎯 ${victim}`;
+        _kfEl.prepend(e);
+        setTimeout(() => {
+          e.style.opacity = "0";
+          setTimeout(() => e.remove(), 350);
+        }, 3200);
+        while (_kfEl.children.length > 5) _kfEl.lastChild.remove();
+      }
+
+      // ── KILL STREAKS ─────────────────────────────────────────────
+      let _streak = 0,
+        _stTmr = null;
+      function _streakCheck() {
+        _streak++;
+        clearTimeout(_stTmr);
+        _stTmr = setTimeout(() => (_streak = 0), 3200);
+        const L = {
+          2: "DOUBLE KILL!",
+          3: "TRIPLE KILL!",
+          4: "QUAD KILL!",
+          5: "PENTA KILL!",
+          6: "RAMPAGE!!",
+          7: "UNSTOPPABLE!",
+          8: "GODLIKE!!",
+        };
+        const lbl =
+          _streak >= 2 ? L[_streak] || `${_streak}x KILL STREAK` : null;
+        if (lbl) {
+          const el = document.getElementById("streak-ann");
+          if (!el) return;
+          el.textContent = lbl;
+          el.style.opacity = "1";
+          sndStreak(_streak);
+          clearTimeout(el._t);
+          el._t = setTimeout(() => (el.style.opacity = "0"), 1700);
+        }
+      }
+
+      // ── MINIMAP ──────────────────────────────────────────────────
+      const _mmC = document.getElementById("minimap");
+      const _mm = _mmC ? _mmC.getContext("2d") : null;
+      const MMW = 148,
+        MMR = 22;
+      function _mmDraw() {
+        if (!_mm || !gs.running) return;
+        const W = MMW;
+        _mm.clearRect(0, 0, W, W);
+        _mm.save();
+        _mm.beginPath();
+        _mm.arc(W / 2, W / 2, W / 2, 0, Math.PI * 2);
+        _mm.clip();
+        _mm.fillStyle = "rgba(0,0,0,0.7)";
+        _mm.fillRect(0, 0, W, W);
+        _mm.strokeStyle = "rgba(255,255,255,0.05)";
+        _mm.lineWidth = 1;
+        for (let g = -4; g <= 4; g++) {
+          const gx = W / 2 + g * ((W / MMR) * 2.5);
+          _mm.beginPath();
+          _mm.moveTo(gx, 0);
+          _mm.lineTo(gx, W);
+          _mm.stroke();
+          _mm.beginPath();
+          _mm.moveTo(0, gx);
+          _mm.lineTo(W, gx);
+          _mm.stroke();
+        }
+        const toMM = (wx, wz) => {
+          const dx = wx - yawObj.position.x,
+            dz = wz - yawObj.position.z;
+          const a = -gs.yaw,
+            rx = dx * Math.cos(a) - dz * Math.sin(a),
+            rz = dx * Math.sin(a) + dz * Math.cos(a);
+          return {
+            x: W / 2 + (rx / MMR) * (W / 2),
+            y: W / 2 + (rz / MMR) * (W / 2),
+          };
+        };
+        gs.enemies.forEach((e) => {
+          if (!e.alive) return;
+          const p = toMM(e.x, e.z);
+          _mm.fillStyle = "#ff4444";
+          _mm.beginPath();
+          _mm.arc(p.x, p.y, 3.2, 0, Math.PI * 2);
+          _mm.fill();
+        });
+        try {
+          Object.values(remoteClients).forEach((rc) => {
+            if (!rc.alive || !rc.pos) return;
+            const p = toMM(rc.pos.x, rc.pos.z);
+            _mm.fillStyle = rc.team === "blue" ? "#44aaff" : "#ff8844";
+            _mm.beginPath();
+            _mm.arc(p.x, p.y, 3.2, 0, Math.PI * 2);
+            _mm.fill();
+          });
+        } catch (e) {}
+        _mm.fillStyle = "#fff";
+        _mm.strokeStyle = "#000";
+        _mm.lineWidth = 1.5;
+        _mm.beginPath();
+        _mm.moveTo(W / 2, W / 2 - 7);
+        _mm.lineTo(W / 2 + 4, W / 2 + 5);
+        _mm.lineTo(W / 2, W / 2 + 2);
+        _mm.lineTo(W / 2 - 4, W / 2 + 5);
+        _mm.closePath();
+        _mm.fill();
+        _mm.stroke();
+        _mm.restore();
+        _mm.strokeStyle = "rgba(255,255,255,0.14)";
+        _mm.lineWidth = 1.5;
+        _mm.beginPath();
+        _mm.arc(W / 2, W / 2, W / 2 - 1, 0, Math.PI * 2);
+        _mm.stroke();
+      }
+
+      // ── ARMOR / MEDICAL DATA + STATE ────────────arl declared─────────────────
+      const ARMOR_ITEMS2 = [
+        {
+          id: "helm1",
+          slot: "head",
+          tier: 1,
+          name: "Foam Helmet",
+          icon: "\u26D1",
+          cost: 150,
+          prot: 5,
+          desc: "Basic head padding. 5% damage reduction.",
+        },
+        {
+          id: "helm2",
+          slot: "head",
+          tier: 2,
+          name: "Tac Helmet",
+          icon: "\uD83E\uDE96",
+          cost: 700,
+          prot: 15,
+          desc: "Hard-shell helmet. Serious head protection.",
+        },
+        {
+          id: "helm3",
+          slot: "head",
+          tier: 3,
+          name: "Pro Helm",
+          icon: "\uD83C\uDF96",
+          cost: 1800,
+          prot: 28,
+          desc: "Military-grade. Maximum head coverage.",
+        },
+        {
+          id: "chest1",
+          slot: "chest",
+          tier: 1,
+          name: "Chest Pad",
+          icon: "\uD83E\uDDBA",
+          cost: 200,
+          prot: 8,
+          desc: "Soft chest protector. Basic torso coverage.",
+        },
+        {
+          id: "chest2",
+          slot: "chest",
+          tier: 2,
+          name: "Tac Vest",
+          icon: "\uD83D\uDEE1",
+          cost: 900,
+          prot: 20,
+          desc: "Multi-panel tactical vest.",
+        },
+        {
+          id: "chest3",
+          slot: "chest",
+          tier: 3,
+          name: "Combat Plate",
+          icon: "\uD83D\uDD30",
+          cost: 2200,
+          prot: 35,
+          desc: "Full ballistic plate carrier. Ultimate armor.",
+        },
+        {
+          id: "arms1",
+          slot: "arms",
+          tier: 1,
+          name: "Arm Guards",
+          icon: "\uD83E\uDDBE",
+          cost: 120,
+          prot: 4,
+          desc: "Elbow & forearm pads.",
+        },
+        {
+          id: "arms2",
+          slot: "arms",
+          tier: 2,
+          name: "Tac Sleeves",
+          icon: "\uD83D\uDCAA",
+          cost: 550,
+          prot: 12,
+          desc: "Full arm sleeves with rigid panels.",
+        },
+        {
+          id: "arms3",
+          slot: "arms",
+          tier: 3,
+          name: "Combat Arms",
+          icon: "\u2699",
+          cost: 1400,
+          prot: 20,
+          desc: "Heavy-duty arm armor.",
+        },
+        {
+          id: "legs1",
+          slot: "legs",
+          tier: 1,
+          name: "Shin Guards",
+          icon: "\uD83E\uDDB5",
+          cost: 120,
+          prot: 4,
+          desc: "Classic shin guards.",
+        },
+        {
+          id: "legs2",
+          slot: "legs",
+          tier: 2,
+          name: "Tac Pants",
+          icon: "\uD83D\uDC56",
+          cost: 550,
+          prot: 12,
+          desc: "Padded pants with knee armor.",
+        },
+        {
+          id: "legs3",
+          slot: "legs",
+          tier: 3,
+          name: "Combat Greaves",
+          icon: "\uD83E\uDE71",
+          cost: 1400,
+          prot: 20,
+          desc: "Full leg armor, thigh to ankle.",
+        },
+        {
+          id: "boots1",
+          slot: "feet",
+          tier: 1,
+          name: "Padded Boots",
+          icon: "\uD83D\uDC9F",
+          cost: 80,
+          prot: 2,
+          desc: "Rubber padded boots.",
+        },
+        {
+          id: "boots2",
+          slot: "feet",
+          tier: 2,
+          name: "Combat Boots",
+          icon: "\uD83E\uDD7E",
+          cost: 450,
+          prot: 7,
+          desc: "Heavy tactical boots.",
+        },
+        {
+          id: "glove1",
+          slot: "hands",
+          tier: 1,
+          name: "Work Gloves",
+          icon: "\uD83E\uDDE4",
+          cost: 60,
+          prot: 2,
+          desc: "Knuckle-padded gloves.",
+        },
+        {
+          id: "glove2",
+          slot: "hands",
+          tier: 2,
+          name: "Combat Gloves",
+          icon: "\uD83E\uDD4A",
+          cost: 350,
+          prot: 6,
+          desc: "Hard-knuckle tactical gloves.",
+        },
+        {
+          id: "fullkit",
+          slot: "all",
+          tier: 4,
+          name: "Full Kit",
+          icon: "\uD83C\uDFBD",
+          cost: 7500,
+          prot: 70,
+          desc: "Complete set head-to-toe. The works.",
+        },
+      ];
+      const MEDICAL_ITEMS2 = [
+        {
+          id: "bandage",
+          type: "use",
+          name: "Bandage",
+          icon: "\uD83E\uDE79",
+          cost: 50,
+          hp: 15,
+          cnt: 1,
+          eff: "+15 HP",
+          desc: "Restores 15 HP.",
+        },
+        {
+          id: "bandage3",
+          type: "use",
+          name: "Bandage x3",
+          icon: "\uD83E\uDE79",
+          cost: 130,
+          hp: 15,
+          cnt: 3,
+          eff: "+15 HP x3",
+          desc: "Pack of 3 bandages.",
+        },
+        {
+          id: "medkit",
+          type: "use",
+          name: "Med Kit",
+          icon: "\uD83E\uDE7A",
+          cost: 180,
+          hp: 40,
+          cnt: 1,
+          eff: "+40 HP",
+          desc: "Restores 40 HP.",
+        },
+        {
+          id: "medkit3",
+          type: "use",
+          name: "Med Kit x3",
+          icon: "\uD83E\uDE7A",
+          cost: 480,
+          hp: 40,
+          cnt: 3,
+          eff: "+40 HP x3",
+          desc: "Three med kits.",
+        },
+        {
+          id: "trauma",
+          type: "use",
+          name: "Trauma Kit",
+          icon: "\uD83C\uDFE5",
+          cost: 450,
+          hp: 100,
+          cnt: 1,
+          eff: "Full HP",
+          desc: "Emergency full health restore.",
+        },
+        {
+          id: "adrenaline",
+          type: "use",
+          name: "Adrenaline",
+          icon: "\uD83D\uDC89",
+          cost: 320,
+          hp: 25,
+          cnt: 1,
+          eff: "+25 HP + Speed",
+          desc: "+25 HP and speed boost for 8s.",
+        },
+        {
+          id: "painkillers",
+          type: "use",
+          name: "Painkillers",
+          icon: "\uD83D\uDC8A",
+          cost: 160,
+          hp: 0,
+          cnt: 1,
+          eff: "Regen 3HP/s x20s",
+          desc: "Slow health regen over 20s.",
+        },
+        {
+          id: "stim",
+          type: "auto",
+          name: "Stim Pack",
+          icon: "\u26A1",
+          cost: 550,
+          hp: 0,
+          cnt: 1,
+          eff: "Auto-heal @30HP",
+          desc: "Auto-activates when HP drops to 30.",
+        },
+        {
+          id: "repair",
+          type: "use",
+          name: "Repair Spray",
+          icon: "\uD83D\uDD27",
+          cost: 380,
+          hp: 0,
+          cnt: 1,
+          eff: "Repair Armor",
+          desc: "Instantly repairs all armor.",
+        },
+        {
+          id: "hp_up",
+          type: "upg",
+          name: "HP Upgrade",
+          icon: "\u2764",
+          cost: 1400,
+          hp: 0,
+          cnt: 1,
+          eff: "+25 Max HP",
+          desc: "Permanently +25 max HP. Stacks x3.",
+        },
+        {
+          id: "regen_chip",
+          type: "upg",
+          name: "Regen Chip",
+          icon: "\uD83E\uFAC0",
+          cost: 2800,
+          hp: 0,
+          cnt: 1,
+          eff: "1HP/3s passive",
+          desc: "Passive health regen forever.",
+        },
+      ];
+      let _armorSlots = {},
+        _armorOwned = [],
+        _cons = {},
+        _hpUps = 0,
+        _regenChip = false;
+      let _regenTk = 0,
+        _pkTk = 0,
+        _pkTmr = 0,
+        _adrTmr = 0;
+
+      function _armorProt() {
+        let t = 0;
+        for (const s in _armorSlots) {
+          const it = ARMOR_ITEMS.find((a) => a.id === _armorSlots[s]);
+          if (it) t += it.prot;
+        }
+        return Math.min(75, t);
+      }
+
+      function renderArmorShop() {
+        const grid = document.getElementById("armor-grid");
+        if (!grid) return;
+        grid.innerHTML = "";
+        ["head", "chest", "arms", "legs", "feet", "hands", "all"].forEach(
+          (slot) => {
+            ARMOR_ITEMS.filter((a) => a.slot === slot).forEach((item) => {
+              const owned = _armorOwned.includes(item.id),
+                equipped = _armorSlots[slot] === item.id,
+                canAfford = pb >= item.cost;
+              const card = document.createElement("div");
+              card.className =
+                "armor-card" +
+                (equipped ? " is-equipped" : owned ? " is-owned" : "");
+              if (equipped)
+                card.innerHTML += '<div class="ac-badge on">ON</div>';
+              else if (owned)
+                card.innerHTML += '<div class="ac-badge own">Owned</div>';
+              const SI = {
+                head: "Helmet",
+                chest: "Chest",
+                arms: "Arms",
+                legs: "Legs",
+                feet: "Feet",
+                hands: "Hands",
+                all: "Full Kit",
+              };
+              card.innerHTML += `<div class="ac-slot">${item.icon} ${SI[slot] || slot}</div><div class="ac-name">${item.name}</div><div class="ac-desc">${item.desc}</div><div class="ac-prot">Shield ${item.prot}% damage reduction</div><div class="ac-bar"><div class="ac-bar-fill" style="width:${Math.round(item.prot / 0.75)}%"></div></div>${!owned ? `<div class="ac-cost">PB ${item.cost.toLocaleString()}</div>` : ""}`;
+              const btn = document.createElement("button");
+              if (!owned) {
+                btn.className = "ac-btn " + (canAfford ? "buy" : "cant");
+                btn.textContent = canAfford
+                  ? "BUY & EQUIP"
+                  : `Need ${(item.cost - pb).toLocaleString()} more`;
+                if (canAfford) btn.onclick = () => _buyArmor(item.id);
+              } else if (!equipped) {
+                btn.className = "ac-btn equip";
+                btn.textContent = "EQUIP";
+                btn.onclick = () => {
+                  _equipArmor(item.id);
+                  renderShop();
+                };
+              } else {
+                btn.className = "ac-btn on";
+                btn.textContent = "EQUIPPED";
+              }
+              card.appendChild(btn);
+              grid.appendChild(card);
+            });
+          },
+        );
+        const tb = document.getElementById("armor-total-bar");
+        if (tb) {
+          const p = _armorProt();
+          tb.innerHTML = `Total: <strong>${p}%</strong> damage reduction${p >= 75 ? " MAX" : ""}`;
+          tb.style.color = "rgba(68,170,255,0.7)";
+        }
+      }
+      function _buyArmor(id) {
+        const it = ARMOR_ITEMS.find((a) => a.id === id);
+        if (!it || pb < it.cost || _armorOwned.includes(id)) return;
+        pb -= it.cost;
+        _armorOwned.push(id);
+        _equipArmor(id);
+      }
+      function _equipArmor(id) {
+        const it = ARMOR_ITEMS.find((a) => a.id === id);
+        if (!it || !_armorOwned.includes(id)) return;
+        if (it.slot === "all") {
+          ARMOR_ITEMS.filter((a) => a.slot !== "all").forEach((a) => {
+            _armorSlots[a.slot] = a.id;
+            if (!_armorOwned.includes(a.id)) _armorOwned.push(a.id);
+          });
+          _armorSlots["all"] = id;
+        } else _armorSlots[it.slot] = id;
+        savePersist();
+        updatePBUI();
+        renderArmorShop();
+      }
+
+      function renderMedicalShop() {
+        const grid = document.getElementById("medical-grid");
+        if (!grid) return;
+        grid.innerHTML = "";
+        MEDICAL_ITEMS.forEach((item) => {
+          const cnt = _cons[item.id] || 0,
+            maxed =
+              item.id === "hp_up"
+                ? _hpUps >= 3
+                : item.id === "regen_chip"
+                  ? _regenChip
+                  : false,
+            canAfford = pb >= item.cost;
+          const card = document.createElement("div");
+          card.className = "armor-card" + (maxed ? " is-equipped" : "");
+          if (cnt > 0 || maxed)
+            card.innerHTML += `<div class="ac-badge ${maxed ? "on" : "own"}">${maxed ? "MAX" : "x" + cnt}</div>`;
+          const tL =
+            item.type === "use"
+              ? "Consumable"
+              : item.type === "auto"
+                ? "Auto-Use"
+                : "Upgrade";
+          const tC =
+            item.type === "use"
+              ? "#44ff88"
+              : item.type === "auto"
+                ? "#ffdd00"
+                : "#ff6b35";
+          card.innerHTML += `<div class="ac-slot">${item.icon} ${tL}</div><div class="ac-name">${item.name}</div><div class="ac-desc">${item.desc}</div><div class="ac-prot" style="color:${tC}">${item.eff}</div>${!maxed ? `<div class="ac-cost">PB ${item.cost.toLocaleString()}</div>` : ""}`;
+          if (!maxed) {
+            const btn = document.createElement("button");
+            btn.className = "ac-btn " + (canAfford ? "buy" : "cant");
+            btn.textContent = canAfford
+              ? "BUY"
+              : `Need ${(item.cost - pb).toLocaleString()} more`;
+            if (canAfford) btn.onclick = () => _buyMedical(item.id);
+            card.appendChild(btn);
+          } else {
+            const btn = document.createElement("button");
+            btn.className = "ac-btn on";
+            btn.textContent = "ACTIVE";
+            card.appendChild(btn);
+          }
+          grid.appendChild(card);
+        });
+      }
+      function _buyMedical(id) {
+        const it = MEDICAL_ITEMS.find((m) => m.id === id);
+        if (!it || pb < it.cost) return;
+        pb -= it.cost;
+        if (it.type === "upg") {
+          if (id === "hp_up" && _hpUps < 3) _hpUps++;
+          else if (id === "regen_chip") _regenChip = true;
+        } else _cons[id] = (_cons[id] || 0) + it.cnt;
+        savePersist();
+        updatePBUI();
+        renderMedicalShop();
+      }
+      function _useConsumable(id) {
+        const it = MEDICAL_ITEMS.find((m) => m.id === id);
+        if (!it || (_cons[id] || 0) <= 0) return false;
+        const mh = 100 + _hpUps * 25;
+        _cons[id]--;
+        if (id === "adrenaline") {
+          gs.health = Math.min(mh, gs.health + 25);
+          _adrTmr = 8;
+          updateHealthUI();
+          updateHpUI();
+          _qmsg("Adrenaline!", "#ffdd00");
+        } else if (id === "painkillers") {
+          _pkTmr = 20;
+          _qmsg("Regen Active", "#44ff88");
+        } else if (id === "stim") {
+          _cons[id] = (_cons[id] || 0) + 1;
+          _qmsg("Stim Armed", "#ffdd00");
+        } else if (id === "repair") {
+          _qmsg("Armor Repaired", "#44aaff");
+        } else if (it.hp > 0) {
+          gs.health = Math.min(mh, gs.health + it.hp);
+          updateHealthUI();
+          updateHpUI();
+          _qmsg(`${it.icon} +${it.hp} HP`, "#44ff88");
+          sndPickup();
+        }
+        savePersist();
+        return true;
+      }
+      document.addEventListener("keydown", (ev) => {
+        if (ev.code === "KeyH" && gs.running) {
+          for (const id of [
+            "trauma",
+            "medkit3",
+            "medkit",
+            "bandage3",
+            "bandage",
+            "adrenaline",
+            "painkillers",
+          ]) {
+            if ((_cons[id] || 0) > 0) {
+              _useConsumable(id);
+              break;
+            }
+          }
+        }
+      });
+      function _qmsg(msg, color) {
+        const el = document.getElementById("wave-ann");
+        if (!el) return;
+        el.textContent = msg;
+        el.style.color = color || "";
+        el.style.opacity = "1";
+        clearTimeout(el._qt);
+        el._qt = setTimeout(() => {
+          el.style.opacity = "0";
+          el.style.color = "";
+        }, 1600);
+      }
+
+      // ── EXTEND PERSISTENCE ───────────────────────────────────────
+      const _origSave = savePersist;
+      window.savePersist = function () {
+        _origSave();
+        try {
+          localStorage.setItem("splat_armor_own", JSON.stringify(_armorOwned));
+          localStorage.setItem("splat_armor_sl", JSON.stringify(_armorSlots));
+          localStorage.setItem("splat_cons", JSON.stringify(_cons));
+          localStorage.setItem("splat_hpup", _hpUps);
+          localStorage.setItem("splat_regen", _regenChip ? "1" : "0");
+        } catch (e) {}
+      };
+      (function () {
+        try {
+          const a = localStorage.getItem("splat_armor_own");
+          if (a) {
+            const p = JSON.parse(a);
+            if (Array.isArray(p)) _armorOwned = p;
+          }
+          const s = localStorage.getItem("splat_armor_sl");
+          if (s) {
+            const o = JSON.parse(s);
+            if (o && typeof o === "object") _armorSlots = o;
+          }
+          const c = localStorage.getItem("splat_cons");
+          if (c) {
+            const o = JSON.parse(c);
+            if (o && typeof o === "object") _cons = o;
+          }
+          const h = localStorage.getItem("splat_hpup");
+          if (h !== null) _hpUps = Math.min(3, parseInt(h) || 0);
+          const r = localStorage.getItem("splat_regen");
+          if (r !== null) _regenChip = r === "1";
+        } catch (e) {}
+      })();
+
+      // ── HOOK initGame ────────────────────────────────────────────
+      const _origInit = initGame;
+      window.initGame = async function () {
+        await _origInit.apply(this, arguments);
+        document.getElementById("minimap-wrap").style.display = "block";
+        document.getElementById("kill-feed").style.display = "flex";
+      };
+
+      // ── ENHANCED LOOP (parallel to main loop) ────────────────────
+      let _eLast = 0;
+      function _eLoop(ts) {
+        requestAnimationFrame(_eLoop);
+        const dt = Math.min((ts - _eLast) / 1000, 0.06);
+        _eLast = ts;
+        if (!gs.running) return;
+        // Screen shake
+        if (_shake > 0) {
+          camera.position.x += (Math.random() - 0.5) * _shake;
+          camera.position.y += (Math.random() - 0.5) * _shake;
+          _shake = Math.max(0, _shake - dt * 16);
+        }
+        _mflTick(dt);
+        _ptsTick(dt);
+        _dnsTick();
+        _mmDraw();
+        // Sprint indicator
+        const spr = document.getElementById("sprint-ind");
+        if (spr)
+          spr.classList.toggle(
+            "active",
+            !!(gs.keys && (gs.keys["ShiftLeft"] || gs.keys["ShiftRight"])),
+          );
+        // Vignette
+        const vig = document.getElementById("damage-vignette");
+        if (vig)
+          vig.className = gs.health > 0 && gs.health < 30 ? "critical" : "";
+        const hpF = document.getElementById("hp-fill");
+        if (hpF) hpF.className = gs.health < 30 ? "critical" : "";
+        const amN = document.getElementById("ammo-num");
+        if (amN)
+          amN.className =
+            gs.ammo === 0 && !hostSettings.infiniteAmmo ? "empty" : "";
+        // Medical ticks
+        const mh = 100 + _hpUps * 25;
+        if (_regenChip && gs.health < mh) {
+          _regenTk += dt;
+          if (_regenTk >= 3) {
+            _regenTk = 0;
+            gs.health = Math.min(mh, gs.health + 1);
+            updateHealthUI();
+            updateHpUI();
+          }
+        }
+        if (_pkTmr > 0) {
+          _pkTmr -= dt;
+          _pkTk += dt;
+          if (_pkTk >= 0.33) {
+            _pkTk = 0;
+            gs.health = Math.min(mh, gs.health + 1);
+            updateHealthUI();
+            updateHpUI();
+          }
+          if (_pkTmr <= 0) {
+            _pkTmr = 0;
+            _pkTk = 0;
+          }
+        }
+        if (_adrTmr > 0) _adrTmr -= dt;
+        // Auto stim
+        if (gs.health > 0 && gs.health <= 30 && (_cons["stim"] || 0) > 0) {
+          _cons["stim"]--;
+          gs.health = Math.min(mh, gs.health + 30);
+          updateHealthUI();
+          updateHpUI();
+          _qmsg("STIM AUTO!", "#ffdd00");
+          sndPickup();
+          savePersist();
+        }
+      }
+      requestAnimationFrame(_eLoop);
+
+      console.log(
+        "%cSPLAT! Enhanced loaded",
+        "color:#ff6b35;font-weight:bold;font-size:14px",
+      );
     </script>
   </body>
 </html>
