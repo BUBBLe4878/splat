@@ -1,148 +1,101 @@
-# ========================================
-# SPLAT! — Flask + Socket.IO relay server
-# ========================================
-# Deploy instructions (HidenCloud / any VPS):
-#   1) pip install flask flask-socketio
-#   2) python flask_app.py
-#   3) Both players open http://YOUR_SERVER_IP:5000
-# ========================================
-
+import os
 from pathlib import Path
 from flask import Flask, send_from_directory, request
 from flask_socketio import SocketIO, emit, join_room, leave_room
 
-BASE_DIR = Path(__file__).resolve().parent
-
 app = Flask(__name__)
-socketio = SocketIO(
-    app,
-    cors_allowed_origins="*",
-    async_mode="threading",
-    serve_client=True,
-)
+app.config["SECRET_KEY"] = "splat-secret-2025"
+HERE = Path(__file__).parent
 
-# room_code -> {"host": sid, "guest": sid|None, "host_name": str, "guest_name": str|None}
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading", serve_client=True)
+
+# rooms[code] = { players:[sid,...], names:{sid:name}, teams:{sid:0|1}, host:sid, settings:{}, max_players:8 }
 rooms = {}
-# sid -> room_code  (reverse lookup for fast cleanup)
-client_rooms = {}
+client_rooms = {}  # sid -> code
 
-
-# ── Serve the game ────────────────────────────────────────────────────────────
-
-@app.route("/")
-def index():
-    return send_from_directory(BASE_DIR, "splat.html")
-
-@app.route("/splat.html")
-def splat():
-    return send_from_directory(BASE_DIR, "splat.html")
-
-
-# ── Room cleanup helper ───────────────────────────────────────────────────────
+def _room_info(code):
+    r = rooms.get(code)
+    if not r: return []
+    return [{"sid":s,"name":r["names"].get(s,"?"),"team":r["teams"].get(s,0)} for s in r["players"]]
 
 def _cleanup_client(sid):
-    code = client_rooms.pop(sid, None)
-    if not code:
-        return
-    room = rooms.get(code)
-    if not room:
-        return
+    code = client_rooms.get(sid)
+    if not code or code not in rooms: return
+    r = rooms[code]
+    name = r["names"].pop(sid, "?")
+    r["teams"].pop(sid, None)
+    if sid in r["players"]: r["players"].remove(sid)
+    del client_rooms[sid]
+    if not r["players"]: del rooms[code]; return
+    if r["host"] == sid and r["players"]: r["host"] = r["players"][0]
+    socketio.emit("player_left", {"sid":sid,"name":name,"players":_room_info(code),"new_host":r["host"]}, room=code)
 
-    if room.get("host") == sid:
-        # Host left — kick the guest and close the room
-        guest_sid = room.get("guest")
-        if guest_sid:
-            client_rooms.pop(guest_sid, None)
-            emit("peer_left", {"role": "host"}, to=guest_sid)
-            try:
-                leave_room(code, sid=guest_sid)
-            except TypeError:
-                pass  # older flask-socketio versions don't take sid kwarg
-        rooms.pop(code, None)
-    else:
-        # Guest left — keep room open so host can accept someone else
-        room["guest"] = None
-        room["guest_name"] = None
-        emit("peer_left", {"role": "guest"}, room=code, include_self=False)
+@app.route("/")
+@app.route("/splat.html")
+def serve_game(): return send_from_directory(HERE, "splat.html")
 
-    try:
-        leave_room(code)
-    except Exception:
-        pass
-
-
-# ── Socket.IO events ─────────────────────────────────────────────────────────
+@app.route("/blasters.json")
+def serve_blasters(): return send_from_directory(HERE, "blasters.json")
 
 @socketio.on("host_room")
 def on_host_room(data):
-    code = (data.get("code") or "").upper()
-    name = data.get("name") or "Host"
-
-    if not code:
-        emit("host_error", {"reason": "bad_code"})
-        return
-    if code in rooms:
-        emit("host_error", {"reason": "code_in_use"})
-        return
-
-    rooms[code] = {
-        "host": request.sid,
-        "guest": None,
-        "host_name": name,
-        "guest_name": None,
-    }
+    sid = request.sid
+    code = data.get("code","").upper().strip()
+    name = data.get("name","Host")[:20]
+    settings = data.get("settings", {})
+    max_p = int(data.get("max_players", 8))
+    if not code: emit("host_error", {"reason":"invalid_code"}); return
+    if code in rooms: emit("host_error", {"reason":"code_taken"}); return
+    rooms[code] = {"players":[sid],"names":{sid:name},"teams":{sid:0},"host":sid,"settings":settings,"max_players":max_p}
+    client_rooms[sid] = code
     join_room(code)
-    client_rooms[request.sid] = code
-    emit("host_ready", {"code": code})
-    print(f"[SPLAT] Room created: {code}  host={name} ({request.sid})")
-
+    emit("host_ready", {"code":code,"players":_room_info(code)})
 
 @socketio.on("join_room")
 def on_join_room(data):
-    code = (data.get("code") or "").upper()
-    name = data.get("name") or "Guest"
-
-    room = rooms.get(code)
-    if not room:
-        emit("join_error", {"reason": "not_found"})
-        return
-    if room.get("guest"):
-        emit("join_error", {"reason": "room_full"})
-        return
-
-    room["guest"] = request.sid
-    room["guest_name"] = name
+    sid = request.sid
+    code = data.get("code","").upper().strip()
+    name = data.get("name","Guest")[:20]
+    if code not in rooms: emit("join_error", {"reason":"not_found"}); return
+    r = rooms[code]
+    if len(r["players"]) >= r["max_players"]: emit("join_error", {"reason":"room_full"}); return
+    team = len(r["players"]) % 2
+    r["players"].append(sid); r["names"][sid] = name; r["teams"][sid] = team
+    client_rooms[sid] = code
     join_room(code)
-    client_rooms[request.sid] = code
+    players_info = _room_info(code)
+    emit("join_ready", {"code":code,"host_sid":r["host"],"host_name":r["names"].get(r["host"],"Host"),"players":players_info,"settings":r["settings"],"your_sid":sid,"your_team":team})
+    socketio.emit("player_joined", {"sid":sid,"name":name,"team":team,"players":players_info}, room=code, skip_sid=sid)
 
-    emit("join_ready", {"code": code, "host_name": room["host_name"]})
-    # Tell everyone else in the room (i.e. the host) a guest arrived
-    emit("guest_joined", {"name": name}, room=code, include_self=False)
-    print(f"[SPLAT] {name} ({request.sid}) joined room {code}")
-
+@socketio.on("update_settings")
+def on_update_settings(data):
+    sid = request.sid
+    code = client_rooms.get(sid)
+    if not code or code not in rooms: return
+    r = rooms[code]
+    if r["host"] != sid: return
+    r["settings"] = data.get("settings", {})
+    socketio.emit("settings_changed", {"settings":r["settings"]}, room=code)
 
 @socketio.on("relay")
-def on_relay(msg):
-    """Forward any game message to the other player — no server-side logic."""
-    code = client_rooms.get(request.sid)
-    if not code:
-        return
-    emit("relay", msg, room=code, include_self=False)
-
+def on_relay(data):
+    sid = request.sid
+    code = client_rooms.get(sid)
+    if not code or code not in rooms: return
+    data["from_sid"] = sid
+    target_sid = data.pop("target_sid", None)
+    if target_sid:
+        socketio.emit("relay", data, room=target_sid)
+    else:
+        socketio.emit("relay", data, room=code, skip_sid=sid)
 
 @socketio.on("leave_room")
-def on_leave_room(_data=None):
-    _cleanup_client(request.sid)
-
+def on_leave_room(data=None): _cleanup_client(request.sid)
 
 @socketio.on("disconnect")
-def on_disconnect():
-    _cleanup_client(request.sid)
-    print(f"[SPLAT] Client disconnected: {request.sid}")
-
-
-# ── Run ───────────────────────────────────────────────────────────────────────
+def on_disconnect(): _cleanup_client(request.sid)
 
 if __name__ == "__main__":
-    print("SPLAT! server starting on http://0.0.0.0:5000")
-    socketio.run(app, host="0.0.0.0", port=5000, debug=False)
+    port = int(os.environ.get("PORT", 5000))
+    print(f"SPLAT! server starting on port {port}")
+    socketio.run(app, host="0.0.0.0", port=port, debug=False)
