@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width,initial-scale=1.0,user-scalable=no"
     />
-    <title>SPLAT!</title>
+    <title>SPLAT! — 3D Paintball</title>
     <style>
       @import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700&display=swap");
       * {
@@ -694,8 +694,8 @@
       }
 
       /* ─── CROSSHAIR / SCOPE ─── */
-      /* xhair is now a canvas — see #xhair-canvas above */
       /* ── SCOPE BASE ── */
+      /* SCOPE BASE */
       #scope {
         position: fixed;
         inset: 0;
@@ -703,17 +703,35 @@
         z-index: 14;
         display: none;
       }
-      #scope::before {
+      /* Black vignette ONLY for sniper (crosshair sight) */
+      #scope[data-sight="crosshair"]::before {
         content: "";
         position: absolute;
         inset: 0;
         background: radial-gradient(
           circle at 50% 50%,
-          transparent 128px,
-          rgba(0, 0, 0, 0.97) 134px
+          transparent 124px,
+          rgba(0, 0, 0, 0.97) 130px
         );
       }
-      /* ── SCOPE OVERLAY SVG (rendered by JS) ── */
+      /* Green lens tint only for sniper */
+      #scope[data-sight="crosshair"]::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 248px;
+        height: 248px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          rgba(20, 80, 20, 0.22) 0%,
+          rgba(0, 0, 0, 0) 70%
+        );
+        pointer-events: none;
+      }
+      /* SVG sight overlay */
       #scope-svg {
         position: absolute;
         top: 50%;
@@ -722,31 +740,47 @@
         pointer-events: none;
         overflow: visible;
       }
-      /* scope lens tint / glare */
-      #scope::after {
-        content: "";
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 256px;
-        height: 256px;
-        border-radius: 50%;
-        background: radial-gradient(
-          circle,
-          rgba(20, 80, 20, 0.18) 0%,
-          rgba(0, 0, 0, 0) 70%
-        );
-        pointer-events: none;
-      }
-      /* ── DYNAMIC CROSSHAIR ── */
-      #xhair-canvas {
+      /* Simple CSS crosshair (non-scoped) */
+      #xhair {
         position: fixed;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
         pointer-events: none;
         z-index: 15;
+        width: 0;
+        height: 0;
+      }
+      #xhair::before,
+      #xhair::after {
+        content: "";
+        position: absolute;
+        background: rgba(255, 255, 255, 0.92);
+        border-radius: 1px;
+        box-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
+      }
+      #xhair::before {
+        width: 14px;
+        height: 2px;
+        top: -1px;
+        left: -7px;
+      }
+      #xhair::after {
+        width: 2px;
+        height: 14px;
+        top: -7px;
+        left: -1px;
+      }
+      /* centre gap using a white box with a hole */
+      #xhair-dot {
+        position: absolute;
+        width: 3px;
+        height: 3px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.9);
+        top: -1.5px;
+        left: -1.5px;
+        box-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
       }
 
       /* ─── TOUCH ─── */
@@ -1242,7 +1276,7 @@
   </head>
   <body>
     <canvas id="canvas"></canvas>
-    <canvas id="xhair-canvas" width="120" height="120"></canvas>
+    <div id="xhair"><div id="xhair-dot"></div></div>
     <div id="scope">
       <svg
         id="scope-svg"
@@ -2667,6 +2701,7 @@
         myTeam = 0;
       let roomCode = null,
         isHost = false;
+      let roomPlayers = []; // tracks {sid,name,team} for everyone in the room
       let conn = {
         open: false,
         send(msg) {
@@ -3076,6 +3111,19 @@
         ];
         return sp[index % sp.length];
       }
+      // Returns a y value (eye height) that puts the player safely above any obstacle at x,z
+      function safeSpawnY(x, z) {
+        let topY = 0;
+        for (const o of obstacles) {
+          if (
+            Math.abs(x - o.x) < o.hw + 0.3 &&
+            Math.abs(z - o.z) < o.hd + 0.3
+          ) {
+            topY = Math.max(topY, o.h);
+          }
+        }
+        return topY + 1.7 + 0.1; // eye height above whatever they'd land on
+      }
 
       // ════════════════════════════════════════════════════
       //  ENEMIES (bots)
@@ -3395,11 +3443,11 @@
         camera.fov = on ? fovMap[equippedBlaster?.id || "basic"] || 50 : 75;
         camera.updateProjectionMatrix();
         const scopeEl = document.getElementById("scope");
+        const sightType = getSightType();
         scopeEl.style.display = on ? "block" : "none";
-        if (on) renderScopeOverlay(getSightType());
-        document.getElementById("xhair-canvas").style.display = on
-          ? "none"
-          : "block";
+        scopeEl.dataset.sight = on ? sightType : "none";
+        if (on) renderScopeOverlay(sightType);
+        document.getElementById("xhair").style.display = on ? "none" : "block";
         document.getElementById("aim-btn").classList.toggle("active", on);
       }
       function renderScopeOverlay(type) {
@@ -3453,9 +3501,9 @@
         gs.yaw = 0;
         gs.pitch = 0;
 
-        // Spawn player
+        // Spawn player — safeSpawnY pushes above any obstacle at that XZ
         const sp = getSpawn(0);
-        yawObj.position.set(sp.x, 1.7, sp.z);
+        yawObj.position.set(sp.x, safeSpawnY(sp.x, sp.z), sp.z);
 
         // Reset remote players health
         Object.values(remoteClients).forEach((rc) => {
@@ -3660,13 +3708,13 @@
 
         if (touchEnabled) {
           document.getElementById("touch-ui").style.display = "block";
-          document.getElementById("xhair-canvas").style.display = "none";
+          document.getElementById("xhair").style.display = "none";
           try {
             document.exitPointerLock();
           } catch (e) {}
         } else {
           document.getElementById("touch-ui").style.display = "none";
-          document.getElementById("xhair-canvas").style.display = "block";
+          document.getElementById("xhair").style.display = "block";
         }
 
         startRound();
@@ -4025,7 +4073,8 @@
             "GAME SETTINGS (Host)";
           renderSettingsUI("room-settings-inner", true);
           conn.open = true;
-          renderPlayersList([{ sid: mySid, name: playerName, team: 0 }]);
+          roomPlayers = [{ sid: mySid, name: playerName, team: 0 }];
+          renderPlayersList(roomPlayers);
         });
 
         socket.on("host_error", (data) => {
@@ -4048,7 +4097,8 @@
           document.getElementById("room-settings-title").textContent =
             "GAME SETTINGS (Read Only)";
           renderSettingsUI("room-settings-inner", false);
-          renderPlayersList(data.players || []);
+          roomPlayers = data.players || [];
+          renderPlayersList(roomPlayers);
           document.getElementById("wait-status").textContent =
             "Waiting for host to start…";
           document.getElementById("wait-spin").style.display = "none";
@@ -4068,10 +4118,11 @@
         });
 
         socket.on("player_joined", (data) => {
-          renderPlayersList(data.players || []);
+          roomPlayers = data.players || [];
+          renderPlayersList(roomPlayers);
           document.getElementById("wait-status").textContent =
             `${data.name} joined!`;
-          if (isHost && data.players && data.players.length >= 2) {
+          if (isHost && roomPlayers.length >= 2) {
             document.getElementById("lobby-start").style.display = "block";
             document.getElementById("wait-spin").style.display = "none";
           }
@@ -4304,10 +4355,10 @@
             ? "block"
             : "none";
           if (!on) {
-            document.getElementById("xhair-canvas").style.display = "block";
+            document.getElementById("xhair").style.display = "block";
             canvas.requestPointerLock();
           } else {
-            document.getElementById("xhair-canvas").style.display = "none";
+            document.getElementById("xhair").style.display = "none";
             try {
               document.exitPointerLock();
             } catch (e) {}
@@ -4539,26 +4590,23 @@
           "Waiting for players…";
       });
 
-      document.getElementById("lobby-start").addEventListener("click", () => {
-        if (!conn.open) return;
-        // Build player list from room
-        const playersInfo = Array.from(
-          document
-            .getElementById("players-list")
-            .querySelectorAll(".player-entry"),
-        ).map((row, i) => ({
-          sid: i === 0 ? mySid : "remote" + i,
-          name: row.querySelector(".p-label").textContent.replace(" (You)", ""),
-          team: i % 2,
-        }));
-        conn.send({
-          type: "start",
-          settings: hostSettings,
-          players: playersInfo,
-          myTeam: 1,
-        }); // guests get team 1
-        initGame();
-      });
+      document
+        .getElementById("lobby-start")
+        .addEventListener("click", async () => {
+          if (!conn.open) return;
+          // Broadcast start to all guests with real SIDs from roomPlayers
+          conn.send({
+            type: "start",
+            settings: hostSettings,
+            players: roomPlayers,
+            myTeam: 1,
+          });
+          // Host starts game then adds remote clients using real SIDs
+          await initGame();
+          roomPlayers.forEach((p) => {
+            if (p.sid !== mySid) addRemoteClient(p.sid, p.name, p.team);
+          });
+        });
 
       document.getElementById("restart-btn").addEventListener("click", () => {
         document.getElementById("gameover").style.display = "none";
@@ -4589,81 +4637,6 @@
       updatePBUI();
       _mapsReady.then(() => buildMap("arena")); // default map after maps load
 
-      // ════════════════════════════════════════════════════
-      //  DYNAMIC CROSSHAIR  (canvas-based)
-      // ════════════════════════════════════════════════════
-      const xhairCanvas = document.getElementById("xhair-canvas");
-      const xhairCtx = xhairCanvas.getContext("2d");
-      let xhairSpread = 1.0; // 0=tight, 1=full spread
-      let xhairTarget = 1.0; // animates toward this
-
-      function updateCrosshair(dt) {
-        // Target spread based on weapon + moving + aiming
-        const bl = equippedBlaster;
-        const base = Math.min(1.0, (bl.spread || 0.015) / 0.22); // normalise to 0-1
-        const moving =
-          Math.abs(gs.keys["KeyW"] || 0) +
-            Math.abs(gs.keys["KeyS"] || 0) +
-            Math.abs(gs.keys["KeyA"] || 0) +
-            Math.abs(gs.keys["KeyD"] || 0) >
-          0;
-        xhairTarget = isAiming ? 0.0 : base + (moving ? 0.2 : 0);
-        xhairTarget = Math.max(0, Math.min(1.0, xhairTarget));
-        xhairSpread += (xhairTarget - xhairSpread) * Math.min(1, dt * 12);
-
-        const cv = xhairCanvas;
-        const ctx = xhairCtx;
-        ctx.clearRect(0, 0, 120, 120);
-        const cx = 60,
-          cy = 60;
-
-        // Gap = 6px when tight, up to 22px when fully spread
-        const gap = 6 + xhairSpread * 16;
-        const len = 8 + xhairSpread * 4;
-        const thick = 2;
-        const alpha = gs.running ? 0.88 : 0;
-        if (!gs.running) return;
-
-        ctx.lineCap = "round";
-        ctx.lineWidth = thick;
-        // Outer white stroke for visibility
-        ctx.strokeStyle = "rgba(0,0,0,0.55)";
-        ctx.lineWidth = thick + 2;
-        _drawCrosshairLines(ctx, cx, cy, gap, len);
-        // Coloured inner lines
-        ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
-        ctx.lineWidth = thick;
-        _drawCrosshairLines(ctx, cx, cy, gap, len);
-        // Centre dot (shrinks when aimed)
-        const dotR = 1.8 * (1 - xhairSpread * 0.7);
-        if (dotR > 0.3) {
-          ctx.fillStyle = `rgba(255,255,255,${alpha})`;
-          ctx.beginPath();
-          ctx.arc(cx, cy, dotR, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      }
-      function _drawCrosshairLines(ctx, cx, cy, gap, len) {
-        // Top, Bottom, Left, Right arms
-        ctx.beginPath();
-        ctx.moveTo(cx, cy - gap);
-        ctx.lineTo(cx, cy - gap - len);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(cx, cy + gap);
-        ctx.lineTo(cx, cy + gap + len);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(cx - gap, cy);
-        ctx.lineTo(cx - gap - len, cy);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(cx + gap, cy);
-        ctx.lineTo(cx + gap + len, cy);
-        ctx.stroke();
-      }
-
-      // ════════════════════════════════════════════════════
       //  SCOPE SVG OVERLAY  (per-blaster sight type)
       // ════════════════════════════════════════════════════
       function renderScopeOverlay(type) {
@@ -4940,9 +4913,6 @@
         const px = yawObj.position.x,
           pz = yawObj.position.z,
           prevY = yawObj.position.y;
-
-        // Dynamic crosshair
-        updateCrosshair(dt);
 
         // Held fire
         if (fireHeld && (document.pointerLockElement || touchEnabled)) shoot();
