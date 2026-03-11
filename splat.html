@@ -694,42 +694,8 @@
       }
 
       /* ─── CROSSHAIR / SCOPE ─── */
-      #xhair {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        pointer-events: none;
-        z-index: 15;
-      }
-      #xhair::before,
-      #xhair::after {
-        content: "";
-        position: absolute;
-        background: rgba(255, 255, 255, 0.9);
-        border-radius: 2px;
-      }
-      #xhair::before {
-        width: 18px;
-        height: 2px;
-        top: -1px;
-        left: -9px;
-      }
-      #xhair::after {
-        width: 2px;
-        height: 18px;
-        top: -9px;
-        left: -1px;
-      }
-      #xhair .dot {
-        width: 4px;
-        height: 4px;
-        background: #fff;
-        border-radius: 50%;
-        position: absolute;
-        top: -2px;
-        left: -2px;
-      }
+      /* xhair is now a canvas — see #xhair-canvas above */
+      /* ── SCOPE BASE ── */
       #scope {
         position: fixed;
         inset: 0;
@@ -743,46 +709,44 @@
         inset: 0;
         background: radial-gradient(
           circle at 50% 50%,
-          transparent 130px,
-          rgba(0, 0, 0, 0.97) 136px
+          transparent 128px,
+          rgba(0, 0, 0, 0.97) 134px
         );
       }
+      /* ── SCOPE OVERLAY SVG (rendered by JS) ── */
+      #scope-svg {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        overflow: visible;
+      }
+      /* scope lens tint / glare */
       #scope::after {
         content: "";
         position: absolute;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        width: 264px;
-        height: 264px;
-        border: 2px solid rgba(255, 255, 255, 0.35);
+        width: 256px;
+        height: 256px;
         border-radius: 50%;
-        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
+        background: radial-gradient(
+          circle,
+          rgba(20, 80, 20, 0.18) 0%,
+          rgba(0, 0, 0, 0) 70%
+        );
+        pointer-events: none;
       }
-      #scope-cross {
-        position: absolute;
+      /* ── DYNAMIC CROSSHAIR ── */
+      #xhair-canvas {
+        position: fixed;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
         pointer-events: none;
-      }
-      #scope-cross::before,
-      #scope-cross::after {
-        content: "";
-        position: absolute;
-        background: rgba(255, 255, 255, 0.6);
-      }
-      #scope-cross::before {
-        width: 220px;
-        height: 1px;
-        top: 0;
-        left: -110px;
-      }
-      #scope-cross::after {
-        width: 1px;
-        height: 220px;
-        top: -110px;
-        left: 0;
+        z-index: 15;
       }
 
       /* ─── TOUCH ─── */
@@ -1278,8 +1242,15 @@
   </head>
   <body>
     <canvas id="canvas"></canvas>
-    <div id="xhair"><div class="dot"></div></div>
-    <div id="scope"><div id="scope-cross"></div></div>
+    <canvas id="xhair-canvas" width="120" height="120"></canvas>
+    <div id="scope">
+      <svg
+        id="scope-svg"
+        width="280"
+        height="280"
+        viewBox="-140 -140 280 280"
+      ></svg>
+    </div>
 
     <!-- HUD -->
     <div id="hud">
@@ -1451,22 +1422,33 @@
         <button class="lb-btn orange" id="name-next">CONTINUE →</button>
       </div>
 
-      <!-- 2: Mode select -->
+      <!-- 2: Main menu (Solo or Multiplayer) -->
       <div class="panel" id="p-mode">
-        <div class="logo" style="font-size: clamp(44px, 9vw, 76px)">
-          SELECT MODE
-        </div>
+        <div class="logo" style="font-size: clamp(44px, 9vw, 76px)">SPLAT!</div>
         <div class="name-badge" id="name-badge"></div>
+        <button class="lb-btn orange" id="solo-quick-btn">🤖 SOLO PLAY</button>
+        <button class="lb-btn blue" id="mp-quick-btn">🌐 MULTIPLAYER</button>
+        <button class="lb-btn gold" id="lobby-shop-btn">🏪 BLASTER SHOP</button>
+        <div class="lobby-pb">💰 <span id="lobby-pb-val">0</span> PB</div>
+        <button
+          class="lb-btn ghost"
+          id="mode-back"
+          style="font-size: 13px; padding: 9px"
+        >
+          ← Back
+        </button>
+      </div>
+
+      <!-- 2b: MP mode select (only shown when hosting) -->
+      <div class="panel" id="p-mp-mode">
+        <div class="logo" style="font-size: clamp(38px, 8vw, 62px)">
+          GAME MODE
+        </div>
         <div class="mode-grid">
-          <div class="mode-card sel" id="card-solo">
-            <div class="mc-icon">🤖</div>
-            <div class="mc-title">Solo Bots</div>
-            <div class="mc-desc">vs AI waves</div>
-          </div>
-          <div class="mode-card" id="card-pvp">
+          <div class="mode-card sel" id="card-pvp">
             <div class="mc-icon">⚔️</div>
             <div class="mc-title">1v1</div>
-            <div class="mc-desc">2 players PvP</div>
+            <div class="mc-desc">2 player PvP</div>
           </div>
           <div class="mode-card" id="card-ffa">
             <div class="mc-icon">🔥</div>
@@ -1479,12 +1461,10 @@
             <div class="mc-desc">Red vs Blue</div>
           </div>
         </div>
-        <button class="lb-btn orange" id="mode-go">NEXT →</button>
-        <button class="lb-btn gold" id="lobby-shop-btn">🏪 BLASTER SHOP</button>
-        <div class="lobby-pb">💰 <span id="lobby-pb-val">0</span> PB</div>
+        <button class="lb-btn orange" id="mp-mode-next">NEXT →</button>
         <button
           class="lb-btn ghost"
-          id="mode-back"
+          id="mp-mode-back"
           style="font-size: 13px; padding: 9px"
         >
           ← Back
@@ -1588,6 +1568,186 @@
         >
           ← Leave
         </button>
+      </div>
+    </div>
+
+    <!-- Pause Menu -->
+    <div
+      id="pause-menu"
+      style="
+        position: fixed;
+        inset: 0;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.82);
+        z-index: 180;
+        backdrop-filter: blur(14px);
+        gap: 13px;
+      "
+    >
+      <div
+        style="
+          font-family: &quot;Bebas Neue&quot;, sans-serif;
+          font-size: clamp(42px, 9vw, 72px);
+          letter-spacing: 5px;
+          background: linear-gradient(135deg, #ff6b35, #ffd23f);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        "
+      >
+        PAUSED
+      </div>
+      <button class="lb-btn orange" id="pause-resume" style="max-width: 240px">
+        ▶ RESUME
+      </button>
+      <button class="lb-btn gold" id="pause-shop" style="max-width: 240px">
+        🏪 BLASTER SHOP
+      </button>
+      <button
+        class="lb-btn ghost"
+        id="pause-settings-btn"
+        style="max-width: 240px; font-size: 14px; padding: 11px"
+      >
+        ⚙ SETTINGS
+      </button>
+      <button
+        class="lb-btn red"
+        id="pause-menu-btn"
+        style="max-width: 240px; font-size: 14px; padding: 11px"
+      >
+        ✕ MAIN MENU
+      </button>
+      <div
+        style="
+          font-size: 10px;
+          opacity: 0.25;
+          letter-spacing: 2px;
+          margin-top: 6px;
+        "
+      >
+        ESC TO RESUME
+      </div>
+    </div>
+
+    <!-- Pause Menu -->
+    <div
+      id="pause-menu"
+      style="
+        position: fixed;
+        inset: 0;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.82);
+        z-index: 180;
+        backdrop-filter: blur(14px);
+        gap: 13px;
+      "
+    >
+      <div
+        style="
+          font-family: &quot;Bebas Neue&quot;, sans-serif;
+          font-size: clamp(42px, 9vw, 72px);
+          letter-spacing: 5px;
+          background: linear-gradient(135deg, #ff6b35, #ffd23f);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        "
+      >
+        PAUSED
+      </div>
+      <button class="lb-btn orange" id="pause-resume" style="max-width: 240px">
+        ▶ RESUME
+      </button>
+      <button class="lb-btn gold" id="pause-shop" style="max-width: 240px">
+        🏪 BLASTER SHOP
+      </button>
+      <button
+        class="lb-btn ghost"
+        id="pause-settings-btn"
+        style="max-width: 240px; font-size: 14px; padding: 11px"
+      >
+        ⚙ SETTINGS
+      </button>
+      <button
+        class="lb-btn red"
+        id="pause-menu-btn"
+        style="max-width: 240px; font-size: 14px; padding: 11px"
+      >
+        ✕ MAIN MENU
+      </button>
+      <div
+        style="
+          font-size: 10px;
+          opacity: 0.25;
+          letter-spacing: 2px;
+          margin-top: 6px;
+        "
+      >
+        ESC TO RESUME
+      </div>
+    </div>
+
+    <!-- Pause Menu -->
+    <div
+      id="pause-menu"
+      style="
+        position: fixed;
+        inset: 0;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.82);
+        z-index: 180;
+        backdrop-filter: blur(14px);
+        gap: 13px;
+      "
+    >
+      <div
+        style="
+          font-family: &quot;Bebas Neue&quot;, sans-serif;
+          font-size: clamp(42px, 9vw, 72px);
+          letter-spacing: 5px;
+          background: linear-gradient(135deg, #ff6b35, #ffd23f);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        "
+      >
+        PAUSED
+      </div>
+      <button class="lb-btn orange" id="pause-resume" style="max-width: 240px">
+        &#9654; RESUME
+      </button>
+      <button class="lb-btn gold" id="pause-shop" style="max-width: 240px">
+        &#127978; BLASTER SHOP
+      </button>
+      <button
+        class="lb-btn ghost"
+        id="pause-settings-btn"
+        style="max-width: 240px; font-size: 14px; padding: 11px"
+      >
+        &#9881; SETTINGS
+      </button>
+      <button
+        class="lb-btn red"
+        id="pause-menu-btn"
+        style="max-width: 240px; font-size: 14px; padding: 11px"
+      >
+        &#10005; MAIN MENU
+      </button>
+      <div
+        style="
+          font-size: 10px;
+          opacity: 0.25;
+          letter-spacing: 2px;
+          margin-top: 6px;
+        "
+      >
+        ESC TO RESUME
       </div>
     </div>
 
@@ -1768,171 +1928,680 @@
       })();
 
       // ════════════════════════════════════════════════════
-      //  MAP DEFINITIONS
+      //  MAPS  — loaded from maps.json, inline fallback if offline
       // ════════════════════════════════════════════════════
-      const MAPS = {
-        arena: {
-          name: "Arena",
-          icon: "🏟",
-          groundColor: 0x4a7c3f,
-          gridColor: 0x3a6a2f,
-          wallColor: 0xd4b896,
-          fogColor: 0x87ceeb,
-          ambientInt: 0.6,
-          sunColor: 0xfff5e0,
-          spawns: [
-            { x: 0, z: 0 },
-            { x: -18, z: 0 },
-            { x: 18, z: 0 },
-            { x: 0, z: -18 },
-            { x: 0, z: 18 },
-            { x: -13, z: -13 },
-            { x: 13, z: -13 },
-            { x: -13, z: 13 },
-            { x: 13, z: 13 },
-          ],
-          obstacles: [
-            // cover walls
-            [1, 3, 6, 13, -9, 0x88cc88],
-            [1, 3, 6, -13, -9, 0x88cccc],
-            [6, 3, 1, 0, -22, 0xcc8888],
-            [6, 3, 1, 0, 22, 0xddaa55],
-            [1, 3, 6, 26, 0, 0xaa55dd],
-            [1, 3, 6, -26, 0, 0xdd5555],
-            // tall pillars
-            [1.2, 4.5, 1.2, 23, 19, 0xcc44cc],
-            [1.2, 4.5, 1.2, -23, 19, 0x44cccc],
-            [1.2, 4.5, 1.2, 23, -19, 0xff9955],
-            [1.2, 4.5, 1.2, -23, -19, 0x55aaff],
-            // low boxes
-            [3.5, 1.5, 3.5, 9, 9, 0xcc8844],
-            [3.5, 1.5, 3.5, -9, 9, 0x8888cc],
-            [4.5, 1.2, 4.5, 0, -11, 0xcc8888],
-            [2.5, 1.5, 2.5, -9, -19, 0xcccc44],
-            [2.5, 1.5, 2.5, 9, -19, 0xee9922],
-            [3.5, 1.5, 3.5, 0, 0, 0x778855],
-            // platforms (jumpable)
-            [6, 1.5, 6, 18, 18, 0xf0d878],
-            [6, 1.5, 6, -18, 18, 0xf0d878],
-            [6, 1.5, 6, 18, -18, 0xf0d878],
-            [6, 1.5, 6, -18, -18, 0xf0d878],
-            [5, 2.0, 5, 31, 0, 0xe0b850],
-            [5, 2.0, 5, -31, 0, 0xe0b850],
-            [5, 2.0, 5, 0, 31, 0xe0b850],
-            [5, 2.0, 5, 0, -31, 0xe0b850],
-            [3, 1.0, 3, 13, 22, 0xd4c060],
-            [3, 1.0, 3, -13, 22, 0xd4c060],
-            [3, 1.0, 3, 13, -22, 0xd4c060],
-            [3, 1.0, 3, -13, -22, 0xd4c060],
-          ],
-        },
-        urban: {
-          name: "Urban",
-          icon: "🏙",
-          groundColor: 0x282828,
-          gridColor: 0x1e1e1e,
-          wallColor: 0x888888,
-          fogColor: 0x667788,
-          ambientInt: 0.5,
-          sunColor: 0xddeeff,
-          spawns: [
-            { x: 0, z: 0 },
-            { x: -20, z: 0 },
-            { x: 20, z: 0 },
-            { x: 0, z: -20 },
-            { x: 0, z: 20 },
-            { x: -14, z: -14 },
-            { x: 14, z: -14 },
-            { x: -14, z: 14 },
-            { x: 14, z: 14 },
-          ],
-          obstacles: [
-            // buildings (tall walls)
-            [4, 6, 4, 14, 14, 0x556677],
-            [4, 6, 4, -14, 14, 0x445566],
-            [4, 6, 4, 14, -14, 0x556688],
-            [4, 6, 4, -14, -14, 0x667799],
-            [2, 6, 8, 24, 0, 0x444455],
-            [2, 6, 8, -24, 0, 0x445566],
-            [8, 6, 2, 0, 24, 0x556677],
-            [8, 6, 2, 0, -24, 0x446677],
-            // low barriers
-            [1, 2, 6, 8, 0, 0x888888],
-            [1, 2, 6, -8, 0, 0x888888],
-            [6, 2, 1, 0, 8, 0x888888],
-            [6, 2, 1, 0, -8, 0x888888],
-            // crates
-            [2, 2, 2, 5, 5, 0x9988aa],
-            [2, 2, 2, -5, 5, 0xaa8899],
-            [2, 2, 2, 5, -5, 0x9988aa],
-            [2, 2, 2, -5, -5, 0xaa8899],
-            // raised walkways (platforms)
-            [10, 2, 2, 0, 16, 0x667788],
-            [10, 2, 2, 0, -16, 0x667788],
-            [2, 2, 10, 16, 0, 0x778899],
-            [2, 2, 10, -16, 0, 0x778899],
-            [4, 1.5, 4, 20, 20, 0x556677],
-            [4, 1.5, 4, -20, 20, 0x556677],
-            [4, 1.5, 4, 20, -20, 0x556677],
-            [4, 1.5, 4, -20, -20, 0x556677],
-          ],
-        },
-        bunker: {
-          name: "Bunker",
-          icon: "🏭",
-          groundColor: 0x3d3520,
-          gridColor: 0x2e2818,
-          wallColor: 0x776655,
-          fogColor: 0x445533,
-          ambientInt: 0.45,
-          sunColor: 0xffeecc,
-          spawns: [
-            { x: 0, z: 0 },
-            { x: -16, z: 0 },
-            { x: 16, z: 0 },
-            { x: 0, z: -16 },
-            { x: 0, z: 16 },
-            { x: -11, z: -11 },
-            { x: 11, z: -11 },
-            { x: -11, z: 11 },
-            { x: 11, z: 11 },
-          ],
-          obstacles: [
-            // metal containers
-            [6, 2.5, 2, 12, 0, 0x556644],
-            [6, 2.5, 2, -12, 0, 0x446655],
-            [2, 2.5, 6, 0, 12, 0x665544],
-            [2, 2.5, 6, 0, -12, 0x554466],
-            // bunker walls
-            [1, 4, 8, 20, 8, 0x8b7355],
-            [1, 4, 8, -20, 8, 0x7b6345],
-            [1, 4, 8, 20, -8, 0x8b7355],
-            [1, 4, 8, -20, -8, 0x7b6345],
-            [8, 4, 1, 8, 20, 0x8b7355],
-            [8, 4, 1, -8, 20, 0x7b6345],
-            [8, 4, 1, 8, -20, 0x8b7355],
-            [8, 4, 1, -8, -20, 0x7b6345],
-            // drums/crates
-            [1.5, 2, 1.5, 5, 5, 0x667744],
-            [1.5, 2, 1.5, -5, 5, 0x556633],
-            [1.5, 2, 1.5, 5, -5, 0x667744],
-            [1.5, 2, 1.5, -5, -5, 0x556633],
-            [2, 1.5, 2, 17, 17, 0x8b7355],
-            [2, 1.5, 2, -17, 17, 0x7b6345],
-            [2, 1.5, 2, 17, -17, 0x8b7355],
-            [2, 1.5, 2, -17, -17, 0x7b6345],
-            // catwalks (platforms)
-            [8, 2, 1.5, 0, 26, 0x998866],
-            [8, 2, 1.5, 0, -26, 0x998866],
-            [1.5, 2, 8, 26, 0, 0x998866],
-            [1.5, 2, 8, -26, 0, 0x998866],
-            [4, 3, 4, 24, 24, 0x887755],
-            [4, 3, 4, -24, 24, 0x887755],
-            [4, 3, 4, 24, -24, 0x887755],
-            [4, 3, 4, -24, -24, 0x887755],
-          ],
-        },
-      };
+      let MAPS = {}; // id -> map definition (populated by loadMaps)
+
+      function hexToInt(hex) {
+        if (typeof hex === "number") return hex;
+        return parseInt((hex || "0").replace("#", ""), 16);
+      }
+
+      async function loadMaps() {
+        try {
+          const r = await fetch("maps.json");
+          if (r.ok) {
+            const arr = await r.json();
+            arr.forEach((m) => {
+              MAPS[m.id] = m;
+            });
+            console.log("Loaded maps:", Object.keys(MAPS));
+            return;
+          }
+        } catch (e) {
+          console.warn("maps.json not found, using fallback.");
+        }
+        _installFallbackMaps();
+      }
+
+      function _installFallbackMaps() {
+        const fallback = [
+          {
+            id: "arena",
+            name: "Arena",
+            icon: "🏟",
+            description: "Classic open grass field.",
+            environment: {
+              groundColor: "#4a7c3f",
+              gridColor: "#3a6a2f",
+              wallColor: "#d4b896",
+              fogColor: "#87ceeb",
+              ambientIntensity: 0.6,
+              sunColor: "#fff5e0",
+            },
+            arenaSize: 80,
+            spawns: [
+              { x: 0, z: 0 },
+              { x: -18, z: 0 },
+              { x: 18, z: 0 },
+              { x: 0, z: -18 },
+              { x: 0, z: 18 },
+              { x: -13, z: -13 },
+              { x: 13, z: -13 },
+              { x: -13, z: 13 },
+              { x: 13, z: 13 },
+            ],
+            objects: [
+              {
+                type: "cover_wall",
+                x: 13,
+                z: -9,
+                w: 1,
+                h: 3,
+                d: 6,
+                color: "#88cc88",
+              },
+              {
+                type: "cover_wall",
+                x: -13,
+                z: -9,
+                w: 1,
+                h: 3,
+                d: 6,
+                color: "#88cccc",
+              },
+              {
+                type: "cover_wall",
+                x: 0,
+                z: -22,
+                w: 6,
+                h: 3,
+                d: 1,
+                color: "#cc8888",
+              },
+              {
+                type: "cover_wall",
+                x: 0,
+                z: 22,
+                w: 6,
+                h: 3,
+                d: 1,
+                color: "#ddaa55",
+              },
+              {
+                type: "cover_wall",
+                x: 26,
+                z: 0,
+                w: 1,
+                h: 3,
+                d: 6,
+                color: "#aa55dd",
+              },
+              {
+                type: "cover_wall",
+                x: -26,
+                z: 0,
+                w: 1,
+                h: 3,
+                d: 6,
+                color: "#dd5555",
+              },
+              {
+                type: "pillar",
+                x: 23,
+                z: 19,
+                w: 1.2,
+                h: 4.5,
+                d: 1.2,
+                color: "#cc44cc",
+              },
+              {
+                type: "pillar",
+                x: -23,
+                z: 19,
+                w: 1.2,
+                h: 4.5,
+                d: 1.2,
+                color: "#44cccc",
+              },
+              {
+                type: "pillar",
+                x: 23,
+                z: -19,
+                w: 1.2,
+                h: 4.5,
+                d: 1.2,
+                color: "#ff9955",
+              },
+              {
+                type: "pillar",
+                x: -23,
+                z: -19,
+                w: 1.2,
+                h: 4.5,
+                d: 1.2,
+                color: "#55aaff",
+              },
+              {
+                type: "crate",
+                x: 9,
+                z: 9,
+                w: 3.5,
+                h: 1.5,
+                d: 3.5,
+                color: "#cc8844",
+              },
+              {
+                type: "crate",
+                x: -9,
+                z: 9,
+                w: 3.5,
+                h: 1.5,
+                d: 3.5,
+                color: "#8888cc",
+              },
+              {
+                type: "crate",
+                x: 0,
+                z: -11,
+                w: 4.5,
+                h: 1.2,
+                d: 4.5,
+                color: "#cc8888",
+              },
+              {
+                type: "crate",
+                x: 0,
+                z: 0,
+                w: 3.5,
+                h: 1.5,
+                d: 3.5,
+                color: "#778855",
+              },
+              {
+                type: "platform",
+                x: 18,
+                z: 18,
+                w: 6,
+                h: 1.5,
+                d: 6,
+                color: "#f0d878",
+              },
+              {
+                type: "platform",
+                x: -18,
+                z: 18,
+                w: 6,
+                h: 1.5,
+                d: 6,
+                color: "#f0d878",
+              },
+              {
+                type: "platform",
+                x: 18,
+                z: -18,
+                w: 6,
+                h: 1.5,
+                d: 6,
+                color: "#f0d878",
+              },
+              {
+                type: "platform",
+                x: -18,
+                z: -18,
+                w: 6,
+                h: 1.5,
+                d: 6,
+                color: "#f0d878",
+              },
+              {
+                type: "platform",
+                x: 31,
+                z: 0,
+                w: 5,
+                h: 2,
+                d: 5,
+                color: "#e0b850",
+              },
+              {
+                type: "platform",
+                x: -31,
+                z: 0,
+                w: 5,
+                h: 2,
+                d: 5,
+                color: "#e0b850",
+              },
+              {
+                type: "platform",
+                x: 0,
+                z: 31,
+                w: 5,
+                h: 2,
+                d: 5,
+                color: "#e0b850",
+              },
+              {
+                type: "platform",
+                x: 0,
+                z: -31,
+                w: 5,
+                h: 2,
+                d: 5,
+                color: "#e0b850",
+              },
+            ],
+          },
+          {
+            id: "urban",
+            name: "Urban",
+            icon: "🏙",
+            description: "Dark city streets.",
+            environment: {
+              groundColor: "#282828",
+              gridColor: "#1e1e1e",
+              wallColor: "#888888",
+              fogColor: "#667788",
+              ambientIntensity: 0.5,
+              sunColor: "#ddeeff",
+            },
+            arenaSize: 80,
+            spawns: [
+              { x: 0, z: 0 },
+              { x: -20, z: 0 },
+              { x: 20, z: 0 },
+              { x: 0, z: -20 },
+              { x: 0, z: 20 },
+              { x: -14, z: -14 },
+              { x: 14, z: -14 },
+              { x: -14, z: 14 },
+              { x: 14, z: 14 },
+            ],
+            objects: [
+              {
+                type: "building",
+                x: 14,
+                z: 14,
+                w: 4,
+                h: 6,
+                d: 4,
+                color: "#556677",
+              },
+              {
+                type: "building",
+                x: -14,
+                z: 14,
+                w: 4,
+                h: 6,
+                d: 4,
+                color: "#445566",
+              },
+              {
+                type: "building",
+                x: 14,
+                z: -14,
+                w: 4,
+                h: 6,
+                d: 4,
+                color: "#556688",
+              },
+              {
+                type: "building",
+                x: -14,
+                z: -14,
+                w: 4,
+                h: 6,
+                d: 4,
+                color: "#667799",
+              },
+              {
+                type: "building",
+                x: 24,
+                z: 0,
+                w: 2,
+                h: 6,
+                d: 8,
+                color: "#444455",
+              },
+              {
+                type: "building",
+                x: -24,
+                z: 0,
+                w: 2,
+                h: 6,
+                d: 8,
+                color: "#445566",
+              },
+              {
+                type: "building",
+                x: 0,
+                z: 24,
+                w: 8,
+                h: 6,
+                d: 2,
+                color: "#556677",
+              },
+              {
+                type: "building",
+                x: 0,
+                z: -24,
+                w: 8,
+                h: 6,
+                d: 2,
+                color: "#446677",
+              },
+              {
+                type: "barrier",
+                x: 8,
+                z: 0,
+                w: 1,
+                h: 2,
+                d: 6,
+                color: "#888888",
+              },
+              {
+                type: "barrier",
+                x: -8,
+                z: 0,
+                w: 1,
+                h: 2,
+                d: 6,
+                color: "#888888",
+              },
+              {
+                type: "barrier",
+                x: 0,
+                z: 8,
+                w: 6,
+                h: 2,
+                d: 1,
+                color: "#888888",
+              },
+              {
+                type: "barrier",
+                x: 0,
+                z: -8,
+                w: 6,
+                h: 2,
+                d: 1,
+                color: "#888888",
+              },
+              { type: "crate", x: 5, z: 5, w: 2, h: 2, d: 2, color: "#9988aa" },
+              {
+                type: "crate",
+                x: -5,
+                z: 5,
+                w: 2,
+                h: 2,
+                d: 2,
+                color: "#aa8899",
+              },
+              {
+                type: "platform",
+                x: 0,
+                z: 16,
+                w: 10,
+                h: 2,
+                d: 2,
+                color: "#667788",
+              },
+              {
+                type: "platform",
+                x: 0,
+                z: -16,
+                w: 10,
+                h: 2,
+                d: 2,
+                color: "#667788",
+              },
+              {
+                type: "platform",
+                x: 16,
+                z: 0,
+                w: 2,
+                h: 2,
+                d: 10,
+                color: "#778899",
+              },
+              {
+                type: "platform",
+                x: -16,
+                z: 0,
+                w: 2,
+                h: 2,
+                d: 10,
+                color: "#778899",
+              },
+              {
+                type: "platform",
+                x: 20,
+                z: 20,
+                w: 4,
+                h: 1.5,
+                d: 4,
+                color: "#556677",
+              },
+              {
+                type: "platform",
+                x: -20,
+                z: 20,
+                w: 4,
+                h: 1.5,
+                d: 4,
+                color: "#556677",
+              },
+              {
+                type: "platform",
+                x: 20,
+                z: -20,
+                w: 4,
+                h: 1.5,
+                d: 4,
+                color: "#556677",
+              },
+              {
+                type: "platform",
+                x: -20,
+                z: -20,
+                w: 4,
+                h: 1.5,
+                d: 4,
+                color: "#556677",
+              },
+            ],
+          },
+          {
+            id: "bunker",
+            name: "Bunker",
+            icon: "🏭",
+            description: "Military bunker.",
+            environment: {
+              groundColor: "#3d3520",
+              gridColor: "#2e2818",
+              wallColor: "#776655",
+              fogColor: "#445533",
+              ambientIntensity: 0.45,
+              sunColor: "#ffeecc",
+            },
+            arenaSize: 80,
+            spawns: [
+              { x: 0, z: 0 },
+              { x: -16, z: 0 },
+              { x: 16, z: 0 },
+              { x: 0, z: -16 },
+              { x: 0, z: 16 },
+              { x: -11, z: -11 },
+              { x: 11, z: -11 },
+              { x: -11, z: 11 },
+              { x: 11, z: 11 },
+            ],
+            objects: [
+              {
+                type: "container",
+                x: 12,
+                z: 0,
+                w: 6,
+                h: 2.5,
+                d: 2,
+                color: "#556644",
+              },
+              {
+                type: "container",
+                x: -12,
+                z: 0,
+                w: 6,
+                h: 2.5,
+                d: 2,
+                color: "#446655",
+              },
+              {
+                type: "container",
+                x: 0,
+                z: 12,
+                w: 2,
+                h: 2.5,
+                d: 6,
+                color: "#665544",
+              },
+              {
+                type: "container",
+                x: 0,
+                z: -12,
+                w: 2,
+                h: 2.5,
+                d: 6,
+                color: "#554466",
+              },
+              {
+                type: "cover_wall",
+                x: 20,
+                z: 8,
+                w: 1,
+                h: 4,
+                d: 8,
+                color: "#8b7355",
+              },
+              {
+                type: "cover_wall",
+                x: -20,
+                z: 8,
+                w: 1,
+                h: 4,
+                d: 8,
+                color: "#7b6345",
+              },
+              {
+                type: "cover_wall",
+                x: 20,
+                z: -8,
+                w: 1,
+                h: 4,
+                d: 8,
+                color: "#8b7355",
+              },
+              {
+                type: "cover_wall",
+                x: -20,
+                z: -8,
+                w: 1,
+                h: 4,
+                d: 8,
+                color: "#7b6345",
+              },
+              {
+                type: "crate",
+                x: 5,
+                z: 5,
+                w: 1.5,
+                h: 2,
+                d: 1.5,
+                color: "#667744",
+              },
+              {
+                type: "crate",
+                x: -5,
+                z: 5,
+                w: 1.5,
+                h: 2,
+                d: 1.5,
+                color: "#556633",
+              },
+              {
+                type: "platform",
+                x: 0,
+                z: 26,
+                w: 8,
+                h: 2,
+                d: 1.5,
+                color: "#998866",
+              },
+              {
+                type: "platform",
+                x: 0,
+                z: -26,
+                w: 8,
+                h: 2,
+                d: 1.5,
+                color: "#998866",
+              },
+              {
+                type: "platform",
+                x: 26,
+                z: 0,
+                w: 1.5,
+                h: 2,
+                d: 8,
+                color: "#998866",
+              },
+              {
+                type: "platform",
+                x: -26,
+                z: 0,
+                w: 1.5,
+                h: 2,
+                d: 8,
+                color: "#998866",
+              },
+              {
+                type: "platform",
+                x: 24,
+                z: 24,
+                w: 4,
+                h: 3,
+                d: 4,
+                color: "#887755",
+              },
+              {
+                type: "platform",
+                x: -24,
+                z: 24,
+                w: 4,
+                h: 3,
+                d: 4,
+                color: "#887755",
+              },
+              {
+                type: "platform",
+                x: 24,
+                z: -24,
+                w: 4,
+                h: 3,
+                d: 4,
+                color: "#887755",
+              },
+              {
+                type: "platform",
+                x: -24,
+                z: -24,
+                w: 4,
+                h: 3,
+                d: 4,
+                color: "#887755",
+              },
+            ],
+          },
+        ];
+        fallback.forEach((m) => {
+          MAPS[m.id] = m;
+        });
+      }
+
+      // Must be called before initGame; wraps game start
+      const _mapsReady = loadMaps();
+
+      function getMapDef(mapId) {
+        return MAPS[mapId] || MAPS["arena"] || Object.values(MAPS)[0] || {};
+      }
 
       const PROMO_CODES = {
         BUBBLE4878: { pb: 1000000, label: "1,000,000 PB", emoji: "🤑" },
@@ -1992,7 +2661,7 @@
       //  STATE
       // ════════════════════════════════════════════════════
       let playerName = "Player",
-        selGameType = "solo";
+        selGameType = "pvp_1v1";
       let socket = null,
         mySid = null,
         myTeam = 0;
@@ -2181,7 +2850,7 @@
         gridMesh = null;
 
       function buildMap(mapId) {
-        // Clear previous map
+        // Clear previous map objects
         while (mapObjects.children.length)
           mapObjects.remove(mapObjects.children[0]);
         obstacles = [];
@@ -2194,31 +2863,41 @@
           gridMesh = null;
         }
 
-        const M = MAPS[mapId] || MAPS.arena;
-        scene.fog.color.setHex(M.fogColor);
-        renderer.setClearColor(M.fogColor);
-        ambientLight.intensity = M.ambientInt;
-        sun.color.setHex(M.sunColor);
+        const M = getMapDef(mapId);
+        const env = M.environment || {};
+        const arenaH = (M.arenaSize || 80) / 2;
 
-        // Ground
+        // Environment
+        const fogHex = hexToInt(env.fogColor || "#87ceeb");
+        const gndHex = hexToInt(env.groundColor || "#4a7c3f");
+        const gridHex = hexToInt(env.gridColor || "#3a6a2f");
+        const wallHex = hexToInt(env.wallColor || "#d4b896");
+        const sunHex = hexToInt(env.sunColor || "#fff5e0");
+        scene.fog.color.setHex(fogHex);
+        renderer.setClearColor(fogHex);
+        ambientLight.intensity = env.ambientIntensity ?? 0.6;
+        sun.color.setHex(sunHex);
+
+        // Ground + grid
+        const sz = M.arenaSize || 80;
         gndMesh = new THREE.Mesh(
-          new THREE.PlaneGeometry(80, 80, 20, 20),
-          new THREE.MeshLambertMaterial({ color: M.groundColor }),
+          new THREE.PlaneGeometry(sz, sz, 20, 20),
+          new THREE.MeshLambertMaterial({ color: gndHex }),
         );
         gndMesh.rotation.x = -Math.PI / 2;
         gndMesh.receiveShadow = true;
         scene.add(gndMesh);
-        gridMesh = new THREE.GridHelper(80, 40, M.gridColor, M.gridColor);
+        gridMesh = new THREE.GridHelper(sz, sz / 2, gridHex, gridHex);
         gridMesh.position.y = 0.02;
         scene.add(gridMesh);
 
         // Boundary walls
-        const wmat = new THREE.MeshLambertMaterial({ color: M.wallColor });
+        const wmat = new THREE.MeshLambertMaterial({ color: wallHex });
         [
-          [80, 6, 1, 0, 3, -40],
-          [80, 6, 1, 0, 3, 40],
-          [1, 6, 80, -40, 3, 0],
-          [1, 6, 80, 40, 3, 0],
+          [sz, 6, 1, 0, 3, -arenaH],
+          [sz, 6, 1, 0, 3, arenaH],
+          [1, 6, sz, -arenaH, 3, 0],
+          [1, 6, sz, arenaH, 3, 0],
         ].forEach(([w, h, d, x, y, z]) => {
           const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), wmat);
           m.position.set(x, y, z);
@@ -2227,19 +2906,23 @@
           mapObjects.add(m);
         });
 
-        // Obstacles
-        M.obstacles.forEach(([w, h, d, x, z, col]) => {
-          const m = new THREE.Mesh(
+        // Objects from JSON
+        (M.objects || []).forEach((obj) => {
+          const w = obj.w || 1,
+            h = obj.h || 1,
+            d = obj.d || 1;
+          const col = hexToInt(obj.color || "#888888");
+          const mesh = new THREE.Mesh(
             new THREE.BoxGeometry(w, h, d),
             new THREE.MeshLambertMaterial({ color: col }),
           );
-          m.position.set(x, h / 2, z);
-          m.castShadow = true;
-          m.receiveShadow = true;
-          mapObjects.add(m);
+          mesh.position.set(obj.x, h / 2, obj.z);
+          mesh.castShadow = true;
+          mesh.receiveShadow = true;
+          mapObjects.add(mesh);
           obstacles.push({
-            x,
-            z,
+            x: obj.x,
+            z: obj.z,
             hw: w / 2,
             hd: d / 2,
             h,
@@ -2388,7 +3071,9 @@
       //  SPAWN SYSTEM
       // ════════════════════════════════════════════════════
       function getSpawn(index) {
-        const sp = (MAPS[hostSettings.mapId] || MAPS.arena).spawns;
+        const sp = (getMapDef(hostSettings.mapId) || {}).spawns || [
+          { x: 0, z: 0 },
+        ];
         return sp[index % sp.length];
       }
 
@@ -2514,10 +3199,11 @@
       // ════════════════════════════════════════════════════
       function fireSingleBall(col, dir, pos, bl) {
         const d = dir.clone();
-        if (bl.spread > 0) {
-          d.x += (Math.random() - 0.5) * bl.spread;
-          d.y += (Math.random() - 0.5) * bl.spread * 0.5;
-          d.z += (Math.random() - 0.5) * bl.spread;
+        const effSpread = (bl.spread || 0) * (isAiming ? 0.15 : 1.0);
+        if (effSpread > 0) {
+          d.x += (Math.random() - 0.5) * effSpread;
+          d.y += (Math.random() - 0.5) * effSpread * 0.5;
+          d.z += (Math.random() - 0.5) * effSpread;
           d.normalize();
         }
         const mesh = new THREE.Mesh(
@@ -2683,13 +3369,45 @@
         }
       }
 
+      // Sight type from blaster: sniper=crosshair, default=reddot, shotgun=ring, mega=holographic
+      const SIGHT_TYPES = {
+        sniper: "crosshair",
+        basic: "reddot",
+        rapid: "reddot",
+        burst: "reddot",
+        shotgun: "ring",
+        mega: "holo",
+      };
+      function getSightType() {
+        return SIGHT_TYPES[equippedBlaster?.id || "basic"] || "reddot";
+      }
       function setAim(on) {
         isAiming = on;
-        camera.fov = on ? 40 : 75;
+        // FOV depends on blaster
+        const fovMap = {
+          sniper: 25,
+          basic: 55,
+          rapid: 52,
+          burst: 50,
+          shotgun: 65,
+          mega: 58,
+        };
+        camera.fov = on ? fovMap[equippedBlaster?.id || "basic"] || 50 : 75;
         camera.updateProjectionMatrix();
-        document.getElementById("scope").style.display = on ? "block" : "none";
-        document.getElementById("xhair").style.display = on ? "none" : "block";
+        const scopeEl = document.getElementById("scope");
+        scopeEl.style.display = on ? "block" : "none";
+        if (on) renderScopeOverlay(getSightType());
+        document.getElementById("xhair-canvas").style.display = on
+          ? "none"
+          : "block";
         document.getElementById("aim-btn").classList.toggle("active", on);
+      }
+      function renderScopeOverlay(type) {
+        // Dynamically set scope class for different sight visuals
+        const scope = document.getElementById("scope");
+        scope.dataset.sight = type;
+        const crossEl = document.getElementById("scope-cross");
+        crossEl.dataset.sight = type;
       }
       function doJump() {
         if (onGround) {
@@ -2905,7 +3623,7 @@
       // ════════════════════════════════════════════════════
       //  GAME INIT / OVER
       // ════════════════════════════════════════════════════
-      function initGame() {
+      async function initGame() {
         clearRemoteClients();
         gs.score = 0;
         gs.kills = 0;
@@ -2915,6 +3633,8 @@
         sessionPBEarned = 0;
         roundCountingDown = false;
 
+        // Ensure maps loaded before building
+        await _mapsReady;
         buildMap(hostSettings.mapId);
 
         document.getElementById("lobby").style.display = "none";
@@ -2940,13 +3660,13 @@
 
         if (touchEnabled) {
           document.getElementById("touch-ui").style.display = "block";
-          document.getElementById("xhair").style.display = "none";
+          document.getElementById("xhair-canvas").style.display = "none";
           try {
             document.exitPointerLock();
           } catch (e) {}
         } else {
           document.getElementById("touch-ui").style.display = "none";
-          document.getElementById("xhair").style.display = "block";
+          document.getElementById("xhair-canvas").style.display = "block";
         }
 
         startRound();
@@ -3076,18 +3796,27 @@
       // ════════════════════════════════════════════════════
       function openShop() {
         renderShop();
+        document.getElementById("pause-menu").style.display = "none";
         document.getElementById("shop").style.display = "flex";
         document.getElementById("promo-inp").value = "";
         document.getElementById("promo-result").textContent = "";
         document.getElementById("promo-result").className = "";
-        if (gs.running && !touchEnabled)
+        if (!touchEnabled)
           try {
             document.exitPointerLock();
           } catch (e) {}
       }
       function closeShop() {
         document.getElementById("shop").style.display = "none";
-        if (gs.running && !touchEnabled) canvas.requestPointerLock();
+        // If we came from the pause menu, re-show it
+        const wasPaused =
+          !gs.running &&
+          document.getElementById("hud").style.display === "block";
+        if (wasPaused) {
+          document.getElementById("pause-menu").style.display = "flex";
+        } else if (gs.running && !touchEnabled) {
+          canvas.requestPointerLock();
+        }
       }
       function renderShop() {
         updatePBUI();
@@ -3199,12 +3928,16 @@
         c.innerHTML = `
     <div class="srow" style="${dis}"><span class="srow-lbl">🗺 Map</span>
       <div class="chip-row">
-        ${Object.entries(MAPS)
-          .map(
-            ([id, m]) =>
-              `<div class="chip${s.mapId === id ? " sel" : ""}" data-key="mapId" data-val="${id}" onclick="setSetting('mapId','${id}')">${m.icon} ${m.name}</div>`,
-          )
-          .join("")}
+        ${
+          Object.entries(MAPS).length > 0
+            ? Object.entries(MAPS)
+                .map(
+                  ([id, m]) =>
+                    `<div class="chip${s.mapId === id ? " sel" : ""}" onclick="setSetting('mapId','${id}')">${m.icon || "🗺"} ${m.name}</div>`,
+                )
+                .join("")
+            : '<span style="opacity:.4">Loading maps…</span>'
+        }
       </div>
     </div>
     <div class="srow" style="${dis}"><span class="srow-lbl">🔄 Rounds</span>
@@ -3411,18 +4144,18 @@
         clearRemoteClients();
       }
 
-      function handleRelay(msg) {
+      async function handleRelay(msg) {
         const from = msg.from_sid;
         if (msg.type === "start") {
           hostSettings = Object.assign({}, hostSettings, msg.settings || {});
-          // Add all known players as remote clients
+          myTeam = msg.myTeam !== undefined ? msg.myTeam : myTeam;
+          // IMPORTANT: initGame() calls clearRemoteClients() so we MUST add players after it
+          await initGame();
           if (msg.players) {
             msg.players.forEach((p) => {
               if (p.sid !== mySid) addRemoteClient(p.sid, p.name, p.team);
             });
           }
-          myTeam = msg.myTeam !== undefined ? msg.myTeam : myTeam;
-          initGame();
         } else if (msg.type === "pos" && remoteClients[from]) {
           const rc = remoteClients[from];
           rc.mesh.position.set(msg.x, 0, msg.z);
@@ -3571,10 +4304,10 @@
             ? "block"
             : "none";
           if (!on) {
-            document.getElementById("xhair").style.display = "block";
+            document.getElementById("xhair-canvas").style.display = "block";
             canvas.requestPointerLock();
           } else {
-            document.getElementById("xhair").style.display = "none";
+            document.getElementById("xhair-canvas").style.display = "none";
             try {
               document.exitPointerLock();
             } catch (e) {}
@@ -3635,15 +4368,22 @@
           e.preventDefault();
           doJump();
         }
-        if (e.code === "KeyB") {
-          if (document.getElementById("shop").style.display === "flex")
+        if (e.code === "Escape" && gs.running) {
+          e.preventDefault();
+          if (document.getElementById("shop").style.display === "flex") {
             closeShop();
-          else openShop();
+          } else if (
+            document.getElementById("pause-menu").style.display === "flex"
+          ) {
+            closePauseMenu();
+          } else {
+            openPauseMenu();
+          }
         }
       });
       document.addEventListener("keyup", (e) => {
         gs.keys[e.code] = false;
-        if (e.code === "ShiftLeft" || e.code === "ShiftRight") setAim(false);
+        // shift key up — no aim action needed
         if (e.code === "MouseLeft" || e.code === "Button0") fireHeld = false;
       });
       document.addEventListener("mousemove", (e) => {
@@ -3690,24 +4430,7 @@
         document.getElementById(id).classList.add("active");
       }
 
-      // Mode cards
-      const modeCardMap = {
-        solo: "card-solo",
-        pvp_1v1: "card-pvp",
-        ffa: "card-ffa",
-        teams: "card-teams",
-      };
-      Object.entries(modeCardMap).forEach(([mode, cardId]) => {
-        document.getElementById(cardId).addEventListener("click", () => {
-          selGameType = mode;
-          hostSettings.gameType = mode;
-          Object.values(modeCardMap).forEach((cid) =>
-            document.getElementById(cid).classList.remove("sel"),
-          );
-          document.getElementById(cardId).classList.add("sel");
-        });
-      });
-
+      // ── Lobby: Name screen ──
       document.getElementById("name-next").addEventListener("click", () => {
         const n = document.getElementById("name-inp").value.trim();
         if (!n) {
@@ -3729,17 +4452,17 @@
         .getElementById("mode-back")
         .addEventListener("click", () => switchPanel("p-name"));
 
-      document.getElementById("mode-go").addEventListener("click", () => {
-        const isMp = GAME_MODES.find((m) => m.id === selGameType)?.mp;
-        hostSettings.gameType = selGameType;
-        if (!isMp) {
-          // Solo — show settings
+      // ── Lobby: Main menu — Solo or Multiplayer ──
+      document
+        .getElementById("solo-quick-btn")
+        .addEventListener("click", () => {
+          hostSettings.gameType = "solo";
           amIHost = true;
           renderSettingsUI("solo-settings-box", true);
           switchPanel("p-solo-settings");
-        } else {
-          switchPanel("p-mp");
-        }
+        });
+      document.getElementById("mp-quick-btn").addEventListener("click", () => {
+        switchPanel("p-mp");
       });
       document
         .getElementById("solo-settings-back")
@@ -3749,9 +4472,18 @@
         initGame();
       });
 
-      document
-        .getElementById("create-btn")
-        .addEventListener("click", () => setupHost());
+      // ── Lobby: MP panel — host vs join ──
+      document.getElementById("create-btn").addEventListener("click", () => {
+        // Show mode select before creating room
+        selGameType = "pvp_1v1";
+        hostSettings.gameType = "pvp_1v1";
+        // Mark pvp card selected
+        ["card-pvp", "card-ffa", "card-teams"].forEach((id) =>
+          document.getElementById(id)?.classList.remove("sel"),
+        );
+        document.getElementById("card-pvp")?.classList.add("sel");
+        switchPanel("p-mp-mode");
+      });
       document.getElementById("join-btn").addEventListener("click", () => {
         const code = document.getElementById("join-inp").value.trim();
         if (!code) {
@@ -3769,6 +4501,32 @@
         switchPanel("p-mode");
         leaveRoom();
       });
+
+      // ── Lobby: MP mode select (host only) ──
+      const mpModeCards = {
+        pvp_1v1: "card-pvp",
+        ffa: "card-ffa",
+        teams: "card-teams",
+      };
+      Object.entries(mpModeCards).forEach(([mode, cardId]) => {
+        const el = document.getElementById(cardId);
+        if (!el) return;
+        el.addEventListener("click", () => {
+          selGameType = mode;
+          hostSettings.gameType = mode;
+          Object.values(mpModeCards).forEach((cid) =>
+            document.getElementById(cid)?.classList.remove("sel"),
+          );
+          el.classList.add("sel");
+        });
+      });
+      document.getElementById("mp-mode-next").addEventListener("click", () => {
+        amIHost = true;
+        setupHost();
+      });
+      document
+        .getElementById("mp-mode-back")
+        .addEventListener("click", () => switchPanel("p-mp"));
       document.getElementById("wait-back").addEventListener("click", () => {
         switchPanel("p-mp");
         leaveRoom();
@@ -3813,6 +4571,7 @@
         initGame();
       });
       document.getElementById("menu-btn").addEventListener("click", () => {
+        document.getElementById("pause-menu").style.display = "none";
         document.getElementById("gameover").style.display = "none";
         document.getElementById("hud").style.display = "none";
         document.getElementById("lobby").style.display = "flex";
@@ -3828,7 +4587,340 @@
       });
 
       updatePBUI();
-      buildMap("arena"); // default map
+      _mapsReady.then(() => buildMap("arena")); // default map after maps load
+
+      // ════════════════════════════════════════════════════
+      //  DYNAMIC CROSSHAIR  (canvas-based)
+      // ════════════════════════════════════════════════════
+      const xhairCanvas = document.getElementById("xhair-canvas");
+      const xhairCtx = xhairCanvas.getContext("2d");
+      let xhairSpread = 1.0; // 0=tight, 1=full spread
+      let xhairTarget = 1.0; // animates toward this
+
+      function updateCrosshair(dt) {
+        // Target spread based on weapon + moving + aiming
+        const bl = equippedBlaster;
+        const base = Math.min(1.0, (bl.spread || 0.015) / 0.22); // normalise to 0-1
+        const moving =
+          Math.abs(gs.keys["KeyW"] || 0) +
+            Math.abs(gs.keys["KeyS"] || 0) +
+            Math.abs(gs.keys["KeyA"] || 0) +
+            Math.abs(gs.keys["KeyD"] || 0) >
+          0;
+        xhairTarget = isAiming ? 0.0 : base + (moving ? 0.2 : 0);
+        xhairTarget = Math.max(0, Math.min(1.0, xhairTarget));
+        xhairSpread += (xhairTarget - xhairSpread) * Math.min(1, dt * 12);
+
+        const cv = xhairCanvas;
+        const ctx = xhairCtx;
+        ctx.clearRect(0, 0, 120, 120);
+        const cx = 60,
+          cy = 60;
+
+        // Gap = 6px when tight, up to 22px when fully spread
+        const gap = 6 + xhairSpread * 16;
+        const len = 8 + xhairSpread * 4;
+        const thick = 2;
+        const alpha = gs.running ? 0.88 : 0;
+        if (!gs.running) return;
+
+        ctx.lineCap = "round";
+        ctx.lineWidth = thick;
+        // Outer white stroke for visibility
+        ctx.strokeStyle = "rgba(0,0,0,0.55)";
+        ctx.lineWidth = thick + 2;
+        _drawCrosshairLines(ctx, cx, cy, gap, len);
+        // Coloured inner lines
+        ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
+        ctx.lineWidth = thick;
+        _drawCrosshairLines(ctx, cx, cy, gap, len);
+        // Centre dot (shrinks when aimed)
+        const dotR = 1.8 * (1 - xhairSpread * 0.7);
+        if (dotR > 0.3) {
+          ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+          ctx.beginPath();
+          ctx.arc(cx, cy, dotR, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      function _drawCrosshairLines(ctx, cx, cy, gap, len) {
+        // Top, Bottom, Left, Right arms
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - gap);
+        ctx.lineTo(cx, cy - gap - len);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(cx, cy + gap);
+        ctx.lineTo(cx, cy + gap + len);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(cx - gap, cy);
+        ctx.lineTo(cx - gap - len, cy);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(cx + gap, cy);
+        ctx.lineTo(cx + gap + len, cy);
+        ctx.stroke();
+      }
+
+      // ════════════════════════════════════════════════════
+      //  SCOPE SVG OVERLAY  (per-blaster sight type)
+      // ════════════════════════════════════════════════════
+      function renderScopeOverlay(type) {
+        const svg = document.getElementById("scope-svg");
+        svg.innerHTML = "";
+        const ns = "http://www.w3.org/2000/svg";
+        function el(tag, attrs) {
+          const e = document.createElementNS(ns, tag);
+          Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, v));
+          return e;
+        }
+        const lc = "rgba(255,255,255,0.55)"; // line color
+
+        if (type === "crosshair") {
+          // Sniper: mil-dot crosshair
+          svg.appendChild(
+            el("circle", {
+              cx: 0,
+              cy: 0,
+              r: 120,
+              fill: "none",
+              stroke: "rgba(255,255,255,0.25)",
+              "stroke-width": 1.5,
+            }),
+          );
+          svg.appendChild(
+            el("line", {
+              x1: -120,
+              y1: 0,
+              x2: -12,
+              y2: 0,
+              stroke: lc,
+              "stroke-width": 1,
+            }),
+          );
+          svg.appendChild(
+            el("line", {
+              x1: 12,
+              y1: 0,
+              x2: 120,
+              y2: 0,
+              stroke: lc,
+              "stroke-width": 1,
+            }),
+          );
+          svg.appendChild(
+            el("line", {
+              x1: 0,
+              y1: -120,
+              x2: 0,
+              y2: -12,
+              stroke: lc,
+              "stroke-width": 1,
+            }),
+          );
+          svg.appendChild(
+            el("line", {
+              x1: 0,
+              y1: 12,
+              x2: 0,
+              y2: 120,
+              stroke: lc,
+              "stroke-width": 1,
+            }),
+          );
+          // mil dots on horizontal
+          [-80, -60, -40, 40, 60, 80].forEach((x) => {
+            svg.appendChild(el("circle", { cx: x, cy: 0, r: 2.5, fill: lc }));
+          });
+          // small centre gap dot
+          svg.appendChild(
+            el("circle", { cx: 0, cy: 0, r: 1.5, fill: "rgba(255,50,50,0.9)" }),
+          );
+          // range lines
+          [-40, 40].forEach((y) => {
+            svg.appendChild(
+              el("line", {
+                x1: -6,
+                y1: y,
+                x2: 6,
+                y2: y,
+                stroke: lc,
+                "stroke-width": 1,
+              }),
+            );
+          });
+        } else if (type === "reddot") {
+          // Red dot sight: simple ring + bright dot
+          svg.appendChild(
+            el("circle", {
+              cx: 0,
+              cy: 0,
+              r: 40,
+              fill: "none",
+              stroke: "rgba(255,255,255,0.3)",
+              "stroke-width": 1.5,
+            }),
+          );
+          svg.appendChild(
+            el("circle", { cx: 0, cy: 0, r: 4, fill: "rgba(255,40,40,0.95)" }),
+          );
+          // 4 small tick marks
+          [
+            [0, -45, 0, -38],
+            [0, 45, 0, 38],
+            [-45, 0, -38, 0],
+            [45, 0, 38, 0],
+          ].forEach(([x1, y1, x2, y2]) => {
+            svg.appendChild(
+              el("line", { x1, y1, x2, y2, stroke: lc, "stroke-width": 1 }),
+            );
+          });
+        } else if (type === "ring") {
+          // Shotgun: wide ring, no zoom feel
+          svg.appendChild(
+            el("circle", {
+              cx: 0,
+              cy: 0,
+              r: 75,
+              fill: "none",
+              stroke: "rgba(255,165,0,0.5)",
+              "stroke-width": 2,
+            }),
+          );
+          svg.appendChild(
+            el("circle", {
+              cx: 0,
+              cy: 0,
+              r: 30,
+              fill: "none",
+              stroke: "rgba(255,165,0,0.3)",
+              "stroke-width": 1,
+            }),
+          );
+          svg.appendChild(
+            el("circle", { cx: 0, cy: 0, r: 5, fill: "rgba(255,165,0,0.85)" }),
+          );
+          // Corner brackets
+          [
+            [-1, -1],
+            [1, -1],
+            [-1, 1],
+            [1, 1],
+          ].forEach(([sx, sy]) => {
+            svg.appendChild(
+              el("line", {
+                x1: sx * 55,
+                y1: sy * 55,
+                x2: sx * 55,
+                y2: sy * 70,
+                stroke: "rgba(255,165,0,0.6)",
+                "stroke-width": 2,
+              }),
+            );
+            svg.appendChild(
+              el("line", {
+                x1: sx * 55,
+                y1: sy * 55,
+                x2: sx * 70,
+                y2: sy * 55,
+                stroke: "rgba(255,165,0,0.6)",
+                "stroke-width": 2,
+              }),
+            );
+          });
+        } else {
+          // Holographic (mega): circle + diamond + dot
+          svg.appendChild(
+            el("circle", {
+              cx: 0,
+              cy: 0,
+              r: 55,
+              fill: "none",
+              stroke: "rgba(0,255,180,0.4)",
+              "stroke-width": 1.5,
+            }),
+          );
+          // Diamond
+          const pts = "0,-28 20,0 0,28 -20,0";
+          svg.appendChild(
+            el("polygon", {
+              points: pts,
+              fill: "none",
+              stroke: "rgba(0,255,180,0.7)",
+              "stroke-width": 1.5,
+            }),
+          );
+          svg.appendChild(
+            el("circle", { cx: 0, cy: 0, r: 3, fill: "rgba(0,255,180,0.95)" }),
+          );
+          // horizontal ticks
+          [
+            [-60, -5],
+            [50, -5],
+          ].forEach(([x, y]) => {
+            svg.appendChild(
+              el("line", {
+                x1: x,
+                y1: 0,
+                x2: x + 10,
+                y2: 0,
+                stroke: "rgba(0,255,180,0.4)",
+                "stroke-width": 1,
+              }),
+            );
+          });
+        }
+      }
+
+      // ════════════════════════════════════════════════════
+      //  PAUSE MENU
+      // ════════════════════════════════════════════════════
+      function openPauseMenu() {
+        gs.running = false;
+        if (!touchEnabled)
+          try {
+            document.exitPointerLock();
+          } catch (e) {}
+        document.getElementById("pause-menu").style.display = "flex";
+      }
+      function closePauseMenu() {
+        document.getElementById("pause-menu").style.display = "none";
+        gs.running = true;
+        if (!touchEnabled) canvas.requestPointerLock();
+      }
+      document
+        .getElementById("pause-resume")
+        .addEventListener("click", closePauseMenu);
+      document.getElementById("pause-shop").addEventListener("click", () => {
+        document.getElementById("pause-menu").style.display = "none";
+        openShop();
+      });
+      document
+        .getElementById("pause-settings-btn")
+        .addEventListener("click", () => {
+          document.getElementById("settings-panel").style.display =
+            document.getElementById("settings-panel").style.display === "block"
+              ? "none"
+              : "block";
+        });
+      document
+        .getElementById("pause-menu-btn")
+        .addEventListener("click", () => {
+          document.getElementById("pause-menu").style.display = "none";
+          document.getElementById("gameover").style.display = "none";
+          document.getElementById("hud").style.display = "none";
+          document.getElementById("lobby").style.display = "flex";
+          gs.running = false;
+          setAim(false);
+          fireHeld = false;
+          if (roomCode) leaveRoom();
+          try {
+            document.exitPointerLock();
+          } catch (e) {}
+          switchPanel("p-mode");
+          updatePBUI();
+        });
 
       // ════════════════════════════════════════════════════
       //  MAIN GAME LOOP
@@ -3848,6 +4940,9 @@
         const px = yawObj.position.x,
           pz = yawObj.position.z,
           prevY = yawObj.position.y;
+
+        // Dynamic crosshair
+        updateCrosshair(dt);
 
         // Held fire
         if (fireHeld && (document.pointerLockElement || touchEnabled)) shoot();
@@ -3917,8 +5012,7 @@
         if (!playerHitsObs(yawObj.position.x, npz, ny)) yawObj.position.z = npz;
         yawObj.rotation.y = gs.yaw;
         pitchObj.rotation.x = gs.pitch;
-        if ((gs.keys["ShiftLeft"] || gs.keys["ShiftRight"]) && !touchEnabled)
-          setAim(true);
+        // Shift = sprint only (aim is right-click / touch button)
 
         // Send position
         if (conn.open && ts - lastPos > 50) {
