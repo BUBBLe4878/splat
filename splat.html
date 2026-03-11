@@ -919,6 +919,51 @@
         z-index: 30;
         transition: opacity 0.1s;
       }
+      /* Hit indicator popup */
+      #hit-indicator {
+        position: fixed;
+        top: 42%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        z-index: 40;
+        font-family: "Bebas Neue", sans-serif;
+        font-size: 28px;
+        letter-spacing: 4px;
+        opacity: 0;
+        transition: opacity 0.08s;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+      }
+      /* Hitmarker crosshair (4 ticks that flash on hit) */
+      #hitmarker {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        z-index: 40;
+        opacity: 0;
+        transition: opacity 0.05s;
+      }
+      #hitmarker::before,
+      #hitmarker::after {
+        content: "";
+        position: absolute;
+        background: #fff;
+        border-radius: 1px;
+      }
+      #hitmarker::before {
+        width: 12px;
+        height: 2px;
+        top: -1px;
+        left: -6px;
+      }
+      #hitmarker::after {
+        width: 2px;
+        height: 12px;
+        top: -6px;
+        left: -1px;
+      }
       #shoot-flash {
         position: fixed;
         inset: 0;
@@ -1176,6 +1221,333 @@
         cursor: default;
         border: 1px solid rgba(255, 107, 53, 0.3);
       }
+      /* ── SHOP TABS ── */
+      .shop-tabs {
+        display: flex;
+        gap: 8px;
+        width: min(800px, 97vw);
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+      }
+      .shop-tab {
+        padding: 9px 20px;
+        border-radius: 10px;
+        border: 1.5px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.04);
+        color: rgba(255, 255, 255, 0.5);
+        font-family: "Bebas Neue", sans-serif;
+        font-size: 15px;
+        letter-spacing: 2px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .shop-tab.active {
+        background: rgba(255, 107, 53, 0.18);
+        border-color: rgba(255, 107, 53, 0.6);
+        color: #ff6b35;
+      }
+      .mod-section {
+        width: min(800px, 97vw);
+        margin-bottom: 18px;
+      }
+      .mod-section-title {
+        font-family: "Bebas Neue", sans-serif;
+        font-size: 16px;
+        letter-spacing: 3px;
+        opacity: 0.4;
+        margin-bottom: 9px;
+      }
+      .mod-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+        gap: 10px;
+      }
+      .mod-card {
+        background: rgba(255, 255, 255, 0.04);
+        border: 2px solid rgba(255, 255, 255, 0.09);
+        border-radius: 13px;
+        padding: 14px 12px 12px;
+        text-align: center;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+        transition: all 0.2s;
+      }
+      .mod-card:hover {
+        border-color: rgba(255, 107, 53, 0.4);
+        transform: translateY(-2px);
+      }
+      .mod-card.c-equipped {
+        border-color: #ff6b35;
+        background: rgba(255, 107, 53, 0.08);
+      }
+      .mod-card.c-owned {
+        border-color: rgba(68, 255, 136, 0.3);
+        background: rgba(68, 255, 136, 0.03);
+      }
+      .mod-icon {
+        font-size: 28px;
+        line-height: 1;
+      }
+      .mod-name {
+        font-family: "Bebas Neue", sans-serif;
+        font-size: 15px;
+        letter-spacing: 1.5px;
+      }
+      .mod-desc {
+        font-size: 10px;
+        color: rgba(255, 255, 255, 0.38);
+        line-height: 1.4;
+        min-height: 24px;
+      }
+      .mod-weight {
+        font-size: 9px;
+        letter-spacing: 1px;
+        color: rgba(255, 200, 60, 0.7);
+        margin-top: 2px;
+      }
+      .pack-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 10px;
+        width: min(800px, 97vw);
+        margin-bottom: 18px;
+      }
+      .pack-card {
+        background: rgba(68, 170, 255, 0.06);
+        border: 1.5px solid rgba(68, 170, 255, 0.2);
+        border-radius: 12px;
+        padding: 14px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .pack-icon {
+        font-size: 28px;
+      }
+      .pack-name {
+        font-family: "Bebas Neue", sans-serif;
+        font-size: 14px;
+        letter-spacing: 1.5px;
+      }
+      .pack-count {
+        font-size: 11px;
+        color: rgba(68, 170, 255, 0.8);
+      }
+      .pack-desc {
+        font-size: 10px;
+        color: rgba(255, 255, 255, 0.35);
+      }
+      .eff-panel {
+        width: min(800px, 97vw);
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.09);
+        border-radius: 13px;
+        padding: 14px 18px;
+        margin-bottom: 16px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        align-items: center;
+      }
+      .eff-stat {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3px;
+        flex: 1;
+        min-width: 70px;
+      }
+      .eff-stat-val {
+        font-family: "Bebas Neue", sans-serif;
+        font-size: 18px;
+        letter-spacing: 1px;
+        color: #ffd700;
+      }
+      .eff-stat-lbl {
+        font-size: 9px;
+        letter-spacing: 1.5px;
+        opacity: 0.4;
+        text-transform: uppercase;
+      }
+      #reserve-hud {
+        position: absolute;
+        bottom: 100px;
+        left: 18px;
+        font-size: 11px;
+        opacity: 0.6;
+        letter-spacing: 1px;
+        display: none;
+      }
+      /* ── SHOP TABS ── */
+      .shop-tabs {
+        display: flex;
+        gap: 8px;
+        width: min(800px, 97vw);
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+      }
+      .shop-tab {
+        padding: 9px 20px;
+        border-radius: 10px;
+        border: 1.5px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.04);
+        color: rgba(255, 255, 255, 0.5);
+        font-family: "Bebas Neue", sans-serif;
+        font-size: 15px;
+        letter-spacing: 2px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .shop-tab.active {
+        background: rgba(255, 107, 53, 0.18);
+        border-color: rgba(255, 107, 53, 0.6);
+        color: #ff6b35;
+      }
+      /* ── MOD CARDS ── */
+      .mod-section {
+        width: min(800px, 97vw);
+        margin-bottom: 18px;
+      }
+      .mod-section-title {
+        font-family: "Bebas Neue", sans-serif;
+        font-size: 16px;
+        letter-spacing: 3px;
+        opacity: 0.4;
+        margin-bottom: 9px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .mod-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+        gap: 10px;
+      }
+      .mod-card {
+        background: rgba(255, 255, 255, 0.04);
+        border: 2px solid rgba(255, 255, 255, 0.09);
+        border-radius: 13px;
+        padding: 14px 12px 12px;
+        text-align: center;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+        transition: all 0.2s;
+      }
+      .mod-card:hover {
+        border-color: rgba(255, 107, 53, 0.4);
+        transform: translateY(-2px);
+      }
+      .mod-card.c-equipped {
+        border-color: #ff6b35;
+        background: rgba(255, 107, 53, 0.08);
+      }
+      .mod-card.c-owned {
+        border-color: rgba(68, 255, 136, 0.3);
+        background: rgba(68, 255, 136, 0.03);
+      }
+      .mod-icon {
+        font-size: 28px;
+        line-height: 1;
+      }
+      .mod-name {
+        font-family: "Bebas Neue", sans-serif;
+        font-size: 15px;
+        letter-spacing: 1.5px;
+      }
+      .mod-desc {
+        font-size: 10px;
+        color: rgba(255, 255, 255, 0.38);
+        line-height: 1.4;
+        min-height: 24px;
+      }
+      .mod-weight {
+        font-size: 9px;
+        letter-spacing: 1px;
+        color: rgba(255, 200, 60, 0.7);
+        margin-top: 2px;
+      }
+      /* ── AMMO PACKS ── */
+      .pack-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 10px;
+        width: min(800px, 97vw);
+        margin-bottom: 18px;
+      }
+      .pack-card {
+        background: rgba(68, 170, 255, 0.06);
+        border: 1.5px solid rgba(68, 170, 255, 0.2);
+        border-radius: 12px;
+        padding: 14px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .pack-icon {
+        font-size: 28px;
+      }
+      .pack-name {
+        font-family: "Bebas Neue", sans-serif;
+        font-size: 14px;
+        letter-spacing: 1.5px;
+      }
+      .pack-count {
+        font-size: 11px;
+        color: rgba(68, 170, 255, 0.8);
+      }
+      .pack-desc {
+        font-size: 10px;
+        color: rgba(255, 255, 255, 0.35);
+      }
+      /* ── EFFECTIVE STATS PANEL (in shop) ── */
+      .eff-panel {
+        width: min(800px, 97vw);
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.09);
+        border-radius: 13px;
+        padding: 14px 18px;
+        margin-bottom: 16px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        align-items: center;
+      }
+      .eff-stat {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3px;
+        flex: 1;
+        min-width: 70px;
+      }
+      .eff-stat-val {
+        font-family: "Bebas Neue", sans-serif;
+        font-size: 18px;
+        letter-spacing: 1px;
+        color: #ffd700;
+      }
+      .eff-stat-lbl {
+        font-size: 9px;
+        letter-spacing: 1.5px;
+        opacity: 0.4;
+        text-transform: uppercase;
+      }
+      /* ── RESERVE AMMO HUD ── */
+      #reserve-hud {
+        position: absolute;
+        bottom: 100px;
+        left: 18px;
+        font-size: 11px;
+        opacity: 0.6;
+        letter-spacing: 1px;
+        display: none;
+      }
       .b-btn.cant {
         background: rgba(255, 255, 255, 0.05);
         color: rgba(255, 255, 255, 0.22);
@@ -1324,6 +1696,10 @@
         <span id="blaster-hud-icon">🔫</span
         ><span id="blaster-hud-name">Basic</span>
       </div>
+      <div id="reserve-hud">
+        &#127912; Reserve: <span id="reserve-val">0</span>
+      </div>
+      <div id="reserve-hud">🎨 Reserve: <span id="reserve-val">0</span></div>
       <div id="wave-ann"></div>
       <div id="reload-ann">RELOADING…</div>
       <button id="settings-btn">⚙</button>
@@ -1375,6 +1751,8 @@
     <!-- Flash FX -->
     <div id="hit-flash"></div>
     <div id="shoot-flash"></div>
+    <div id="hitmarker"></div>
+    <div id="hit-indicator"></div>
 
     <!-- Round overlay -->
     <div id="round-overlay">
@@ -1387,10 +1765,49 @@
     <!-- SHOP -->
     <div id="shop">
       <div class="shop-header">
-        <div class="shop-title">🏪 Blaster Shop</div>
+        <div class="shop-title">🏪 SPLAT! Shop</div>
         <div class="shop-pb-badge">💰 <span id="shop-pb-val">0</span> PB</div>
       </div>
-      <div class="blaster-grid" id="blaster-grid"></div>
+      <div class="shop-tabs">
+        <button
+          class="shop-tab active"
+          id="tab-blasters"
+          onclick="switchShopTab('blasters')"
+        >
+          🔫 BLASTERS
+        </button>
+        <button class="shop-tab" id="tab-mods" onclick="switchShopTab('mods')">
+          🔧 MODS
+        </button>
+        <button class="shop-tab" id="tab-ammo" onclick="switchShopTab('ammo')">
+          🎨 AMMO PACKS
+        </button>
+      </div>
+      <!-- Effective stats bar (shown in mods + blasters tab) -->
+      <div class="eff-panel" id="eff-panel"></div>
+      <!-- Tab contents -->
+      <div id="shop-tab-blasters">
+        <div class="blaster-grid" id="blaster-grid"></div>
+      </div>
+      <div id="shop-tab-mods" style="display: none">
+        <div class="mod-section" id="mod-section-sight"></div>
+        <div class="mod-section" id="mod-section-mag"></div>
+        <div class="mod-section" id="mod-section-reload"></div>
+      </div>
+      <div id="shop-tab-ammo" style="display: none">
+        <div class="pack-grid" id="pack-grid"></div>
+        <div
+          style="
+            font-size: 12px;
+            opacity: 0.4;
+            text-align: center;
+            margin-bottom: 12px;
+          "
+        >
+          Reserve ammo carries into Limited Ammo mode and refills your mag when
+          empty.
+        </div>
+      </div>
       <div class="promo-box">
         <div class="promo-head">🎟 Promo Code</div>
         <div class="promo-row">
@@ -1405,7 +1822,6 @@
         <div id="promo-result"></div>
       </div>
       <button id="shop-close">← CLOSE SHOP</button>
-      <div id="shop-back-hint">Press B to toggle shop anytime</div>
     </div>
 
     <!-- LOBBY -->
@@ -1493,6 +1909,11 @@
             <div class="mc-icon">🛡</div>
             <div class="mc-title">Teams</div>
             <div class="mc-desc">Red vs Blue</div>
+          </div>
+          <div class="mode-card" id="card-limited_ammo">
+            <div class="mc-icon">🎨</div>
+            <div class="mc-title">Limited Ammo</div>
+            <div class="mc-desc">Fixed ammo pool</div>
           </div>
         </div>
         <button class="lb-btn orange" id="mp-mode-next">NEXT →</button>
@@ -1665,6 +2086,126 @@
       </div>
     </div>
 
+    <!-- Pause Menu -->
+    <div
+      id="pause-menu"
+      style="
+        position: fixed;
+        inset: 0;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.82);
+        z-index: 180;
+        backdrop-filter: blur(14px);
+        gap: 13px;
+      "
+    >
+      <div
+        style="
+          font-family: &quot;Bebas Neue&quot;, sans-serif;
+          font-size: clamp(42px, 9vw, 72px);
+          letter-spacing: 5px;
+          background: linear-gradient(135deg, #ff6b35, #ffd23f);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        "
+      >
+        PAUSED
+      </div>
+      <button class="lb-btn orange" id="pause-resume" style="max-width: 240px">
+        ▶ RESUME
+      </button>
+      <button class="lb-btn gold" id="pause-shop" style="max-width: 240px">
+        🏪 BLASTER SHOP
+      </button>
+      <button
+        class="lb-btn ghost"
+        id="pause-settings-btn"
+        style="max-width: 240px; font-size: 14px; padding: 11px"
+      >
+        ⚙ SETTINGS
+      </button>
+      <button
+        class="lb-btn red"
+        id="pause-menu-btn"
+        style="max-width: 240px; font-size: 14px; padding: 11px"
+      >
+        ✕ MAIN MENU
+      </button>
+      <div
+        style="
+          font-size: 10px;
+          opacity: 0.25;
+          letter-spacing: 2px;
+          margin-top: 6px;
+        "
+      >
+        ESC TO RESUME
+      </div>
+    </div>
+
+    <!-- Pause Menu -->
+    <div
+      id="pause-menu"
+      style="
+        position: fixed;
+        inset: 0;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.82);
+        z-index: 180;
+        backdrop-filter: blur(14px);
+        gap: 13px;
+      "
+    >
+      <div
+        style="
+          font-family: &quot;Bebas Neue&quot;, sans-serif;
+          font-size: clamp(42px, 9vw, 72px);
+          letter-spacing: 5px;
+          background: linear-gradient(135deg, #ff6b35, #ffd23f);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        "
+      >
+        PAUSED
+      </div>
+      <button class="lb-btn orange" id="pause-resume" style="max-width: 240px">
+        &#9654; RESUME
+      </button>
+      <button class="lb-btn gold" id="pause-shop" style="max-width: 240px">
+        &#127978; BLASTER SHOP
+      </button>
+      <button
+        class="lb-btn ghost"
+        id="pause-settings-btn"
+        style="max-width: 240px; font-size: 14px; padding: 11px"
+      >
+        &#9881; SETTINGS
+      </button>
+      <button
+        class="lb-btn red"
+        id="pause-menu-btn"
+        style="max-width: 240px; font-size: 14px; padding: 11px"
+      >
+        &#10005; MAIN MENU
+      </button>
+      <div
+        style="
+          font-size: 10px;
+          opacity: 0.25;
+          letter-spacing: 2px;
+          margin-top: 6px;
+        "
+      >
+        ESC TO RESUME
+      </div>
+    </div>
+
     <!-- Game Over -->
     <div id="gameover">
       <h2 id="go-title" style="color: #ff4444">YOU'RE OUT!</h2>
@@ -1689,6 +2230,8 @@
       //  BLASTER DATA (fetched from blasters.json or inline fallback)
       // ════════════════════════════════════════════════════
       let BLASTERS = [
+        // recoil: pitch kick in radians per shot
+        // weight: 1.0=normal move speed, >1 = slower, <1 = faster
         {
           id: "basic",
           name: "Basic Blaster",
@@ -1702,6 +2245,8 @@
           reloadMs: 1400,
           gravity: 18,
           spread: 0.015,
+          recoil: 0.018,
+          weight: 1.0,
           pellets: 1,
           burstCount: 1,
           ammoFill: 0.17,
@@ -1726,6 +2271,8 @@
           reloadMs: 1600,
           gravity: 18,
           spread: 0.045,
+          recoil: 0.025,
+          weight: 1.0,
           pellets: 1,
           burstCount: 1,
           ammoFill: 0.42,
@@ -1750,6 +2297,8 @@
           reloadMs: 2000,
           gravity: 3,
           spread: 0.003,
+          recoil: 0.065,
+          weight: 1.1,
           pellets: 1,
           burstCount: 1,
           ammoFill: 0.08,
@@ -1774,6 +2323,8 @@
           reloadMs: 1800,
           gravity: 24,
           spread: 0.22,
+          recoil: 0.09,
+          weight: 1.3,
           pellets: 5,
           burstCount: 1,
           ammoFill: 0.13,
@@ -1798,6 +2349,8 @@
           reloadMs: 1700,
           gravity: 15,
           spread: 0.022,
+          recoil: 0.022,
+          weight: 1.1,
           pellets: 1,
           burstCount: 3,
           ammoFill: 0.5,
@@ -1822,6 +2375,8 @@
           reloadMs: 2200,
           gravity: 18,
           spread: 0.07,
+          recoil: 0.008,
+          weight: 1.5,
           pellets: 1,
           burstCount: 1,
           ammoFill: 1.0,
@@ -2557,6 +3112,14 @@
           mp: true,
           maxP: 8,
         },
+        {
+          id: "limited_ammo",
+          label: "Limited Ammo",
+          icon: "🎨",
+          desc: "Fixed ammo pool",
+          mp: true,
+          maxP: 8,
+        },
       ];
 
       let hostSettings = {
@@ -2564,6 +3127,8 @@
         mapId: "arena",
         rounds: 3,
         infiniteAmmo: false,
+        limitedAmmo: false,
+        startingReserve: 150,
         botCount: 3,
         botDifficulty: "medium",
         maxPlayers: 8,
@@ -2593,6 +3158,7 @@
       let sensitivity = 5,
         touchEnabled = false,
         isAiming = false;
+      let recoilVel = 0; // pitch recoil velocity (rad/s)
       let playerVY = 0,
         onGround = true;
       let waveActive = false,
@@ -2614,6 +3180,406 @@
         ownedBlasters = ["basic"],
         equippedBlaster = null,
         usedCodes = [];
+
+      // ── MOD SYSTEM ──
+      const MODS = {
+        sight_iron: {
+          id: "sight_iron",
+          slot: "sight",
+          name: "Iron Sights",
+          icon: "🔩",
+          cost: 0,
+          weight: 0.0,
+          spreadMult: 1.0,
+          desc: "Default iron sights. No frills.",
+          tier: 0,
+        },
+        sight_red: {
+          id: "sight_red",
+          slot: "sight",
+          name: "Red Dot",
+          icon: "🔴",
+          cost: 400,
+          weight: 0.05,
+          spreadMult: 0.8,
+          desc: "Red dot sight. Tighter aim cone.",
+          tier: 1,
+        },
+        sight_holo: {
+          id: "sight_holo",
+          slot: "sight",
+          name: "Holographic",
+          icon: "💠",
+          cost: 900,
+          weight: 0.08,
+          spreadMult: 0.65,
+          desc: "Holo sight. Wide view, crisp accuracy.",
+          tier: 2,
+        },
+        sight_scope: {
+          id: "sight_scope",
+          slot: "sight",
+          name: "Long Scope",
+          icon: "🔭",
+          cost: 1800,
+          weight: 0.12,
+          spreadMult: 0.4,
+          desc: "Long-range scope. Pinpoint precision.",
+          tier: 3,
+        },
+        mag_std: {
+          id: "mag_std",
+          slot: "mag",
+          name: "Standard Mag",
+          icon: "📦",
+          cost: 0,
+          weight: 0.0,
+          ammoMult: 1.0,
+          desc: "Stock magazine. What came in the box.",
+          tier: 0,
+        },
+        mag_ext: {
+          id: "mag_ext",
+          slot: "mag",
+          name: "Extended Mag",
+          icon: "🔋",
+          cost: 350,
+          weight: 0.1,
+          ammoMult: 1.5,
+          desc: "+50% ammo capacity. Heavier though.",
+          tier: 1,
+        },
+        mag_drum: {
+          id: "mag_drum",
+          slot: "mag",
+          name: "Drum Mag",
+          icon: "🥁",
+          cost: 800,
+          weight: 0.2,
+          ammoMult: 2.0,
+          desc: "Double capacity. Noticeably heavier.",
+          tier: 2,
+        },
+        mag_tank: {
+          id: "mag_tank",
+          slot: "mag",
+          name: "Tank Mag",
+          icon: "🛢",
+          cost: 1600,
+          weight: 0.35,
+          ammoMult: 3.0,
+          desc: "Triple ammo. Feels like a brick.",
+          tier: 3,
+        },
+        reload_std: {
+          id: "reload_std",
+          slot: "reload",
+          name: "Stock Loader",
+          icon: "⏱",
+          cost: 0,
+          weight: 0.0,
+          reloadMult: 1.0,
+          desc: "Standard reload. No modifications.",
+          tier: 0,
+        },
+        reload_quick: {
+          id: "reload_quick",
+          slot: "reload",
+          name: "Quick Loader",
+          icon: "⚡",
+          cost: 300,
+          weight: 0.05,
+          reloadMult: 0.75,
+          desc: "25% faster reload. Small weight cost.",
+          tier: 1,
+        },
+        reload_speed: {
+          id: "reload_speed",
+          slot: "reload",
+          name: "Speed Loader",
+          icon: "💨",
+          cost: 700,
+          weight: 0.08,
+          reloadMult: 0.55,
+          desc: "Almost twice as fast. Solid upgrade.",
+          tier: 2,
+        },
+        reload_auto: {
+          id: "reload_auto",
+          slot: "reload",
+          name: "Auto Loader",
+          icon: "🤖",
+          cost: 1500,
+          weight: 0.12,
+          reloadMult: 0.3,
+          desc: "Near-instant reload. Worth every penny.",
+          tier: 3,
+        },
+      };
+      const AMMO_PACKS = [
+        {
+          id: "pack_small",
+          name: "Small Pack",
+          icon: "🎨",
+          count: 30,
+          cost: 50,
+          desc: "30 extra paintballs.",
+        },
+        {
+          id: "pack_medium",
+          name: "Medium Pack",
+          icon: "🪣",
+          count: 80,
+          cost: 120,
+          desc: "80 extra paintballs.",
+        },
+        {
+          id: "pack_large",
+          name: "Large Pack",
+          icon: "🛒",
+          count: 200,
+          cost: 280,
+          desc: "200 extra paintballs.",
+        },
+        {
+          id: "pack_mega",
+          name: "Mega Pack",
+          icon: "🏭",
+          count: 500,
+          cost: 600,
+          desc: "500 extra paintballs. Stock up!",
+        },
+      ];
+      let equippedMods = {
+        sight: "sight_iron",
+        mag: "mag_std",
+        reload: "reload_std",
+      };
+      let ownedMods = ["sight_iron", "mag_std", "reload_std"];
+      let reserveAmmo = 0;
+
+      function getEffectiveStats() {
+        const bl = equippedBlaster || BLASTERS[0];
+        const sm = MODS[equippedMods.sight] || MODS.sight_iron;
+        const mm = MODS[equippedMods.mag] || MODS.mag_std;
+        const rm = MODS[equippedMods.reload] || MODS.reload_std;
+        const totalWeight =
+          (bl.weight || 1.0) + sm.weight + mm.weight + rm.weight;
+        return {
+          ammo: Math.round((bl.ammo || 10) * (mm.ammoMult || 1.0)),
+          reloadMs: Math.round((bl.reloadMs || 1400) * (rm.reloadMult || 1.0)),
+          spread: (bl.spread || 0.015) * (sm.spreadMult || 1.0),
+          moveSpeed: Math.max(2.5, 5.0 / totalWeight),
+          sprintSpeed: Math.max(4.0, 8.0 / totalWeight),
+          totalWeight,
+        };
+      }
+
+      // ── MOD SYSTEM ──
+      // Mods are per-slot upgrades. Each blaster has 3 slots: sight, mag, reload.
+      // Each mod has a weight that stacks with the blaster's base weight.
+      const MODS = {
+        // ── SIGHT mods ─────────────────────────────────────────────────
+        sight_iron: {
+          id: "sight_iron",
+          slot: "sight",
+          name: "Iron Sights",
+          icon: "🔩",
+          cost: 0,
+          weight: 0.0,
+          spreadMult: 1.0,
+          desc: "Default iron sights. No frills.",
+          tier: 0,
+        },
+        sight_red: {
+          id: "sight_red",
+          slot: "sight",
+          name: "Red Dot",
+          icon: "🔴",
+          cost: 400,
+          weight: 0.05,
+          spreadMult: 0.8,
+          desc: "Red dot sight. Tighter aim cone.",
+          tier: 1,
+        },
+        sight_holo: {
+          id: "sight_holo",
+          slot: "sight",
+          name: "Holographic",
+          icon: "💠",
+          cost: 900,
+          weight: 0.08,
+          spreadMult: 0.65,
+          desc: "Holo sight. Wide view, crisp accuracy.",
+          tier: 2,
+        },
+        sight_scope: {
+          id: "sight_scope",
+          slot: "sight",
+          name: "Long Scope",
+          icon: "🔭",
+          cost: 1800,
+          weight: 0.12,
+          spreadMult: 0.4,
+          desc: "Long-range scope. Pinpoint precision.",
+          tier: 3,
+        },
+
+        // ── MAG mods ───────────────────────────────────────────────────
+        mag_std: {
+          id: "mag_std",
+          slot: "mag",
+          name: "Standard Mag",
+          icon: "📦",
+          cost: 0,
+          weight: 0.0,
+          ammoMult: 1.0,
+          desc: "Stock magazine. What came in the box.",
+          tier: 0,
+        },
+        mag_ext: {
+          id: "mag_ext",
+          slot: "mag",
+          name: "Extended Mag",
+          icon: "🔋",
+          cost: 350,
+          weight: 0.1,
+          ammoMult: 1.5,
+          desc: "+50% ammo capacity. Heavier though.",
+          tier: 1,
+        },
+        mag_drum: {
+          id: "mag_drum",
+          slot: "mag",
+          name: "Drum Mag",
+          icon: "🥁",
+          cost: 800,
+          weight: 0.2,
+          ammoMult: 2.0,
+          desc: "Double capacity. Noticeably heavier.",
+          tier: 2,
+        },
+        mag_tank: {
+          id: "mag_tank",
+          slot: "mag",
+          name: "Tank Mag",
+          icon: "🛢",
+          cost: 1600,
+          weight: 0.35,
+          ammoMult: 3.0,
+          desc: "Triple ammo. Feels like a brick.",
+          tier: 3,
+        },
+
+        // ── RELOAD mods ────────────────────────────────────────────────
+        reload_std: {
+          id: "reload_std",
+          slot: "reload",
+          name: "Stock Loader",
+          icon: "⏱",
+          cost: 0,
+          weight: 0.0,
+          reloadMult: 1.0,
+          desc: "Standard reload. No modifications.",
+          tier: 0,
+        },
+        reload_quick: {
+          id: "reload_quick",
+          slot: "reload",
+          name: "Quick Loader",
+          icon: "⚡",
+          cost: 300,
+          weight: 0.05,
+          reloadMult: 0.75,
+          desc: "25% faster reload. Small weight cost.",
+          tier: 1,
+        },
+        reload_speed: {
+          id: "reload_speed",
+          slot: "reload",
+          name: "Speed Loader",
+          icon: "💨",
+          cost: 700,
+          weight: 0.08,
+          reloadMult: 0.55,
+          desc: "Almost twice as fast. Solid upgrade.",
+          tier: 2,
+        },
+        reload_auto: {
+          id: "reload_auto",
+          slot: "reload",
+          name: "Auto Loader",
+          icon: "🤖",
+          cost: 1500,
+          weight: 0.12,
+          reloadMult: 0.3,
+          desc: "Near-instant reload. Worth every penny.",
+          tier: 3,
+        },
+      };
+
+      // equippedMods: slot -> mod id
+      let equippedMods = {
+        sight: "sight_iron",
+        mag: "mag_std",
+        reload: "reload_std",
+      };
+      let ownedMods = ["sight_iron", "mag_std", "reload_std"];
+
+      // Paintball packs (consumable — adds to a reserve pool)
+      const AMMO_PACKS = [
+        {
+          id: "pack_small",
+          name: "Small Pack",
+          icon: "🎨",
+          count: 30,
+          cost: 50,
+          desc: "30 extra paintballs.",
+        },
+        {
+          id: "pack_medium",
+          name: "Medium Pack",
+          icon: "🪣",
+          count: 80,
+          cost: 120,
+          desc: "80 extra paintballs.",
+        },
+        {
+          id: "pack_large",
+          name: "Large Pack",
+          icon: "🛒",
+          count: 200,
+          cost: 280,
+          desc: "200 extra paintballs.",
+        },
+        {
+          id: "pack_mega",
+          name: "Mega Pack",
+          icon: "🏭",
+          count: 500,
+          cost: 600,
+          desc: "500 extra paintballs. Stock up!",
+        },
+      ];
+      let reserveAmmo = 0; // paintballs in reserve (shown in HUD)
+
+      // Computed effective stats (recalculated whenever mods change)
+      function getEffectiveStats() {
+        const bl = equippedBlaster;
+        const sm = MODS[equippedMods.sight] || MODS.sight_iron;
+        const mm = MODS[equippedMods.mag] || MODS.mag_std;
+        const rm = MODS[equippedMods.reload] || MODS.reload_std;
+        const totalWeight =
+          (bl.weight || 1.0) + sm.weight + mm.weight + rm.weight;
+        return {
+          ammo: Math.round((bl.ammo || 10) * (mm.ammoMult || 1.0)),
+          reloadMs: Math.round((bl.reloadMs || 1400) * (rm.reloadMult || 1.0)),
+          spread: (bl.spread || 0.015) * (sm.spreadMult || 1.0),
+          moveSpeed: Math.max(2.5, 5.0 / totalWeight), // base 5, reduced by weight
+          sprintSpeed: Math.max(4.0, 8.0 / totalWeight),
+          totalWeight,
+        };
+      }
       function loadPersist() {
         try {
           const sp = localStorage.getItem("splat_pb");
@@ -2633,6 +3599,19 @@
             const bl = BLASTERS.find((b) => b.id === se);
             if (bl && ownedBlasters.includes(bl.id)) equippedBlaster = bl;
           }
+          const sm = localStorage.getItem("splat_mods_owned");
+          if (sm) {
+            const a = JSON.parse(sm);
+            if (Array.isArray(a)) ownedMods = a;
+          }
+          const seq = localStorage.getItem("splat_mods_eq");
+          if (seq) {
+            const o = JSON.parse(seq);
+            if (o && typeof o === "object")
+              equippedMods = Object.assign(equippedMods, o);
+          }
+          const sr = localStorage.getItem("splat_reserve");
+          if (sr !== null) reserveAmmo = Math.max(0, parseInt(sr) || 0);
         } catch (e) {}
       }
       function savePersist() {
@@ -2644,6 +3623,9 @@
             "splat_equipped",
             equippedBlaster ? equippedBlaster.id : "basic",
           );
+          localStorage.setItem("splat_mods_owned", JSON.stringify(ownedMods));
+          localStorage.setItem("splat_mods_eq", JSON.stringify(equippedMods));
+          localStorage.setItem("splat_reserve", reserveAmmo);
         } catch (e) {}
       }
       loadPersist();
@@ -3099,27 +4081,91 @@
       //  SPLAT
       // ════════════════════════════════════════════════════
       function addSplat(x, y, z, col, isGround, bvx, bvy, bvz) {
-        const m = new THREE.Mesh(
-          new THREE.CircleGeometry(0.35 + Math.random() * 0.31, 8),
-          new THREE.MeshBasicMaterial({
-            color: col,
-            transparent: true,
-            opacity: 0.92,
-            depthWrite: false,
-            polygonOffset: true,
-            polygonOffsetFactor: -1,
-          }),
-        );
+        const mat = new THREE.MeshLambertMaterial({
+          color: col,
+          transparent: true,
+          opacity: 0.95,
+          depthWrite: false,
+          polygonOffset: true,
+          polygonOffsetFactor: -1,
+        });
+        const r = 0.13 + Math.random() * 0.12; // smaller: 0.13–0.25 radius
+        const grp = new THREE.Group();
+
         if (isGround) {
-          m.rotation.x = -Math.PI / 2;
-          m.position.set(x, 0.03, z);
+          // Floor splat: flat irregular blob lying on XZ plane
+          const geo = new THREE.CylinderGeometry(r, r * 0.8, 0.025, 10);
+          const blob = new THREE.Mesh(geo, mat);
+          // Squish randomly so it looks like a splat not a coin
+          blob.scale.set(1 + Math.random() * 0.6, 1, 0.6 + Math.random() * 0.8);
+          grp.add(blob);
+          // 2-3 small drip splodges around it
+          const drops = 1 + Math.floor(Math.random() * 2);
+          for (let i = 0; i < drops; i++) {
+            const dr = r * (0.25 + Math.random() * 0.25);
+            const dblob = new THREE.Mesh(
+              new THREE.CylinderGeometry(dr, dr * 0.7, 0.022, 7),
+              mat,
+            );
+            const ang = Math.random() * Math.PI * 2;
+            dblob.position.set(
+              Math.cos(ang) * (r * 0.9 + dr * 0.6),
+              0,
+              Math.sin(ang) * (r * 0.9 + dr * 0.6),
+            );
+            grp.add(dblob);
+          }
+          grp.position.set(x, 0.012, z);
         } else {
-          m.position.set(x, y, z);
-          const len = Math.sqrt(bvx * bvx + bvy * bvy + bvz * bvz) || 1;
-          m.lookAt(x + -bvx / len, y + -bvy / len, z + -bvz / len);
+          // Wall splat: detect surface normal from velocity direction, lay flat against it
+          const vlen = Math.sqrt(bvx * bvx + bvy * bvy + bvz * bvz) || 1;
+          const nx = -bvx / vlen,
+            ny = -bvy / vlen,
+            nz = -bvz / vlen;
+          // Determine dominant wall axis
+          const absX = Math.abs(bvx),
+            absZ = Math.abs(bvz),
+            absY = Math.abs(bvy);
+          const geo = new THREE.CylinderGeometry(r, r * 0.75, 0.028, 9);
+          const blob = new THREE.Mesh(geo, mat);
+          blob.scale.set(
+            1 + Math.random() * 0.5,
+            1,
+            0.65 + Math.random() * 0.7,
+          );
+          grp.add(blob);
+          // Drips — hang downward along the wall
+          const drips = 1 + Math.floor(Math.random() * 3);
+          for (let i = 0; i < drips; i++) {
+            const dlen = 0.06 + Math.random() * 0.14;
+            const drad = 0.018 + Math.random() * 0.018;
+            // cylinder drip
+            const drip = new THREE.Mesh(
+              new THREE.CylinderGeometry(drad, drad * 0.4, dlen, 5),
+              mat,
+            );
+            const sideOff = (Math.random() - 0.5) * r * 0.7;
+            drip.position.set(sideOff, -r * 0.6 - dlen / 2, 0);
+            grp.add(drip);
+          }
+          // Orient group so local +Y faces away from wall (along normal)
+          // and local -Y is "down the wall"
+          if (absX > absZ && absX > absY) {
+            // Hit side wall (X axis)
+            grp.rotation.z = (Math.PI / 2) * Math.sign(bvx);
+            grp.position.set(x + nx * 0.03, y, z);
+          } else if (absZ > absX && absZ > absY) {
+            // Hit front/back wall (Z axis)
+            grp.rotation.x = (-Math.PI / 2) * Math.sign(bvz);
+            grp.position.set(x, y, z + nz * 0.03);
+          } else {
+            // Hit ceiling or steep angle
+            grp.rotation.x = -Math.PI / 2;
+            grp.position.set(x, y + ny * 0.03, z);
+          }
         }
-        scene.add(m);
-        gs.splats.push({ mesh: m, life: 45 });
+        scene.add(grp);
+        gs.splats.push({ mesh: grp, life: 50 });
       }
 
       // ════════════════════════════════════════════════════
@@ -3127,7 +4173,8 @@
       // ════════════════════════════════════════════════════
       function fireSingleBall(col, dir, pos, bl) {
         const d = dir.clone();
-        const effSpread = (bl.spread || 0) * (isAiming ? 0.15 : 1.0);
+        const _es = getEffectiveStats();
+        const effSpread = (_es.spread || 0) * (isAiming ? 0.15 : 1.0);
         if (effSpread > 0) {
           d.x += (Math.random() - 0.5) * effSpread;
           d.y += (Math.random() - 0.5) * effSpread * 0.5;
@@ -3135,7 +4182,7 @@
           d.normalize();
         }
         const mesh = new THREE.Mesh(
-          new THREE.SphereGeometry(0.12, 8, 8),
+          new THREE.SphereGeometry(0.055, 6, 6),
           new THREE.MeshLambertMaterial({ color: col }),
         );
         mesh.position.copy(pos).addScaledVector(d, 0.5);
@@ -3161,6 +4208,41 @@
         const ammoToUse = hostSettings.infiniteAmmo ? 0 : 1;
         gs.ammo = Math.max(0, gs.ammo - ammoToUse);
         if (!hostSettings.infiniteAmmo) updateAmmoUI();
+        if (
+          hostSettings.limitedAmmo &&
+          !hostSettings.infiniteAmmo &&
+          gs.ammo === 0 &&
+          reserveAmmo > 0
+        ) {
+          const refill = Math.min(gs.maxAmmo, reserveAmmo);
+          reserveAmmo -= refill;
+          setTimeout(() => {
+            if (gs.running) {
+              gs.ammo = refill;
+              updateAmmoUI();
+              updateReserveHUD();
+            }
+          }, getEffectiveStats().reloadMs);
+        }
+        updateReserveHUD();
+        // Limited ammo mode: auto-reload from reserve when mag empty
+        if (
+          hostSettings.limitedAmmo &&
+          !hostSettings.infiniteAmmo &&
+          gs.ammo === 0 &&
+          reserveAmmo > 0
+        ) {
+          const refill = Math.min(gs.maxAmmo, reserveAmmo);
+          reserveAmmo -= refill;
+          setTimeout(() => {
+            if (gs.running) {
+              gs.ammo = refill;
+              updateAmmoUI();
+              updateReserveHUD();
+            }
+          }, getEffectiveStats().reloadMs);
+        }
+        updateReserveHUD();
         const col = gs.paintColor;
         const dir = new THREE.Vector3();
         camera.getWorldDirection(dir);
@@ -3197,6 +4279,9 @@
         const sf = document.getElementById("shoot-flash");
         sf.style.opacity = "1";
         setTimeout(() => (sf.style.opacity = "0"), 60);
+        // Recoil: bl.recoil is ~0.01–0.09, *14 gives ~0.15–1.3 rad/s kick
+        const recoilKick = (bl.recoil || 0.02) * (isAiming ? 0.4 : 1.0) * 14;
+        recoilVel += recoilKick;
         gs.paintColor =
           PCOLS[(PCOLS.indexOf(gs.paintColor) + 1) % PCOLS.length];
         updateColorUI();
@@ -3204,7 +4289,7 @@
 
       function enemyShoot(e) {
         const mesh = new THREE.Mesh(
-          new THREE.SphereGeometry(0.1, 6, 6),
+          new THREE.SphereGeometry(0.05, 6, 6),
           new THREE.MeshLambertMaterial({ color: 0xaa00ff }),
         );
         const dx = yawObj.position.x - e.x,
@@ -3234,12 +4319,53 @@
         gs.isReloading = true;
         const el = document.getElementById("reload-ann");
         el.style.opacity = "1";
+        const _re = getEffectiveStats();
         setTimeout(() => {
           gs.ammo = gs.maxAmmo;
           gs.isReloading = false;
           updateAmmoUI();
           el.style.opacity = "0";
-        }, equippedBlaster.reloadMs || 1500);
+        }, _re.reloadMs);
+      }
+
+      // ── Hit indicators ──
+      let _hitTimer = null,
+        _hitIndTimer = null;
+      function showHitmarker(isKill, isPvP) {
+        const hm = document.getElementById("hitmarker");
+        const hi = document.getElementById("hit-indicator");
+        // Hitmarker flash
+        hm.style.opacity = "1";
+        hm.style.filter = isKill
+          ? "drop-shadow(0 0 4px #ffdd00)"
+          : isPvP
+            ? "drop-shadow(0 0 4px #ff8800)"
+            : "drop-shadow(0 0 3px #fff)";
+        clearTimeout(_hitTimer);
+        _hitTimer = setTimeout(
+          () => (hm.style.opacity = "0"),
+          isKill ? 220 : 120,
+        );
+        // Text popup
+        if (isKill) {
+          hi.textContent = "KILL!";
+          hi.style.color = "#ffdd00";
+          hi.style.fontSize = "36px";
+        } else if (isPvP) {
+          hi.textContent = "HIT!";
+          hi.style.color = "#ff8833";
+          hi.style.fontSize = "26px";
+        } else {
+          hi.textContent = "HIT";
+          hi.style.color = "#ffffff";
+          hi.style.fontSize = "22px";
+        }
+        hi.style.opacity = "1";
+        clearTimeout(_hitIndTimer);
+        _hitIndTimer = setTimeout(
+          () => (hi.style.opacity = "0"),
+          isKill ? 500 : 280,
+        );
       }
 
       function hitEnemy(e, dmg) {
@@ -3255,6 +4381,9 @@
           earnPB(10);
           scene.remove(e.mesh);
           updateScoreUI();
+          showHitmarker(true, false);
+        } else {
+          showHitmarker(false, false);
         }
       }
 
@@ -3329,6 +4458,13 @@
         if (on) renderScopeOverlay(sightType);
         document.getElementById("xhair").style.display = on ? "none" : "block";
         document.getElementById("aim-btn").classList.toggle("active", on);
+      }
+      function renderScopeOverlay(type) {
+        // Dynamically set scope class for different sight visuals
+        const scope = document.getElementById("scope");
+        scope.dataset.sight = type;
+        const crossEl = document.getElementById("scope-cross");
+        crossEl.dataset.sight = type;
       }
       function doJump() {
         if (onGround) {
@@ -3739,8 +4875,43 @@
           canvas.requestPointerLock();
         }
       }
+      let _shopTab = "blasters";
+      function switchShopTab(tab) {
+        _shopTab = tab;
+        ["blasters", "mods", "ammo"].forEach((t) => {
+          document.getElementById("shop-tab-" + t).style.display =
+            t === tab ? "block" : "none";
+          document
+            .getElementById("tab-" + t)
+            .classList.toggle("active", t === tab);
+        });
+        renderShopTab();
+      }
+      function renderShopTab() {
+        renderEffPanel();
+        if (_shopTab === "blasters") renderBlasters();
+        else if (_shopTab === "mods") renderMods();
+        else renderAmmoPacks();
+      }
+      function renderEffPanel() {
+        const e = getEffectiveStats();
+        const bl = equippedBlaster;
+        const sm = MODS[equippedMods.sight];
+        const mm = MODS[equippedMods.mag];
+        const rm = MODS[equippedMods.reload];
+        document.getElementById("eff-panel").innerHTML = `
+    <div class="eff-stat"><div class="eff-stat-val">${bl.icon} ${bl.name}</div><div class="eff-stat-lbl">Blaster</div></div>
+    <div class="eff-stat"><div class="eff-stat-val">${e.ammo}</div><div class="eff-stat-lbl">📦 Mag Size</div></div>
+    <div class="eff-stat"><div class="eff-stat-val">${(e.reloadMs / 1000).toFixed(1)}s</div><div class="eff-stat-lbl">⏱ Reload</div></div>
+    <div class="eff-stat"><div class="eff-stat-val">${e.moveSpeed.toFixed(1)}</div><div class="eff-stat-lbl">🏃 Speed</div></div>
+    <div class="eff-stat"><div class="eff-stat-val">${e.totalWeight.toFixed(2)}kg</div><div class="eff-stat-lbl">⚖️ Weight</div></div>
+    <div class="eff-stat"><div class="eff-stat-val">${sm.icon}${mm.icon}${rm.icon}</div><div class="eff-stat-lbl">🔧 Mods</div></div>`;
+      }
       function renderShop() {
         updatePBUI();
+        renderShopTab();
+      }
+      function renderBlasters() {
         const grid = document.getElementById("blaster-grid");
         grid.innerHTML = "";
         BLASTERS.forEach((bl) => {
@@ -3763,6 +4934,7 @@
         <div class="b-stat"><span class="b-stat-lbl">⚡ Rate ${bl.rateLabel}</span><div class="b-stat-bar"><div class="b-stat-fill rate" style="width:${bl.rateFill * 100}%"></div></div></div>
         <div class="b-stat"><span class="b-stat-lbl">💨 Speed ${bl.speedLabel}</span><div class="b-stat-bar"><div class="b-stat-fill speed" style="width:${bl.speedFill * 100}%"></div></div></div>
         <div class="b-stat"><span class="b-stat-lbl">🎯 Accuracy ${bl.accuracyLabel}</span><div class="b-stat-bar"><div class="b-stat-fill acc" style="width:${bl.accuracyFill * 100}%"></div></div></div>
+        <div class="b-stat"><span class="b-stat-lbl">⚖️ Weight ${bl.weight ? bl.weight.toFixed(1) : "1.0"}</span><div class="b-stat-bar"><div class="b-stat-fill" style="width:${Math.min(100, (bl.weight || 1) * 50)}%;background:linear-gradient(90deg,#aabb44,#887700)"></div></div></div>
       </div>`;
           if (!owned) {
             card.innerHTML += `<div class="b-cost">💰 ${bl.cost.toLocaleString()} PB</div>`;
@@ -3788,6 +4960,134 @@
           grid.appendChild(card);
         });
       }
+      function renderMods() {
+        const SLOTS = [
+          {
+            key: "sight",
+            label: "🔭 SIGHT MOD",
+            ids: ["sight_iron", "sight_red", "sight_holo", "sight_scope"],
+          },
+          {
+            key: "mag",
+            label: "📦 MAG MOD",
+            ids: ["mag_std", "mag_ext", "mag_drum", "mag_tank"],
+          },
+          {
+            key: "reload",
+            label: "⏱ RELOAD MOD",
+            ids: ["reload_std", "reload_quick", "reload_speed", "reload_auto"],
+          },
+        ];
+        SLOTS.forEach((slot) => {
+          const sec = document.getElementById("mod-section-" + slot.key);
+          sec.innerHTML = `<div class="mod-section-title">${slot.label}</div><div class="mod-grid" id="modgrid-${slot.key}"></div>`;
+          const grid = document.getElementById("modgrid-" + slot.key);
+          slot.ids.forEach((mid) => {
+            const mod = MODS[mid];
+            const owned = ownedMods.includes(mid);
+            const equipped = equippedMods[slot.key] === mid;
+            const canAfford = pb >= mod.cost;
+            const card = document.createElement("div");
+            card.className =
+              "mod-card" + (equipped ? " c-equipped" : owned ? " c-owned" : "");
+            card.innerHTML = `
+        ${equipped ? '<div class="b-badge eq">ON</div>' : ""}
+        <div class="mod-icon">${mod.icon}</div>
+        <div class="mod-name">${mod.name}</div>
+        <div class="mod-desc">${mod.desc}</div>
+        <div class="mod-weight">⚖️ +${mod.weight.toFixed(2)}kg</div>`;
+            if (!owned) {
+              card.innerHTML += `<div class="b-cost" style="font-size:11px;margin-top:auto">💰 ${mod.cost.toLocaleString()} PB</div>`;
+              const btn = document.createElement("button");
+              btn.className = "b-btn " + (canAfford ? "buy" : "cant");
+              btn.textContent = canAfford
+                ? "BUY"
+                : `Need ${(mod.cost - pb).toLocaleString()} more`;
+              if (canAfford) btn.onclick = () => buyMod(mid);
+              card.appendChild(btn);
+            } else if (!equipped) {
+              const btn = document.createElement("button");
+              btn.className = "b-btn equip";
+              btn.textContent = "EQUIP";
+              btn.onclick = () => equipMod(mid);
+              card.appendChild(btn);
+            } else {
+              const btn = document.createElement("button");
+              btn.className = "b-btn is-equipped";
+              btn.textContent = "✓ EQUIPPED";
+              card.appendChild(btn);
+            }
+            grid.appendChild(card);
+          });
+        });
+      }
+      function renderAmmoPacks() {
+        const grid = document.getElementById("pack-grid");
+        grid.innerHTML = "";
+        AMMO_PACKS.forEach((pack) => {
+          const canAfford = pb >= pack.cost;
+          const card = document.createElement("div");
+          card.className = "pack-card";
+          card.innerHTML = `
+      <div class="pack-icon">${pack.icon}</div>
+      <div class="pack-name">${pack.name}</div>
+      <div class="pack-count">+${pack.count} 🎨</div>
+      <div class="pack-desc">${pack.desc}</div>
+      <div class="b-cost" style="font-size:11px">💰 ${pack.cost} PB</div>`;
+          const btn = document.createElement("button");
+          btn.className = "b-btn " + (canAfford ? "buy" : "cant");
+          btn.textContent = canAfford
+            ? "BUY"
+            : `Need ${pack.cost - pb} more PB`;
+          if (canAfford) btn.onclick = () => buyAmmoPack(pack.id);
+          card.appendChild(btn);
+          grid.appendChild(card);
+        });
+        // Show current reserve
+        const info = document.createElement("div");
+        info.style =
+          "width:100%;text-align:center;font-size:13px;color:#44aaff;margin-top:8px";
+        info.textContent = `Current Reserve: ${reserveAmmo} 🎨 paintballs`;
+        document.getElementById("pack-grid").after(info);
+      }
+      function buyMod(id) {
+        const mod = MODS[id];
+        if (!mod || pb < mod.cost || ownedMods.includes(id)) return;
+        pb -= mod.cost;
+        ownedMods.push(id);
+        savePersist();
+        equipMod(id);
+      }
+      function equipMod(id) {
+        const mod = MODS[id];
+        if (!mod || !ownedMods.includes(id)) return;
+        equippedMods[mod.slot] = id;
+        gs.maxAmmo = getEffectiveStats().ammo;
+        gs.ammo = Math.min(gs.ammo, gs.maxAmmo);
+        updateAmmoUI();
+        savePersist();
+        renderShop();
+        renderEffPanel();
+      }
+      function buyAmmoPack(id) {
+        const pack = AMMO_PACKS.find((p) => p.id === id);
+        if (!pack || pb < pack.cost) return;
+        pb -= pack.cost;
+        reserveAmmo += pack.count;
+        savePersist();
+        updateReserveHUD();
+        renderShop();
+      }
+      function updateReserveHUD() {
+        const el = document.getElementById("reserve-hud");
+        if (!el) return;
+        if (hostSettings.limitedAmmo && gs.running) {
+          el.style.display = "block";
+          document.getElementById("reserve-val").textContent = reserveAmmo;
+        } else {
+          el.style.display = "none";
+        }
+      }
       function buyBlaster(id) {
         const bl = BLASTERS.find((b) => b.id === id);
         if (!bl || pb < bl.cost || ownedBlasters.includes(id)) return;
@@ -3800,7 +5100,7 @@
         const bl = BLASTERS.find((b) => b.id === id);
         if (!bl || !ownedBlasters.includes(id)) return;
         equippedBlaster = bl;
-        gs.maxAmmo = bl.ammo;
+        gs.maxAmmo = getEffectiveStats().ammo;
         gs.ammo = Math.min(gs.ammo, gs.maxAmmo);
         updateAmmoUI();
         updateBlasterHUD();
@@ -3869,6 +5169,17 @@
     <div class="srow" style="${dis}"><span class="srow-lbl">∞ Infinite Ammo</span>
       <div class="toggle${s.infiniteAmmo ? " on" : ""}" id="inf-ammo-tog" onclick="setSetting('infiniteAmmo',!hostSettings.infiniteAmmo)"><div class="tknob"></div></div>
     </div>
+    ${s.gameType === "limited_ammo" ? `<div class="srow" style="${dis}"><span class="srow-lbl">🎨 Starting Reserve</span><div class="chip-row">${[50, 100, 200, 500].map((n) => `<div class="chip${s.startingReserve === n ? " sel" : ""}" onclick="setSetting('startingReserve',${n})">${n}</div>`).join("")}</div></div>` : ""}
+    ${
+      s.gameType === "limited_ammo"
+        ? `
+    <div class="srow" style="${dis}"><span class="srow-lbl">🎨 Starting Reserve</span>
+      <div class="chip-row">
+        ${[50, 100, 200, 500].map((n) => `<div class="chip${s.startingReserve === n ? " sel" : ""}" onclick="setSetting('startingReserve',${n})">${n}</div>`).join("")}
+      </div>
+    </div>`
+        : ""
+    }
     ${
       s.gameType === "solo" || s.gameType === "ffa"
         ? `
@@ -3900,10 +5211,11 @@
       function setSetting(key, val) {
         if (!amIHost) return;
         hostSettings[key] = val;
-        // Re-render both settings containers
+        // Auto-enable limitedAmmo flag when mode is selected
+        if (key === "gameType")
+          hostSettings.limitedAmmo = val === "limited_ammo";
         renderSettingsUI("solo-settings-box", true);
         renderSettingsUI("room-settings-inner", true);
-        // Broadcast to room if in multiplayer
         if (socket && roomCode)
           socket.emit("update_settings", { settings: hostSettings });
       }
@@ -4086,7 +5398,7 @@
           rc.mesh.rotation.y = msg.yaw;
         } else if (msg.type === "shoot") {
           const rm = new THREE.Mesh(
-            new THREE.SphereGeometry(0.12, 8, 8),
+            new THREE.SphereGeometry(0.055, 6, 6),
             new THREE.MeshLambertMaterial({ color: msg.color }),
           );
           rm.position.set(msg.ox, msg.oy, msg.oz);
@@ -4431,6 +5743,7 @@
         pvp_1v1: "card-pvp",
         ffa: "card-ffa",
         teams: "card-teams",
+        limited_ammo: "card-limited_ammo",
       };
       Object.entries(mpModeCards).forEach(([mode, cardId]) => {
         const el = document.getElementById(cardId);
@@ -4816,7 +6129,11 @@
         yawObj.position.y = ny;
 
         // ── Movement ──
-        const spd = gs.keys["ShiftLeft"] || gs.keys["ShiftRight"] ? 8 : 5;
+        const _eff = getEffectiveStats();
+        const spd =
+          gs.keys["ShiftLeft"] || gs.keys["ShiftRight"]
+            ? _eff.sprintSpeed
+            : _eff.moveSpeed;
         const fw = new THREE.Vector3(-Math.sin(gs.yaw), 0, -Math.cos(gs.yaw));
         const rt = new THREE.Vector3(Math.cos(gs.yaw), 0, -Math.sin(gs.yaw));
         let mx = 0,
@@ -4857,7 +6174,17 @@
         pitchObj.rotation.x = gs.pitch;
         // Shift = sprint only (aim is right-click / touch button)
 
-        // Send position
+        // ── Recoil recovery — smooth pitch settle ──
+        if (recoilVel > 0) {
+          const kick = recoilVel * dt;
+          gs.pitch = Math.max(
+            -Math.PI / 3,
+            Math.min(Math.PI / 3, gs.pitch - kick),
+          );
+          pitchObj.rotation.x = gs.pitch;
+          // Decay: fast initial drop, then smooth settle back
+          recoilVel = Math.max(0, recoilVel * (1 - 12 * dt));
+        }
         if (conn.open && ts - lastPos > 50) {
           lastPos = ts;
           conn.send({
@@ -5033,7 +6360,10 @@
               if (rc.health <= 0) {
                 rc.alive = false;
                 conn.send({ type: "pvp_hit", dmg: 100, target_sid: sid });
+                showHitmarker(true, true);
                 checkRoundOver();
+              } else {
+                showHitmarker(false, true);
               }
               break;
             }
