@@ -130,5 +130,49 @@
     "reloadMult": 0.3,
     "desc": "Near-instant reload.",
     "tier": 3
+  },
+  "sight_micro": {
+    "id": "sight_micro",
+    "slot": "sight",
+    "name": "Micro Reflex",
+    "icon": "📍",
+    "cost": 650,
+    "weight": 0.04,
+    "spreadMult": 0.7,
+    "desc": "Tiny reflex sight. Super clean picture.",
+    "tier": 2
+  },
+  "sight_tri": {
+    "id": "sight_tri",
+    "slot": "sight",
+    "name": "Tri‑Dot Holo",
+    "icon": "🔺",
+    "cost": 1300,
+    "weight": 0.1,
+    "spreadMult": 0.55,
+    "desc": "Triangle holo reticle. Great for tracking moving targets.",
+    "tier": 3
+  },
+  "mag_feeder": {
+    "id": "mag_feeder",
+    "slot": "mag",
+    "name": "Feeder System",
+    "icon": "🧵",
+    "cost": 1200,
+    "weight": 0.25,
+    "ammoMult": 2.4,
+    "desc": "Side‑feed hopper. Huge capacity, noticeably heavier.",
+    "tier": 3
+  },
+  "reload_snap": {
+    "id": "reload_snap",
+    "slot": "reload",
+    "name": "Snap Reload",
+    "icon": "🥏",
+    "cost": 2200,
+    "weight": 0.14,
+    "reloadMult": 0.22,
+    "desc": "Competition‑grade reload kit. Almost instant between bursts.",
+    "tier": 4
   }
 }
