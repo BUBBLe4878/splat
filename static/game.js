@@ -587,7 +587,7 @@ function sweepArenaBounds(px, py, pz, nx, ny, nz, bound) {
     return {
         t: tHit,
         x: px + dx * tHit,
-        y: py + dy * tHit,
+        //y: py + dy * tHit,
         z: pz + dz * tHit,
         n,
     };
@@ -706,13 +706,21 @@ function clearRemoteClients() {
 // ════════════════════════════════════════════════════
 //  SPAWN SYSTEM  — FIX: uses player index
 // ════════════════════════════════════════════════════
-function getSpawn() {
+function getSpawn(playerIndex) {
     const sp = (getMapDef(hostSettings.mapId) || {}).spawns || [
         { x: 0, z: 0 },
     ];
+
+    // If playerIndex is provided and valid, use it
+    // Otherwise, pick a random spawn
+    if (playerIndex !== undefined && playerIndex >= 0 && playerIndex < sp.length) {
+        return sp[playerIndex];
+    }
+
     const index = Math.floor(Math.random() * sp.length);
     return sp[index];
 }
+
 function safeSpawnY(x, z) {
     let topY = 0;
     for (const o of obstacles)
@@ -1124,18 +1132,41 @@ function hitEnemy(e, dmg) {
     } else showHitmarker(false, false);
 }
 
-function takeDmg(n) {
-    gs.health = Math.max(0, gs.health - n);
+function takeDmg(rawDamage, killerSid = null) {  // ← ADD killerSid parameter
+    console.log("[TAKE-DMG] Incoming raw damage:", rawDamage);
+
+    // Apply armor reduction (centralized!)
+    const prot = _armorProt() / 100;
+    const actualDmg = Math.max(1, Math.round(rawDamage * (1 - prot)));
+
+    gs.health = Math.max(0, gs.health - actualDmg);
+    console.log("[TAKE-DMG] After armor → health now:", gs.health);
+
     updateHealthUI();
+
+    // Visual & audio feedback
     const hf = document.getElementById("hit-flash");
-    hf.style.opacity = "1";
-    setTimeout(() => (hf.style.opacity = "0"), 160);
-    if (gs.health <= 0) localPlayerDied();
+    if (hf) {
+        hf.style.opacity = "1";
+        setTimeout(() => (hf.style.opacity = "0"), 160);
+    }
+
+    sndDamage();
+    _shake = Math.max(_shake, 0.011);
+
+    if (gs.health <= 0) {
+        console.log("[TAKE-DMG] Health <= 0 → dying");
+        localPlayerDied(killerSid);  // ← PASS killerSid here
+    }
 }
 
-function localPlayerDied() {
+function localPlayerDied(killerSid = null) {
     if (!gs.running) return;
-    if (conn.open) conn.send({ type: "player_dead", sid: mySid });
+    if (conn.open) conn.send({
+        type: "player_dead",
+        sid: mySid,
+        killer_sid: killerSid  // ← ADD THIS
+    });
 
     if (isTimerMode) {
         gs.running = false;
@@ -1146,6 +1177,7 @@ function localPlayerDied() {
         setTimeout(() => {
             document.getElementById("wave-ann").style.opacity = "0";
             respawnPlayer(true);
+            console.log("Player respawned after death in timer mode.");
             if (!touchEnabled) canvas.requestPointerLock();
         }, 3000);
     } else {
@@ -1166,7 +1198,7 @@ function localPlayerDied() {
 }
 
 function respawnPlayer(isLocal = true, sid = mySid) {
-    const sp = getSpawn();  // random spawn every time
+    const sp = getSpawn(); // random spawn every time
     const y = safeSpawnY(sp.x, sp.z);
 
     if (isLocal) {
@@ -1179,14 +1211,15 @@ function respawnPlayer(isLocal = true, sid = mySid) {
         if (conn.open) {
             conn.send({ type: "respawn", x: sp.x, z: sp.z });
         }
+
     } else {
         const rc = remoteClients[sid];
         if (rc) {
-            rc.mesh.position.set(sp.x, 0, sp.z);
+            rc.mesh.position.set(sp.x, 0, sp.z);   // note: remote mesh Y is always 0 (ground level)
             rc.pos = { x: sp.x, y: 1.7, z: sp.z };
             rc.health = 100;
             rc.alive = true;
-            rc.mesh.visible = true;  // make sure they become visible again
+            rc.mesh.visible = true;               // ← already here, good
         }
     }
 }
@@ -1285,6 +1318,7 @@ function startRound() {
     Object.entries(remoteClients).forEach(([sid, rc]) => {
         rc.health = 100;
         rc.alive = true;
+        rc.mesh.visible = true;  // ← ADD THIS
         const player = roomPlayers.find((p) => p.sid === sid);
         if (player) {
             const rsp = getSpawn(player.index || 0);
@@ -1463,6 +1497,9 @@ async function initGame() {
     buildMap(hostSettings.mapId);
     matchTimeLeft = hostSettings.timeLimit || 0;
     isTimerMode = hostSettings.timeLimit > 0;
+    console.log("[INIT] Final hostSettings:", JSON.stringify(hostSettings));
+    console.log("[INIT] isTimerMode final value:", isTimerMode);
+    console.log("[INIT] timeLimit =", hostSettings.timeLimit, "→ isTimerMode =", isTimerMode);
     matchActive = true;
     document.getElementById("lobby").style.display = "none";
     document.getElementById("gameover").style.display = "none";
@@ -2386,7 +2423,7 @@ async function handleRelay(msg) {
         const rc = remoteClients[from];
         rc.mesh.position.set(msg.x, 0, msg.z);
         rc.mesh.rotation.y = msg.yaw;
-        rc.pos = { x: msg.x, y: msg.y || 1.7, z: msg.z }; // ← FIX: track pos for minimap
+        rc.pos = { x: msg.x, y: msg.y || 1.7, z: msg.z }; // ✓ Already correct
     } else if (msg.type === "shoot") {
         const rc = remoteClients[from];
         // Ignore shots from players that are already marked dead
@@ -2414,34 +2451,15 @@ async function handleRelay(msg) {
         const targetSid = msg.target_sid;
         if (targetSid !== mySid) return;
 
-        console.log(`[RECEIVER] Got hit! base=${msg.dmg}, armor=${_armorProt()}%`);  // ← debug line
+        console.log(`[RECEIVER] Got hit! base=${msg.dmg}, armor=${_armorProt()}%`);
 
         const baseDmg = msg.dmg || 10;
-        const prot = _armorProt() / 100;
-        const actualDmg = Math.max(1, Math.round(baseDmg * (1 - prot)));
+        const killerSid = msg.from_sid || msg.killer_sid;  // ← GET killer SID
 
-        gs.health = Math.max(0, gs.health - actualDmg);
-        updateHealthUI();
-
-        const hf = document.getElementById("hit-flash");
-        if (hf) {
-            hf.style.opacity = "1";
-            setTimeout(() => (hf.style.opacity = "0"), 160);
-        }
+        // Pass both damage and killer ID
+        takeDmg(baseDmg, killerSid);  // ← PASS killerSid
 
         showHitmarker(false, true);
-
-        if (gs.health <= 0) {
-            console.log("[RECEIVER] Health reached 0 after armor — dying");
-            localPlayerDied();
-            if (conn.open) {
-                conn.send({
-                    type: "player_dead",
-                    sid: mySid,
-                    killer_sid: msg.from_sid
-                });
-            }
-        }
     } else if (msg.type === "player_dead") {
         const victimSid = msg.sid;
         const killerSid = msg.killer_sid;
@@ -2454,6 +2472,7 @@ async function handleRelay(msg) {
         const victim = remoteClients[victimSid];
         if (victim) {
             victim.alive = false;
+            victim.health = 0;  // ← ADD THIS
             if (victim.mesh) victim.mesh.visible = false;
         }
 
@@ -2467,6 +2486,13 @@ async function handleRelay(msg) {
             _kfAdd(playerName, victim?.name || "Enemy");
             sndKill();
             _shake = Math.max(_shake, 0.015);
+        } else if (killerSid && remoteClients[killerSid]) {
+            // Someone else got the kill - update their score
+            const killer = remoteClients[killerSid];
+            killer.kills = (killer.kills || 0) + 1;
+            killer.score = (killer.score || 0) + 50;
+            updateScoreboard();
+            _kfAdd(killer.name, victim?.name || "Enemy");
         }
 
         checkRoundOver();
@@ -3806,7 +3832,7 @@ function loop(ts) {
                 scene.remove(b.mesh);
                 b.life = 0;
 
-                console.log(`[SHOOTER] Hit ${sid} — sending dmg`);   // ← debug line
+                console.log(`[SHOOTER] Hit ${sid} — sending dmg`);
 
                 gs.score += 25;
                 updateScoreUI();
@@ -3816,7 +3842,8 @@ function loop(ts) {
                     type: "pvp_hit",
                     dmg: baseDmg,
                     target_sid: sid,
-                    from_sid: mySid
+                    from_sid: mySid,
+                    killer_sid: mySid  // ← ADD THIS for tracking kills
                 });
 
                 showHitmarker(false, true);
