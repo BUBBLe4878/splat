@@ -1,725 +1,758 @@
 [
-  {
-    "id": "arena",
-    "name": "Arena",
-    "icon": "🏟",
-    "description": "Classic open grass field.",
-    "environment": {
-      "groundColor": "#4a7c3f",
-      "gridColor": "#3a6a2f",
-      "wallColor": "#d4b896",
-      "fogColor": "#87ceeb",
-      "ambientIntensity": 0.6,
-      "sunColor": "#fff5e0"
+    {
+        "id": "arena",
+        "name": "Arena",
+        "icon": "🏟",
+        "description": "Classic open grass field.",
+        "environment": {
+            "groundColor": "#4a7c3f",
+            "gridColor": "#3a6a2f",
+            "wallColor": "#d4b896",
+            "fogColor": "#87ceeb",
+            "ambientIntensity": 0.6,
+            "sunColor": "#fff5e0"
+        },
+        "arenaSize": 80,
+        "spawns": [
+            {
+                "x": 0,
+                "z": 0
+            },
+            {
+                "x": -18,
+                "z": 0
+            },
+            {
+                "x": 18,
+                "z": 0
+            },
+            {
+                "x": 0,
+                "z": -18
+            },
+            {
+                "x": 0,
+                "z": 18
+            },
+            {
+                "x": -13,
+                "z": -13
+            },
+            {
+                "x": 13,
+                "z": -13
+            },
+            {
+                "x": -13,
+                "z": 13
+            },
+            {
+                "x": 13,
+                "z": 13
+            }
+        ],
+        "objects": [
+            {
+                "type": "cover_wall",
+                "x": 13,
+                "z": -9,
+                "w": 1,
+                "h": 3,
+                "d": 6,
+                "color": "#88cc88"
+            },
+            {
+                "type": "cover_wall",
+                "x": -13,
+                "z": -9,
+                "w": 1,
+                "h": 3,
+                "d": 6,
+                "color": "#88cccc"
+            },
+            {
+                "type": "cover_wall",
+                "x": 0,
+                "z": -22,
+                "w": 6,
+                "h": 3,
+                "d": 1,
+                "color": "#cc8888"
+            },
+            {
+                "type": "cover_wall",
+                "x": 0,
+                "z": 22,
+                "w": 6,
+                "h": 3,
+                "d": 1,
+                "color": "#ddaa55"
+            },
+            {
+                "type": "cover_wall",
+                "x": 26,
+                "z": 0,
+                "w": 1,
+                "h": 3,
+                "d": 6,
+                "color": "#aa55dd"
+            },
+            {
+                "type": "cover_wall",
+                "x": -26,
+                "z": 0,
+                "w": 1,
+                "h": 3,
+                "d": 6,
+                "color": "#dd5555"
+            },
+            {
+                "type": "pillar",
+                "x": 23,
+                "z": 19,
+                "w": 1.2,
+                "h": 4.5,
+                "d": 1.2,
+                "color": "#cc44cc"
+            },
+            {
+                "type": "pillar",
+                "x": -23,
+                "z": 19,
+                "w": 1.2,
+                "h": 4.5,
+                "d": 1.2,
+                "color": "#44cccc"
+            },
+            {
+                "type": "pillar",
+                "x": 23,
+                "z": -19,
+                "w": 1.2,
+                "h": 4.5,
+                "d": 1.2,
+                "color": "#ff9955"
+            },
+            {
+                "type": "pillar",
+                "x": -23,
+                "z": -19,
+                "w": 1.2,
+                "h": 4.5,
+                "d": 1.2,
+                "color": "#55aaff"
+            },
+            {
+                "type": "crate",
+                "x": 9,
+                "z": 9,
+                "w": 3.5,
+                "h": 1.5,
+                "d": 3.5,
+                "color": "#cc8844"
+            },
+            {
+                "type": "crate",
+                "x": -9,
+                "z": 9,
+                "w": 3.5,
+                "h": 1.5,
+                "d": 3.5,
+                "color": "#8888cc"
+            },
+            {
+                "type": "crate",
+                "x": 0,
+                "z": -11,
+                "w": 4.5,
+                "h": 1.2,
+                "d": 4.5,
+                "color": "#cc8888"
+            },
+            {
+                "type": "crate",
+                "x": 0,
+                "z": 0,
+                "w": 3.5,
+                "h": 1.5,
+                "d": 3.5,
+                "color": "#778855"
+            },
+            {
+                "type": "platform",
+                "x": 18,
+                "z": 18,
+                "w": 6,
+                "h": 1.5,
+                "d": 6,
+                "color": "#f0d878"
+            },
+            {
+                "type": "platform",
+                "x": -18,
+                "z": 18,
+                "w": 6,
+                "h": 1.5,
+                "d": 6,
+                "color": "#f0d878"
+            },
+            {
+                "type": "platform",
+                "x": 18,
+                "z": -18,
+                "w": 6,
+                "h": 1.5,
+                "d": 6,
+                "color": "#f0d878"
+            },
+            {
+                "type": "platform",
+                "x": -18,
+                "z": -18,
+                "w": 6,
+                "h": 1.5,
+                "d": 6,
+                "color": "#f0d878"
+            },
+            {
+                "type": "platform",
+                "x": 31,
+                "z": 0,
+                "w": 5,
+                "h": 2,
+                "d": 5,
+                "color": "#e0b850"
+            },
+            {
+                "type": "platform",
+                "x": -31,
+                "z": 0,
+                "w": 5,
+                "h": 2,
+                "d": 5,
+                "color": "#e0b850"
+            },
+            {
+                "type": "platform",
+                "x": 0,
+                "z": 31,
+                "w": 5,
+                "h": 2,
+                "d": 5,
+                "color": "#e0b850"
+            },
+            {
+                "type": "platform",
+                "x": 0,
+                "z": -31,
+                "w": 5,
+                "h": 2,
+                "d": 5,
+                "color": "#e0b850"
+            },
+            {
+                "type": "gate",
+                "x": 0,
+                "z": -35,
+                "w": 6,
+                "h": 4.5,
+                "color": "#d4b896"
+            },
+            {
+                "type": "window_box",
+                "x": -32,
+                "z": 10,
+                "w": 3,
+                "h": 3,
+                "d": 0.7,
+                "color": "#aaaaaa"
+            },
+            {
+                "type": "arch",
+                "x": 5,
+                "z": 5,
+                "w": 5,
+                "h": 4,
+                "color": "#FFFFFF"
+            },
+            {
+                "type": "watchtower",
+                "x": 30,
+                "z": 28,
+                "w": 3,
+                "h": 7,
+                "color": "#887766"
+            }
+        ]
     },
-    "arenaSize": 80,
-    "spawns": [
-      {
-        "x": 0,
-        "z": 0
-      },
-      {
-        "x": -18,
-        "z": 0
-      },
-      {
-        "x": 18,
-        "z": 0
-      },
-      {
-        "x": 0,
-        "z": -18
-      },
-      {
-        "x": 0,
-        "z": 18
-      },
-      {
-        "x": -13,
-        "z": -13
-      },
-      {
-        "x": 13,
-        "z": -13
-      },
-      {
-        "x": -13,
-        "z": 13
-      },
-      {
-        "x": 13,
-        "z": 13
-      }
-    ],
-    "objects": [
-      {
-        "type": "cover_wall",
-        "x": 13,
-        "z": -9,
-        "w": 1,
-        "h": 3,
-        "d": 6,
-        "color": "#88cc88"
-      },
-      {
-        "type": "cover_wall",
-        "x": -13,
-        "z": -9,
-        "w": 1,
-        "h": 3,
-        "d": 6,
-        "color": "#88cccc"
-      },
-      {
-        "type": "cover_wall",
-        "x": 0,
-        "z": -22,
-        "w": 6,
-        "h": 3,
-        "d": 1,
-        "color": "#cc8888"
-      },
-      {
-        "type": "cover_wall",
-        "x": 0,
-        "z": 22,
-        "w": 6,
-        "h": 3,
-        "d": 1,
-        "color": "#ddaa55"
-      },
-      {
-        "type": "cover_wall",
-        "x": 26,
-        "z": 0,
-        "w": 1,
-        "h": 3,
-        "d": 6,
-        "color": "#aa55dd"
-      },
-      {
-        "type": "cover_wall",
-        "x": -26,
-        "z": 0,
-        "w": 1,
-        "h": 3,
-        "d": 6,
-        "color": "#dd5555"
-      },
-      {
-        "type": "pillar",
-        "x": 23,
-        "z": 19,
-        "w": 1.2,
-        "h": 4.5,
-        "d": 1.2,
-        "color": "#cc44cc"
-      },
-      {
-        "type": "pillar",
-        "x": -23,
-        "z": 19,
-        "w": 1.2,
-        "h": 4.5,
-        "d": 1.2,
-        "color": "#44cccc"
-      },
-      {
-        "type": "pillar",
-        "x": 23,
-        "z": -19,
-        "w": 1.2,
-        "h": 4.5,
-        "d": 1.2,
-        "color": "#ff9955"
-      },
-      {
-        "type": "pillar",
-        "x": -23,
-        "z": -19,
-        "w": 1.2,
-        "h": 4.5,
-        "d": 1.2,
-        "color": "#55aaff"
-      },
-      {
-        "type": "crate",
-        "x": 9,
-        "z": 9,
-        "w": 3.5,
-        "h": 1.5,
-        "d": 3.5,
-        "color": "#cc8844"
-      },
-      {
-        "type": "crate",
-        "x": -9,
-        "z": 9,
-        "w": 3.5,
-        "h": 1.5,
-        "d": 3.5,
-        "color": "#8888cc"
-      },
-      {
-        "type": "crate",
-        "x": 0,
-        "z": -11,
-        "w": 4.5,
-        "h": 1.2,
-        "d": 4.5,
-        "color": "#cc8888"
-      },
-      {
-        "type": "crate",
-        "x": 0,
-        "z": 0,
-        "w": 3.5,
-        "h": 1.5,
-        "d": 3.5,
-        "color": "#778855"
-      },
-      {
-        "type": "platform",
-        "x": 18,
-        "z": 18,
-        "w": 6,
-        "h": 1.5,
-        "d": 6,
-        "color": "#f0d878"
-      },
-      {
-        "type": "platform",
-        "x": -18,
-        "z": 18,
-        "w": 6,
-        "h": 1.5,
-        "d": 6,
-        "color": "#f0d878"
-      },
-      {
-        "type": "platform",
-        "x": 18,
-        "z": -18,
-        "w": 6,
-        "h": 1.5,
-        "d": 6,
-        "color": "#f0d878"
-      },
-      {
-        "type": "platform",
-        "x": -18,
-        "z": -18,
-        "w": 6,
-        "h": 1.5,
-        "d": 6,
-        "color": "#f0d878"
-      },
-      {
-        "type": "platform",
-        "x": 31,
-        "z": 0,
-        "w": 5,
-        "h": 2,
-        "d": 5,
-        "color": "#e0b850"
-      },
-      {
-        "type": "platform",
-        "x": -31,
-        "z": 0,
-        "w": 5,
-        "h": 2,
-        "d": 5,
-        "color": "#e0b850"
-      },
-      {
-        "type": "platform",
-        "x": 0,
-        "z": 31,
-        "w": 5,
-        "h": 2,
-        "d": 5,
-        "color": "#e0b850"
-      },
-      {
-        "type": "platform",
-        "x": 0,
-        "z": -31,
-        "w": 5,
-        "h": 2,
-        "d": 5,
-        "color": "#e0b850"
-      }
-    ]
-  },
-  {
-    "id": "urban",
-    "name": "Urban",
-    "icon": "🏙",
-    "description": "Dark city streets.",
-    "environment": {
-      "groundColor": "#282828",
-      "gridColor": "#1e1e1e",
-      "wallColor": "#888888",
-      "fogColor": "#667788",
-      "ambientIntensity": 0.5,
-      "sunColor": "#ddeeff"
+    {
+        "id": "urban",
+        "name": "Urban",
+        "icon": "🏙",
+        "description": "Dark city streets.",
+        "environment": {
+            "groundColor": "#282828",
+            "gridColor": "#1e1e1e",
+            "wallColor": "#888888",
+            "fogColor": "#667788",
+            "ambientIntensity": 0.5,
+            "sunColor": "#ddeeff"
+        },
+        "arenaSize": 80,
+        "spawns": [
+            {
+                "x": 0,
+                "z": 0
+            },
+            {
+                "x": -20,
+                "z": 0
+            },
+            {
+                "x": 20,
+                "z": 0
+            },
+            {
+                "x": 0,
+                "z": -20
+            },
+            {
+                "x": 0,
+                "z": 20
+            },
+            {
+                "x": -14,
+                "z": -14
+            },
+            {
+                "x": 14,
+                "z": -14
+            },
+            {
+                "x": -14,
+                "z": 14
+            },
+            {
+                "x": 14,
+                "z": 14
+            }
+        ],
+        "objects": [
+            {
+                "type": "building",
+                "x": 14,
+                "z": 14,
+                "w": 4,
+                "h": 6,
+                "d": 4,
+                "color": "#556677"
+            },
+            {
+                "type": "building",
+                "x": -14,
+                "z": 14,
+                "w": 4,
+                "h": 6,
+                "d": 4,
+                "color": "#445566"
+            },
+            {
+                "type": "building",
+                "x": 14,
+                "z": -14,
+                "w": 4,
+                "h": 6,
+                "d": 4,
+                "color": "#556688"
+            },
+            {
+                "type": "building",
+                "x": -14,
+                "z": -14,
+                "w": 4,
+                "h": 6,
+                "d": 4,
+                "color": "#667799"
+            },
+            {
+                "type": "building",
+                "x": 24,
+                "z": 0,
+                "w": 2,
+                "h": 6,
+                "d": 8,
+                "color": "#444455"
+            },
+            {
+                "type": "building",
+                "x": -24,
+                "z": 0,
+                "w": 2,
+                "h": 6,
+                "d": 8,
+                "color": "#445566"
+            },
+            {
+                "type": "building",
+                "x": 0,
+                "z": 24,
+                "w": 8,
+                "h": 6,
+                "d": 2,
+                "color": "#556677"
+            },
+            {
+                "type": "building",
+                "x": 0,
+                "z": -24,
+                "w": 8,
+                "h": 6,
+                "d": 2,
+                "color": "#446677"
+            },
+            {
+                "type": "barrier",
+                "x": 8,
+                "z": 0,
+                "w": 1,
+                "h": 2,
+                "d": 6,
+                "color": "#888888"
+            },
+            {
+                "type": "barrier",
+                "x": -8,
+                "z": 0,
+                "w": 1,
+                "h": 2,
+                "d": 6,
+                "color": "#888888"
+            },
+            {
+                "type": "barrier",
+                "x": 0,
+                "z": 8,
+                "w": 6,
+                "h": 2,
+                "d": 1,
+                "color": "#888888"
+            },
+            {
+                "type": "barrier",
+                "x": 0,
+                "z": -8,
+                "w": 6,
+                "h": 2,
+                "d": 1,
+                "color": "#888888"
+            },
+            {
+                "type": "crate",
+                "x": 5,
+                "z": 5,
+                "w": 2,
+                "h": 2,
+                "d": 2,
+                "color": "#9988aa"
+            },
+            {
+                "type": "crate",
+                "x": -5,
+                "z": 5,
+                "w": 2,
+                "h": 2,
+                "d": 2,
+                "color": "#aa8899"
+            },
+            {
+                "type": "platform",
+                "x": 0,
+                "z": 16,
+                "w": 10,
+                "h": 2,
+                "d": 2,
+                "color": "#667788"
+            },
+            {
+                "type": "platform",
+                "x": 0,
+                "z": -16,
+                "w": 10,
+                "h": 2,
+                "d": 2,
+                "color": "#667788"
+            },
+            {
+                "type": "platform",
+                "x": 16,
+                "z": 0,
+                "w": 2,
+                "h": 2,
+                "d": 10,
+                "color": "#778899"
+            },
+            {
+                "type": "platform",
+                "x": -16,
+                "z": 0,
+                "w": 2,
+                "h": 2,
+                "d": 10,
+                "color": "#778899"
+            },
+            {
+                "type": "platform",
+                "x": 20,
+                "z": 20,
+                "w": 4,
+                "h": 1.5,
+                "d": 4,
+                "color": "#556677"
+            },
+            {
+                "type": "platform",
+                "x": -20,
+                "z": 20,
+                "w": 4,
+                "h": 1.5,
+                "d": 4,
+                "color": "#556677"
+            },
+            {
+                "type": "platform",
+                "x": 20,
+                "z": -20,
+                "w": 4,
+                "h": 1.5,
+                "d": 4,
+                "color": "#556677"
+            },
+            {
+                "type": "platform",
+                "x": -20,
+                "z": -20,
+                "w": 4,
+                "h": 1.5,
+                "d": 4,
+                "color": "#556677"
+            }
+        ]
     },
-    "arenaSize": 80,
-    "spawns": [
-      {
-        "x": 0,
-        "z": 0
-      },
-      {
-        "x": -20,
-        "z": 0
-      },
-      {
-        "x": 20,
-        "z": 0
-      },
-      {
-        "x": 0,
-        "z": -20
-      },
-      {
-        "x": 0,
-        "z": 20
-      },
-      {
-        "x": -14,
-        "z": -14
-      },
-      {
-        "x": 14,
-        "z": -14
-      },
-      {
-        "x": -14,
-        "z": 14
-      },
-      {
-        "x": 14,
-        "z": 14
-      }
-    ],
-    "objects": [
-      {
-        "type": "building",
-        "x": 14,
-        "z": 14,
-        "w": 4,
-        "h": 6,
-        "d": 4,
-        "color": "#556677"
-      },
-      {
-        "type": "building",
-        "x": -14,
-        "z": 14,
-        "w": 4,
-        "h": 6,
-        "d": 4,
-        "color": "#445566"
-      },
-      {
-        "type": "building",
-        "x": 14,
-        "z": -14,
-        "w": 4,
-        "h": 6,
-        "d": 4,
-        "color": "#556688"
-      },
-      {
-        "type": "building",
-        "x": -14,
-        "z": -14,
-        "w": 4,
-        "h": 6,
-        "d": 4,
-        "color": "#667799"
-      },
-      {
-        "type": "building",
-        "x": 24,
-        "z": 0,
-        "w": 2,
-        "h": 6,
-        "d": 8,
-        "color": "#444455"
-      },
-      {
-        "type": "building",
-        "x": -24,
-        "z": 0,
-        "w": 2,
-        "h": 6,
-        "d": 8,
-        "color": "#445566"
-      },
-      {
-        "type": "building",
-        "x": 0,
-        "z": 24,
-        "w": 8,
-        "h": 6,
-        "d": 2,
-        "color": "#556677"
-      },
-      {
-        "type": "building",
-        "x": 0,
-        "z": -24,
-        "w": 8,
-        "h": 6,
-        "d": 2,
-        "color": "#446677"
-      },
-      {
-        "type": "barrier",
-        "x": 8,
-        "z": 0,
-        "w": 1,
-        "h": 2,
-        "d": 6,
-        "color": "#888888"
-      },
-      {
-        "type": "barrier",
-        "x": -8,
-        "z": 0,
-        "w": 1,
-        "h": 2,
-        "d": 6,
-        "color": "#888888"
-      },
-      {
-        "type": "barrier",
-        "x": 0,
-        "z": 8,
-        "w": 6,
-        "h": 2,
-        "d": 1,
-        "color": "#888888"
-      },
-      {
-        "type": "barrier",
-        "x": 0,
-        "z": -8,
-        "w": 6,
-        "h": 2,
-        "d": 1,
-        "color": "#888888"
-      },
-      {
-        "type": "crate",
-        "x": 5,
-        "z": 5,
-        "w": 2,
-        "h": 2,
-        "d": 2,
-        "color": "#9988aa"
-      },
-      {
-        "type": "crate",
-        "x": -5,
-        "z": 5,
-        "w": 2,
-        "h": 2,
-        "d": 2,
-        "color": "#aa8899"
-      },
-      {
-        "type": "platform",
-        "x": 0,
-        "z": 16,
-        "w": 10,
-        "h": 2,
-        "d": 2,
-        "color": "#667788"
-      },
-      {
-        "type": "platform",
-        "x": 0,
-        "z": -16,
-        "w": 10,
-        "h": 2,
-        "d": 2,
-        "color": "#667788"
-      },
-      {
-        "type": "platform",
-        "x": 16,
-        "z": 0,
-        "w": 2,
-        "h": 2,
-        "d": 10,
-        "color": "#778899"
-      },
-      {
-        "type": "platform",
-        "x": -16,
-        "z": 0,
-        "w": 2,
-        "h": 2,
-        "d": 10,
-        "color": "#778899"
-      },
-      {
-        "type": "platform",
-        "x": 20,
-        "z": 20,
-        "w": 4,
-        "h": 1.5,
-        "d": 4,
-        "color": "#556677"
-      },
-      {
-        "type": "platform",
-        "x": -20,
-        "z": 20,
-        "w": 4,
-        "h": 1.5,
-        "d": 4,
-        "color": "#556677"
-      },
-      {
-        "type": "platform",
-        "x": 20,
-        "z": -20,
-        "w": 4,
-        "h": 1.5,
-        "d": 4,
-        "color": "#556677"
-      },
-      {
-        "type": "platform",
-        "x": -20,
-        "z": -20,
-        "w": 4,
-        "h": 1.5,
-        "d": 4,
-        "color": "#556677"
-      }
-    ]
-  },
-  {
-    "id": "bunker",
-    "name": "Bunker",
-    "icon": "🏭",
-    "description": "Military bunker.",
-    "environment": {
-      "groundColor": "#3d3520",
-      "gridColor": "#2e2818",
-      "wallColor": "#776655",
-      "fogColor": "#445533",
-      "ambientIntensity": 0.45,
-      "sunColor": "#ffeecc"
-    },
-    "arenaSize": 80,
-    "spawns": [
-      {
-        "x": 0,
-        "z": 0
-      },
-      {
-        "x": -16,
-        "z": 0
-      },
-      {
-        "x": 16,
-        "z": 0
-      },
-      {
-        "x": 0,
-        "z": -16
-      },
-      {
-        "x": 0,
-        "z": 16
-      },
-      {
-        "x": -11,
-        "z": -11
-      },
-      {
-        "x": 11,
-        "z": -11
-      },
-      {
-        "x": -11,
-        "z": 11
-      },
-      {
-        "x": 11,
-        "z": 11
-      }
-    ],
-    "objects": [
-      {
-        "type": "container",
-        "x": 12,
-        "z": 0,
-        "w": 6,
-        "h": 2.5,
-        "d": 2,
-        "color": "#556644"
-      },
-      {
-        "type": "container",
-        "x": -12,
-        "z": 0,
-        "w": 6,
-        "h": 2.5,
-        "d": 2,
-        "color": "#446655"
-      },
-      {
-        "type": "container",
-        "x": 0,
-        "z": 12,
-        "w": 2,
-        "h": 2.5,
-        "d": 6,
-        "color": "#665544"
-      },
-      {
-        "type": "container",
-        "x": 0,
-        "z": -12,
-        "w": 2,
-        "h": 2.5,
-        "d": 6,
-        "color": "#554466"
-      },
-      {
-        "type": "cover_wall",
-        "x": 20,
-        "z": 8,
-        "w": 1,
-        "h": 4,
-        "d": 8,
-        "color": "#8b7355"
-      },
-      {
-        "type": "cover_wall",
-        "x": -20,
-        "z": 8,
-        "w": 1,
-        "h": 4,
-        "d": 8,
-        "color": "#7b6345"
-      },
-      {
-        "type": "cover_wall",
-        "x": 20,
-        "z": -8,
-        "w": 1,
-        "h": 4,
-        "d": 8,
-        "color": "#8b7355"
-      },
-      {
-        "type": "cover_wall",
-        "x": -20,
-        "z": -8,
-        "w": 1,
-        "h": 4,
-        "d": 8,
-        "color": "#7b6345"
-      },
-      {
-        "type": "crate",
-        "x": 5,
-        "z": 5,
-        "w": 1.5,
-        "h": 2,
-        "d": 1.5,
-        "color": "#667744"
-      },
-      {
-        "type": "crate",
-        "x": -5,
-        "z": 5,
-        "w": 1.5,
-        "h": 2,
-        "d": 1.5,
-        "color": "#556633"
-      },
-      {
-        "type": "platform",
-        "x": 0,
-        "z": 26,
-        "w": 8,
-        "h": 2,
-        "d": 1.5,
-        "color": "#998866"
-      },
-      {
-        "type": "platform",
-        "x": 0,
-        "z": -26,
-        "w": 8,
-        "h": 2,
-        "d": 1.5,
-        "color": "#998866"
-      },
-      {
-        "type": "platform",
-        "x": 26,
-        "z": 0,
-        "w": 1.5,
-        "h": 2,
-        "d": 8,
-        "color": "#998866"
-      },
-      {
-        "type": "platform",
-        "x": -26,
-        "z": 0,
-        "w": 1.5,
-        "h": 2,
-        "d": 8,
-        "color": "#998866"
-      },
-      {
-        "type": "platform",
-        "x": 24,
-        "z": 24,
-        "w": 4,
-        "h": 3,
-        "d": 4,
-        "color": "#887755"
-      },
-      {
-        "type": "platform",
-        "x": -24,
-        "z": 24,
-        "w": 4,
-        "h": 3,
-        "d": 4,
-        "color": "#887755"
-      },
-      {
-        "type": "platform",
-        "x": 24,
-        "z": -24,
-        "w": 4,
-        "h": 3,
-        "d": 4,
-        "color": "#887755"
-      },
-      {
-        "type": "platform",
-        "x": -24,
-        "z": -24,
-        "w": 4,
-        "h": 3,
-        "d": 4,
-        "color": "#887755"
-      }
-    ]
-  }
+    {
+        "id": "bunker",
+        "name": "Bunker",
+        "icon": "🏭",
+        "description": "Military bunker.",
+        "environment": {
+            "groundColor": "#3d3520",
+            "gridColor": "#2e2818",
+            "wallColor": "#776655",
+            "fogColor": "#445533",
+            "ambientIntensity": 0.45,
+            "sunColor": "#ffeecc"
+        },
+        "arenaSize": 80,
+        "spawns": [
+            {
+                "x": 0,
+                "z": 0
+            },
+            {
+                "x": -16,
+                "z": 0
+            },
+            {
+                "x": 16,
+                "z": 0
+            },
+            {
+                "x": 0,
+                "z": -16
+            },
+            {
+                "x": 0,
+                "z": 16
+            },
+            {
+                "x": -11,
+                "z": -11
+            },
+            {
+                "x": 11,
+                "z": -11
+            },
+            {
+                "x": -11,
+                "z": 11
+            },
+            {
+                "x": 11,
+                "z": 11
+            }
+        ],
+        "objects": [
+            {
+                "type": "container",
+                "x": 12,
+                "z": 0,
+                "w": 6,
+                "h": 2.5,
+                "d": 2,
+                "color": "#556644"
+            },
+            {
+                "type": "container",
+                "x": -12,
+                "z": 0,
+                "w": 6,
+                "h": 2.5,
+                "d": 2,
+                "color": "#446655"
+            },
+            {
+                "type": "container",
+                "x": 0,
+                "z": 12,
+                "w": 2,
+                "h": 2.5,
+                "d": 6,
+                "color": "#665544"
+            },
+            {
+                "type": "container",
+                "x": 0,
+                "z": -12,
+                "w": 2,
+                "h": 2.5,
+                "d": 6,
+                "color": "#554466"
+            },
+            {
+                "type": "cover_wall",
+                "x": 20,
+                "z": 8,
+                "w": 1,
+                "h": 4,
+                "d": 8,
+                "color": "#8b7355"
+            },
+            {
+                "type": "cover_wall",
+                "x": -20,
+                "z": 8,
+                "w": 1,
+                "h": 4,
+                "d": 8,
+                "color": "#7b6345"
+            },
+            {
+                "type": "cover_wall",
+                "x": 20,
+                "z": -8,
+                "w": 1,
+                "h": 4,
+                "d": 8,
+                "color": "#8b7355"
+            },
+            {
+                "type": "cover_wall",
+                "x": -20,
+                "z": -8,
+                "w": 1,
+                "h": 4,
+                "d": 8,
+                "color": "#7b6345"
+            },
+            {
+                "type": "crate",
+                "x": 5,
+                "z": 5,
+                "w": 1.5,
+                "h": 2,
+                "d": 1.5,
+                "color": "#667744"
+            },
+            {
+                "type": "crate",
+                "x": -5,
+                "z": 5,
+                "w": 1.5,
+                "h": 2,
+                "d": 1.5,
+                "color": "#556633"
+            },
+            {
+                "type": "platform",
+                "x": 0,
+                "z": 26,
+                "w": 8,
+                "h": 2,
+                "d": 1.5,
+                "color": "#998866"
+            },
+            {
+                "type": "platform",
+                "x": 0,
+                "z": -26,
+                "w": 8,
+                "h": 2,
+                "d": 1.5,
+                "color": "#998866"
+            },
+            {
+                "type": "platform",
+                "x": 26,
+                "z": 0,
+                "w": 1.5,
+                "h": 2,
+                "d": 8,
+                "color": "#998866"
+            },
+            {
+                "type": "platform",
+                "x": -26,
+                "z": 0,
+                "w": 1.5,
+                "h": 2,
+                "d": 8,
+                "color": "#998866"
+            },
+            {
+                "type": "platform",
+                "x": 24,
+                "z": 24,
+                "w": 4,
+                "h": 3,
+                "d": 4,
+                "color": "#887755"
+            },
+            {
+                "type": "platform",
+                "x": -24,
+                "z": 24,
+                "w": 4,
+                "h": 3,
+                "d": 4,
+                "color": "#887755"
+            },
+            {
+                "type": "platform",
+                "x": 24,
+                "z": -24,
+                "w": 4,
+                "h": 3,
+                "d": 4,
+                "color": "#887755"
+            },
+            {
+                "type": "platform",
+                "x": -24,
+                "z": -24,
+                "w": 4,
+                "h": 3,
+                "d": 4,
+                "color": "#887755"
+            }
+        ]
+    }
 ]
