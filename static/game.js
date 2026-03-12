@@ -323,6 +323,7 @@ let gndMesh = null,
     gridMesh = null;
 
 function buildMap(mapId) {
+    console.log("Building map:", mapId);
     while (mapObjects.children.length)
         mapObjects.remove(mapObjects.children[0]);
     obstacles = [];
@@ -371,28 +372,108 @@ function buildMap(mapId) {
         mapObjects.add(m);
     });
     (M.objects || []).forEach((obj) => {
-        const w = obj.w || 1,
-            h = obj.h || 1,
-            d = obj.d || 1;
-        const col = hexToInt(obj.color || "#888888");
-        const mesh = new THREE.Mesh(
-            new THREE.BoxGeometry(w, h, d),
-            new THREE.MeshLambertMaterial({ color: col }),
-        );
+        buildComplexObject(obj, mapObjects, obstacles);
+    });
+}
+
+function buildComplexObject(obj, parent, obstacleList) {
+    console.log("buildComplexObject called:", obj.type, obj); // ← ADD THIS
+    const col = hexToInt(obj.color || "#888888");
+    const mat = (c) => new THREE.MeshLambertMaterial({ color: hexToInt(c || obj.color || "#888888") });
+    const box = (w, h, d, x, y, z, c) => {
+        const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat(c));
+        m.position.set(x, y, z);
+        m.castShadow = true;
+        m.receiveShadow = true;
+        parent.add(m);
+        return m;
+    };
+
+    if (obj.type === "gate") {
+        const postW = 0.5, postH = obj.h || 4, gateW = obj.w || 6;
+        // Left post
+        box(postW, postH, postW, obj.x - gateW / 2, postH / 2, obj.z, obj.color);
+        // Right post
+        box(postW, postH, postW, obj.x + gateW / 2, postH / 2, obj.z, obj.color);
+        // Top crossbar
+        box(gateW + postW, 0.4, postW, obj.x, postH - 0.2, obj.z, obj.color);
+        // Two decorative vertical bars in the opening
+        box(0.2, postH * 0.7, 0.2, obj.x - gateW * 0.2, postH * 0.35, obj.z, obj.color);
+        box(0.2, postH * 0.7, 0.2, obj.x + gateW * 0.2, postH * 0.35, obj.z, obj.color);
+        // Collision: treat the posts as obstacles, leave the gap open
+        obstacleList.push({ x: obj.x - gateW / 2, z: obj.z, hw: postW / 2, hd: postW / 2, h: postH, hwp: postW / 2 + 0.38, hdp: postW / 2 + 0.38 });
+        obstacleList.push({ x: obj.x + gateW / 2, z: obj.z, hw: postW / 2, hd: postW / 2, h: postH, hwp: postW / 2 + 0.38, hdp: postW / 2 + 0.38 });
+
+    } else if (obj.type === "window_box") {
+        const w = obj.w || 4, h = obj.h || 3, d = obj.d || 0.6;
+        const wallCol = obj.color || "#aaaaaa";
+        const glassCol = "#223355";
+        // Bottom sill
+        box(w, 0.25, d, obj.x, h * 0.28, obj.z, wallCol);
+        // Top lintel
+        box(w, 0.25, d, obj.x, h * 0.85, obj.z, wallCol);
+        // Left side
+        box(0.3, h, d, obj.x - w / 2 + 0.15, h / 2, obj.z, wallCol);
+        // Right side
+        box(0.3, h, d, obj.x + w / 2 - 0.15, h / 2, obj.z, wallCol);
+        // Centre mullion
+        box(0.2, h * 0.55, d * 0.5, obj.x, h * 0.57, obj.z, wallCol);
+        // Glass panes (slightly recessed, tinted)
+        box(w * 0.35, h * 0.52, 0.08, obj.x - w * 0.22, h * 0.57, obj.z, glassCol);
+        box(w * 0.35, h * 0.52, 0.08, obj.x + w * 0.22, h * 0.57, obj.z, glassCol);
+        // Full collision block
+        obstacleList.push({ x: obj.x, z: obj.z, hw: w / 2, hd: d / 2, h, hwp: w / 2 + 0.38, hdp: d / 2 + 0.38 });
+    } else if (obj.type === "arch") {
+        const w = obj.w || 5, h = obj.h || 4, thick = 0.7;
+        const archCol = obj.color || "#888888";
+
+        // Left pillar
+        box(thick, h, thick, obj.x - w / 2 + thick / 2, h / 2, obj.z, archCol);
+        // Right pillar
+        box(thick, h, thick, obj.x + w / 2 - thick / 2, h / 2, obj.z, archCol);
+        // Top crossbar
+        box(w, thick, thick, obj.x, h - thick / 2, obj.z, archCol);
+
+        // Collision: pillars only, walkable underneath
+        obstacleList.push({ x: obj.x - w / 2 + thick / 2, z: obj.z, hw: thick / 2, hd: thick / 2, h, hwp: thick / 2 + 0.38, hdp: thick / 2 + 0.38 });
+        obstacleList.push({ x: obj.x + w / 2 - thick / 2, z: obj.z, hw: thick / 2, hd: thick / 2, h, hwp: thick / 2 + 0.38, hdp: thick / 2 + 0.38 });
+    } else if (obj.type === "watchtower") {
+        const base = obj.w || 3, h = obj.h || 6;
+        const darkCol = obj.color || "#776655";
+        const roofCol = "#554433";
+        // Four corner legs
+        const legOff = base / 2 - 0.2;
+        [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([sx, sz]) => {
+            box(0.3, h * 0.65, 0.3, obj.x + sx * legOff, h * 0.325, obj.z + sz * legOff, darkCol);
+        });
+        // Cross-braces (visual only, flat planks)
+        box(base * 1.05, 0.18, 0.15, obj.x, h * 0.3, obj.z, darkCol);
+        box(base * 1.05, 0.18, 0.15, obj.x, h * 0.55, obj.z, darkCol);
+        box(0.15, 0.18, base * 1.05, obj.x, h * 0.3, obj.z, darkCol);
+        box(0.15, 0.18, base * 1.05, obj.x, h * 0.55, obj.z, darkCol);
+        // Platform floor
+        box(base + 0.6, 0.25, base + 0.6, obj.x, h * 0.68, obj.z, darkCol);
+        // Platform walls with gaps (4 half-walls)
+        const pw = base + 0.4;
+        box(pw, 0.9, 0.2, obj.x, h * 0.68 + 0.57, obj.z - pw / 2, darkCol);
+        box(pw, 0.9, 0.2, obj.x, h * 0.68 + 0.57, obj.z + pw / 2, darkCol);
+        box(0.2, 0.9, pw, obj.x - pw / 2, h * 0.68 + 0.57, obj.z, darkCol);
+        box(0.2, 0.9, pw, obj.x + pw / 2, h * 0.68 + 0.57, obj.z, darkCol);
+        // Roof
+        box(base + 0.8, 0.25, base + 0.8, obj.x, h * 0.68 + 1.2, obj.z, roofCol);
+        // Collision: just a solid block for the base footprint
+        obstacleList.push({ x: obj.x, z: obj.z, hw: base / 2, hd: base / 2, h, hwp: base / 2 + 0.38, hdp: base / 2 + 0.38 });
+
+    } else {
+        // Fallback: original single-box behaviour
+        const w = obj.w || 1, h = obj.h || 1, d = obj.d || 1;
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat(obj.color));
         mesh.position.set(obj.x, h / 2, obj.z);
         mesh.castShadow = true;
         mesh.receiveShadow = true;
-        mapObjects.add(mesh);
-        obstacles.push({
-            x: obj.x,
-            z: obj.z,
-            hw: w / 2,
-            hd: d / 2,
-            h,
-            hwp: w / 2 + 0.38,
-            hdp: d / 2 + 0.38,
-        });
-    });
+        parent.add(mesh);
+        obstacleList.push({ x: obj.x, z: obj.z, hw: w / 2, hd: d / 2, h, hwp: w / 2 + 0.38, hdp: d / 2 + 0.38 });
+    }
 }
 
 // ════════════════════════════════════════════════════
@@ -2421,9 +2502,10 @@ async function handleRelay(msg) {
         }
     } else if (msg.type === "pos" && remoteClients[from]) {
         const rc = remoteClients[from];
-        rc.mesh.position.set(msg.x, 0, msg.z);
+        const remoteY = (msg.y || 1.7) - 1.7;
+        rc.mesh.position.set(msg.x, remoteY, msg.z);
         rc.mesh.rotation.y = msg.yaw;
-        rc.pos = { x: msg.x, y: msg.y || 1.7, z: msg.z }; // ✓ Already correct
+        rc.pos = { x: msg.x, y: msg.y || 1.7, z: msg.z };
     } else if (msg.type === "shoot") {
         const rc = remoteClients[from];
         // Ignore shots from players that are already marked dead
@@ -3699,6 +3781,7 @@ function loop(ts) {
         conn.send({
             type: "pos",
             x: yawObj.position.x,
+            y: yawObj.position.y,  
             z: yawObj.position.z,
             yaw: gs.yaw,
         });
