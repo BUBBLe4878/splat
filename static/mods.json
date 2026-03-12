@@ -1,0 +1,134 @@
+{
+  "sight_iron": {
+    "id": "sight_iron",
+    "slot": "sight",
+    "name": "Iron Sights",
+    "icon": "🔩",
+    "cost": 0,
+    "weight": 0,
+    "spreadMult": 1,
+    "desc": "Default iron sights. No frills.",
+    "tier": 0
+  },
+  "sight_red": {
+    "id": "sight_red",
+    "slot": "sight",
+    "name": "Red Dot",
+    "icon": "🔴",
+    "cost": 400,
+    "weight": 0.05,
+    "spreadMult": 0.8,
+    "desc": "Red dot sight. Tighter aim cone.",
+    "tier": 1
+  },
+  "sight_holo": {
+    "id": "sight_holo",
+    "slot": "sight",
+    "name": "Holographic",
+    "icon": "💠",
+    "cost": 900,
+    "weight": 0.08,
+    "spreadMult": 0.65,
+    "desc": "Holo sight. Wide view, crisp accuracy.",
+    "tier": 2
+  },
+  "sight_scope": {
+    "id": "sight_scope",
+    "slot": "sight",
+    "name": "Long Scope",
+    "icon": "🔭",
+    "cost": 1800,
+    "weight": 0.12,
+    "spreadMult": 0.4,
+    "desc": "Long-range scope. Pinpoint precision.",
+    "tier": 3
+  },
+  "mag_std": {
+    "id": "mag_std",
+    "slot": "mag",
+    "name": "Standard Mag",
+    "icon": "📦",
+    "cost": 0,
+    "weight": 0,
+    "ammoMult": 1,
+    "desc": "Stock magazine.",
+    "tier": 0
+  },
+  "mag_ext": {
+    "id": "mag_ext",
+    "slot": "mag",
+    "name": "Extended Mag",
+    "icon": "🔋",
+    "cost": 350,
+    "weight": 0.1,
+    "ammoMult": 1.5,
+    "desc": "+50% ammo capacity. Heavier.",
+    "tier": 1
+  },
+  "mag_drum": {
+    "id": "mag_drum",
+    "slot": "mag",
+    "name": "Drum Mag",
+    "icon": "🥁",
+    "cost": 800,
+    "weight": 0.2,
+    "ammoMult": 2,
+    "desc": "Double capacity.",
+    "tier": 2
+  },
+  "mag_tank": {
+    "id": "mag_tank",
+    "slot": "mag",
+    "name": "Tank Mag",
+    "icon": "🛢",
+    "cost": 1600,
+    "weight": 0.35,
+    "ammoMult": 3,
+    "desc": "Triple ammo.",
+    "tier": 3
+  },
+  "reload_std": {
+    "id": "reload_std",
+    "slot": "reload",
+    "name": "Stock Loader",
+    "icon": "⏱",
+    "cost": 0,
+    "weight": 0,
+    "reloadMult": 1,
+    "desc": "Standard reload.",
+    "tier": 0
+  },
+  "reload_quick": {
+    "id": "reload_quick",
+    "slot": "reload",
+    "name": "Quick Loader",
+    "icon": "⚡",
+    "cost": 300,
+    "weight": 0.05,
+    "reloadMult": 0.75,
+    "desc": "25% faster reload.",
+    "tier": 1
+  },
+  "reload_speed": {
+    "id": "reload_speed",
+    "slot": "reload",
+    "name": "Speed Loader",
+    "icon": "💨",
+    "cost": 700,
+    "weight": 0.08,
+    "reloadMult": 0.55,
+    "desc": "Almost twice as fast.",
+    "tier": 2
+  },
+  "reload_auto": {
+    "id": "reload_auto",
+    "slot": "reload",
+    "name": "Auto Loader",
+    "icon": "🤖",
+    "cost": 1500,
+    "weight": 0.12,
+    "reloadMult": 0.3,
+    "desc": "Near-instant reload.",
+    "tier": 3
+  }
+}
