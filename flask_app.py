@@ -1,17 +1,16 @@
 import os
 from pathlib import Path
-from flask import Flask, send_from_directory, request
+from flask import Flask, send_from_directory, send_file, request
 from flask_socketio import SocketIO, emit, join_room, leave_room
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="static", static_url_path="/static")
 app.config["SECRET_KEY"] = "splat-secret-2025"
 HERE = Path(__file__).parent
 
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading", serve_client=True)
 
-# rooms[code] = { players:[sid,...], names:{sid:name}, teams:{sid:0|1}, host:sid, settings:{}, max_players:8 }
 rooms = {}
-client_rooms = {}  # sid -> code
+client_rooms = {}
 
 def _room_info(code):
     r = rooms.get(code)
@@ -31,11 +30,34 @@ def _cleanup_client(sid):
     socketio.emit("player_left", {"sid":sid,"name":name,"players":_room_info(code),"new_host":r["host"]}, room=code)
 
 @app.route("/")
-@app.route("/splat.html")
-def serve_game(): return send_from_directory(HERE, "splat.html")
+def serve_game():
+    return send_file(HERE / "splat.html")
 
-@app.route("/blasters.json")
-def serve_blasters(): return send_from_directory(HERE, "blasters.json")
+@app.route("/splat.html")
+def serve_game_html():
+    return send_file(HERE / "splat.html")
+
+@app.route("/static/blasters.json")
+def serve_blasters():
+    return send_from_directory(HERE, "static/blasters.json")
+
+@app.route("/static/mods.json")
+def serve_mods():
+    return send_from_directory(HERE, "static/mods.json")
+
+@app.route("/static/maps.json")
+def serve_maps():
+    return send_from_directory(HERE, "static/maps.json")
+
+@app.route("/static/armor.json")
+def serve_armor_items():
+    return send_from_directory(HERE, "static/armor.json")
+
+@app.route("/static/medical_items.json")
+def serve_medical_items():
+    return send_from_directory(HERE, "static/medical_items.json")
+
+# --- rest of your socket handlers unchanged below ---
 
 @socketio.on("host_room")
 def on_host_room(data):
@@ -97,5 +119,7 @@ def on_disconnect(): _cleanup_client(request.sid)
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    print(f"SPLAT! server starting on port {port}")
+    print(f"SPLAT! server starting on http://0.0.0.0:{port}")
+    print(f"Looking for splat.html at: {HERE / 'splat.html'}")
+    print(f"File exists: {(HERE / 'splat.html').exists()}")
     socketio.run(app, host="0.0.0.0", port=port, debug=False)
