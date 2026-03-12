@@ -3,16 +3,18 @@
 //  BLASTER DATA
 // ════════════════════════════════════════════════════
 let BLASTERS = [
-    { id: "basic", name: "Basic Blaster", icon: "🔫", cost: 0, ammo: 10, 
-      rateLimit: 0.12, speed: 44, mode: "single", dmg: 1, reloadMs: 1400, 
-      gravity: 18, spread: 0.015, recoil: 0.018, weight: 1.0, pellets: 1, 
-      burstCount: 1 }
+    {
+        id: "basic", name: "Basic Blaster", icon: "🔫", cost: 0, ammo: 10,
+        rateLimit: 0.12, speed: 44, mode: "single", dmg: 1, reloadMs: 1400,
+        gravity: 18, spread: 0.015, recoil: 0.018, weight: 1.0, pellets: 1,
+        burstCount: 1
+    }
 ];
 const _blastersReady = (async () => {
     try {
         const r = await fetch("/static/blasters.json");
         if (r.ok) BLASTERS = await r.json();
-    } catch (e) {}
+    } catch (e) { }
 })();
 
 // ════════════════════════════════════════════════════
@@ -108,6 +110,7 @@ let pb = 0,
     ownedBlasters = ["basic"],
     equippedBlaster = null,
     usedCodes = [];
+let matchTimeLeft = 0;
 
 // ── MOD SYSTEM ──
 let MODS = [];
@@ -115,7 +118,7 @@ let MODS = [];
     try {
         const r = await fetch("/static/mods.json");
         if (r.ok) MODS = await r.json();
-    } catch (e) {}
+    } catch (e) { }
 })();
 
 let equippedMods = {
@@ -1164,6 +1167,19 @@ const SIGHT_TYPES = {
     mega: "holo",
 };
 function getSightType() {
+    // Prefer the equipped sight mod if available, so holographic/red-dot mods
+    // actually change what the scope looks like when aiming.
+    const sightMod = MODS && equippedMods ? MODS[equippedMods.sight] : null;
+    if (sightMod && sightMod.id) {
+        if (sightMod.id === "sight_holo") return "holo";
+        if (sightMod.id === "sight_scope") return "crosshair";
+        if (sightMod.id === "sight_red") return "reddot";
+        if (sightMod.id === "sight_iron") {
+            // Slightly chunkier ring-style irons
+            return "ring";
+        }
+    }
+    // Fallback to blaster-based defaults
     return SIGHT_TYPES[equippedBlaster?.id || "basic"] || "reddot";
 }
 function setAim(on) {
@@ -1362,6 +1378,26 @@ function checkRoundOver() {
     }
 }
 
+function onTimeLimitReached() {
+    if (!matchActive) return;
+    matchActive = false;
+    // Only the host decides the winner and broadcasts it
+    if (!amIHost || !conn.open) return;
+    // Find the player with the most kills (local + remotes)
+    let bestSid = mySid;
+    let bestKills = gs.kills || 0;
+    Object.entries(remoteClients).forEach(([sid, rc]) => {
+        const k = rc.kills || 0;
+        if (k > bestKills) {
+            bestKills = k;
+            bestSid = sid;
+        }
+    });
+    const winnerSid = bestSid;
+    conn.send({ type: "round_over", winnerSid });
+    endRound(winnerSid);
+}
+
 // ════════════════════════════════════════════════════
 //  PB CURRENCY
 // ════════════════════════════════════════════════════
@@ -1392,6 +1428,8 @@ async function initGame() {
     roundCountingDown = false;
     await _mapsReady;
     buildMap(hostSettings.mapId);
+    matchTimeLeft = hostSettings.timeLimit || 0;
+    matchActive = true;
     document.getElementById("lobby").style.display = "none";
     document.getElementById("gameover").style.display = "none";
     document.getElementById("hud").style.display = "block";
@@ -1506,7 +1544,16 @@ function updateRoundStrip() {
         Object.entries(roundWins)
             .map(([n, w]) => `${n.slice(0, 6)}: ${w}`)
             .join(" | ") || "Round " + roundNum + "/" + hostSettings.rounds;
-    el.textContent = `ROUND ${roundNum}/${hostSettings.rounds}  —  ${wins}`;
+    let txt = `ROUND ${roundNum}/${hostSettings.rounds}  —  ${wins}`;
+    if (hostSettings.timeLimit && hostSettings.timeLimit > 0 && matchTimeLeft > 0) {
+        const totalSec = Math.ceil(matchTimeLeft);
+        const m = Math.floor(totalSec / 60)
+            .toString()
+            .padStart(1, "0");
+        const s = (totalSec % 60).toString().padStart(2, "0");
+        txt += `  ·  TIME LEFT ${m}:${s}`;
+    }
+    el.textContent = txt;
 }
 function updateScoreboard() {
     const sb = document.getElementById("scoreboard");
@@ -1647,17 +1694,17 @@ function renderMods() {
         {
             key: "sight",
             label: "🔭 SIGHT MOD",
-            ids: ["sight_iron", "sight_red", "sight_holo", "sight_scope"],
+            ids: ["sight_iron", "sight_red", "sight_holo", "sight_scope", "sight_micro", "sight_tri"],
         },
         {
             key: "mag",
             label: "📦 MAG MOD",
-            ids: ["mag_std", "mag_ext", "mag_drum", "mag_tank"],
+            ids: ["mag_std", "mag_ext", "mag_drum", "mag_tank", "mag_feeder"],
         },
         {
             key: "reload",
             label: "⏱ RELOAD MOD",
-            ids: ["reload_std", "reload_quick", "reload_speed", "reload_auto"],
+            ids: ["reload_std", "reload_quick", "reload_speed", "reload_auto", "reload_snap"],
         },
     ];
     SLOTS.forEach((slot) => {
@@ -1723,7 +1770,7 @@ let ARMOR_ITEMS = [];
     try {
         const r = await fetch("/static/armor.json");
         if (r.ok) ARMOR_ITEMS = await r.json();
-    } catch (e) {}
+    } catch (e) { }
 })();
 
 let MEDICAL_ITEMS = [];
@@ -1731,7 +1778,7 @@ let MEDICAL_ITEMS = [];
     try {
         const r = await fetch("/static/medical_items.json");
         if (r.ok) MEDICAL_ITEMS = await r.json();
-    } catch (e) {}
+    } catch (e) { }
 })();
 
 let _armorSlots = {},
@@ -2079,6 +2126,19 @@ function renderSettingsUI(containerId, editable) {
     <div class="srow" style="${dis}"><span class="srow-lbl">🔄 Rounds</span>
       <div class="chip-row">${[1, 3, 5, 10].map((n) => `<div class="chip${s.rounds === n ? " sel" : ""}" onclick="setSetting('rounds',${n})">${n}</div>`).join("")}</div>
     </div>
+    <div class="srow" style="${dis}"><span class="srow-lbl">⏱ Time Limit</span>
+      <div class="chip-row">${[
+            { v: 0, lbl: "Off" },
+            { v: 180, lbl: "3 min" },
+            { v: 300, lbl: "5 min" },
+            { v: 600, lbl: "10 min" },
+        ]
+            .map(
+                (opt) =>
+                    `<div class="chip${s.timeLimit === opt.v ? " sel" : ""}" onclick="setSetting('timeLimit',${opt.v})">${opt.lbl}</div>`,
+            )
+            .join("")}</div>
+    </div>
     <div class="srow" style="${dis}"><span class="srow-lbl">∞ Infinite Ammo</span>
       <div class="toggle${s.infiniteAmmo ? " on" : ""}" onclick="setSetting('infiniteAmmo',!hostSettings.infiniteAmmo)"><div class="tknob"></div></div>
     </div>
@@ -2294,6 +2354,9 @@ async function handleRelay(msg) {
         rc.mesh.rotation.y = msg.yaw;
         rc.pos = { x: msg.x, y: msg.y || 1.7, z: msg.z }; // ← FIX: track pos for minimap
     } else if (msg.type === "shoot") {
+        const rc = remoteClients[from];
+        // Ignore shots from players that are already marked dead
+        if (rc && rc.alive === false) return;
         const rm = new THREE.Mesh(
             new THREE.SphereGeometry(0.055, 6, 6),
             new THREE.MeshLambertMaterial({ color: msg.color }),
@@ -2311,13 +2374,16 @@ async function handleRelay(msg) {
         });
     } else if (msg.type === "score_update" && remoteClients[from]) {
         remoteClients[from].score = msg.score;
+        remoteClients[from].kills = msg.kills;
         updateScoreboard();
     } else if (msg.type === "pvp_hit") {
         const prot = _armorProt() / 100;
         takeDmg(Math.max(1, Math.round(msg.dmg * (1 - prot))));
     } else if (msg.type === "player_dead") {
-        if (remoteClients[from]) {
-            remoteClients[from].alive = false;
+        const rc = remoteClients[from];
+        if (rc) {
+            rc.alive = false;
+            if (rc.mesh) rc.mesh.visible = false;
             checkRoundOver();
         }
     } else if (msg.type === "round_over") {
@@ -3345,6 +3411,19 @@ function _eLoop(ts) {
         sndPickup();
         savePersist();
     }
+    // Timed match countdown (multiplayer only)
+    if (
+        matchActive &&
+        hostSettings.timeLimit &&
+        hostSettings.timeLimit > 0 &&
+        hostSettings.gameType !== "solo"
+    ) {
+        if (matchTimeLeft > 0) {
+            matchTimeLeft = Math.max(0, matchTimeLeft - dt);
+            updateRoundStrip();
+            if (matchTimeLeft === 0) onTimeLimitReached();
+        }
+    }
 }
 requestAnimationFrame(_eLoop);
 
@@ -3422,7 +3501,8 @@ function loop(ts) {
     const px = yawObj.position.x,
         pz = yawObj.position.z,
         prevY = yawObj.position.y;
-    if (fireHeld && (document.pointerLockElement || touchEnabled)) shoot();
+    if (fireHeld && gs.running && (document.pointerLockElement || touchEnabled))
+        shoot();
 
     // Gravity / Jump / Platform landing
     playerVY += -26 * dt;
@@ -3662,6 +3742,16 @@ function loop(ts) {
     // Remote paintballs
     gs.remoteBalls = gs.remoteBalls.filter((b) => b.life > 0);
     for (const b of gs.remoteBalls) {
+        // If the shooter has died, clear any of their remaining paintballs
+        if (
+            b.fromSid &&
+            remoteClients[b.fromSid] &&
+            remoteClients[b.fromSid].alive === false
+        ) {
+            scene.remove(b.mesh);
+            b.life = 0;
+            continue;
+        }
         b.vy -= 18 * dt;
         const px = b.mesh.position.x,
             py = b.mesh.position.y,
