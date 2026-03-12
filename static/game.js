@@ -521,35 +521,32 @@ function sweepBulletObs(px, py, pz, nx, ny, nz) {
         const hx = px + dx * tHit,
             hy = py + dy * tHit,
             hz = pz + dz * tHit;
-        let n = tmin >= 0 ? nEnter : nExit;
-        if (!n) {
-            const dMinX = Math.abs(hx - minX),
-                dMaxX = Math.abs(hx - maxX),
-                dMinY = Math.abs(hy - minY),
-                dMaxY = Math.abs(hy - maxY),
-                dMinZ = Math.abs(hz - minZ),
-                dMaxZ = Math.abs(hz - maxZ);
-            let bestD = dMinX;
-            n = { x: -1, y: 0, z: 0 };
-            if (dMaxX < bestD) {
-                bestD = dMaxX;
-                n = { x: 1, y: 0, z: 0 };
-            }
-            if (dMinY < bestD) {
-                bestD = dMinY;
-                n = { x: 0, y: -1, z: 0 };
-            }
-            if (dMaxY < bestD) {
-                bestD = dMaxY;
-                n = { x: 0, y: 1, z: 0 };
-            }
-            if (dMinZ < bestD) {
-                bestD = dMinZ;
-                n = { x: 0, y: 0, z: -1 };
-            }
-            if (dMaxZ < bestD) {
-                n = { x: 0, y: 0, z: 1 };
-            }
+        const dMinX = Math.abs(hx - minX),
+            dMaxX = Math.abs(hx - maxX),
+            dMinY = Math.abs(hy - minY),
+            dMaxY = Math.abs(hy - maxY),
+            dMinZ = Math.abs(hz - minZ),
+            dMaxZ = Math.abs(hz - maxZ);
+        let bestD = dMinX;
+        let n = { x: -1, y: 0, z: 0 };
+        if (dMaxX < bestD) {
+            bestD = dMaxX;
+            n = { x: 1, y: 0, z: 0 };
+        }
+        if (dMinY < bestD) {
+            bestD = dMinY;
+            n = { x: 0, y: -1, z: 0 };
+        }
+        if (dMaxY < bestD) {
+            bestD = dMaxY;
+            n = { x: 0, y: 1, z: 0 };
+        }
+        if (dMinZ < bestD) {
+            bestD = dMinZ;
+            n = { x: 0, y: 0, z: -1 };
+        }
+        if (dMaxZ < bestD) {
+            n = { x: 0, y: 0, z: 1 };
         }
         if (!best || tHit < best.t) {
             best = { t: tHit, x: hx, y: hy, z: hz, n };
@@ -569,7 +566,7 @@ function sweepArenaBounds(px, py, pz, nx, ny, nz, bound) {
             const t = (bx - px) / dx;
             if (t >= 0 && t <= 1 && t < tHit) {
                 tHit = t;
-                n = { x: nx > bound ? 1 : -1, y: 0, z: 0 };
+                n = { x: nx > bound ? -1 : 1, y: 0, z: 0 };
             }
         }
     }
@@ -579,7 +576,7 @@ function sweepArenaBounds(px, py, pz, nx, ny, nz, bound) {
             const t = (bz - pz) / dz;
             if (t >= 0 && t <= 1 && t < tHit) {
                 tHit = t;
-                n = { x: 0, y: 0, z: nz > bound ? 1 : -1 };
+                n = { x: 0, y: 0, z: nz > bound ? -1 : 1 };
             }
         }
     }
