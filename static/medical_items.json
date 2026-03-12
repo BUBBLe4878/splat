@@ -1,0 +1,112 @@
+[
+  {
+    "id": "bandage",
+    "type": "consumable",
+    "name": "Bandage",
+    "icon": "🩹",
+    "cost": 50,
+    "hp": 15,
+    "count": 1,
+    "effect": "+15 HP",
+    "desc": "Basic bandage. Restores 15 HP."
+  },
+  {
+    "id": "medkit",
+    "type": "consumable",
+    "name": "Med Kit",
+    "icon": "🩺",
+    "cost": 200,
+    "hp": 40,
+    "count": 1,
+    "effect": "+40 HP",
+    "desc": "Full medical kit. Restores 40 HP."
+  },
+  {
+    "id": "trauma_kit",
+    "type": "consumable",
+    "name": "Trauma Kit",
+    "icon": "🏥",
+    "cost": 500,
+    "hp": 100,
+    "count": 1,
+    "effect": "+100 HP",
+    "desc": "Emergency trauma kit. Full health restore."
+  },
+  {
+    "id": "bandage_x3",
+    "type": "consumable",
+    "name": "Bandage × 3",
+    "icon": "🩹",
+    "cost": 130,
+    "hp": 15,
+    "count": 3,
+    "effect": "+15 HP × 3",
+    "desc": "Three bandages."
+  },
+  {
+    "id": "medkit_x3",
+    "type": "consumable",
+    "name": "Med Kit × 3",
+    "icon": "🩺",
+    "cost": 550,
+    "hp": 40,
+    "count": 3,
+    "effect": "+40 HP × 3",
+    "desc": "Three med kits. Great value."
+  },
+  {
+    "id": "adrenaline",
+    "type": "consumable",
+    "name": "Adrenaline",
+    "icon": "💉",
+    "cost": 350,
+    "hp": 25,
+    "count": 1,
+    "effect": "+25 HP + Speed↑",
+    "desc": "Restores HP and boosts movement for 10s."
+  },
+  {
+    "id": "painkillers",
+    "type": "consumable",
+    "name": "Painkillers",
+    "icon": "💊",
+    "cost": 180,
+    "hp": 0,
+    "count": 1,
+    "effect": "Regen 3HP/s × 20s",
+    "desc": "Slow health regen over 20 seconds."
+  },
+  {
+    "id": "stim_pack",
+    "type": "passive",
+    "name": "Stim Pack",
+    "icon": "⚡",
+    "cost": 600,
+    "hp": 0,
+    "count": 1,
+    "effect": "Auto-heal at 30HP",
+    "desc": "Auto-activates at 30 HP."
+  },
+  {
+    "id": "hp_up",
+    "type": "upgrade",
+    "name": "HP Upgrade",
+    "icon": "❤",
+    "cost": 1500,
+    "hp": 0,
+    "count": 1,
+    "effect": "+25 Max HP",
+    "desc": "Permanently +25 max HP. Up to 3 times."
+  },
+  {
+    "id": "regen_chip",
+    "type": "upgrade",
+    "name": "Regen Chip",
+    "icon": "🫀",
+    "cost": 3000,
+    "hp": 0,
+    "count": 1,
+    "effect": "1HP/3s passive",
+    "desc": "Passive health regen forever."
+  }
+]
