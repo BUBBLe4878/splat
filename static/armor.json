@@ -1,0 +1,146 @@
+[
+  {
+    "id": "helmet_basic",
+    "slot": "head",
+    "name": "Basic Helmet",
+    "icon": "⛑",
+    "cost": 200,
+    "protection": 5,
+    "desc": "Light foam padding. Reduces head damage by 5%."
+  },
+  {
+    "id": "helmet_tactical",
+    "slot": "head",
+    "name": "Tac Helmet",
+    "icon": "🪖",
+    "cost": 800,
+    "protection": 15,
+    "desc": "Hard shell tactical helmet. Serious head coverage."
+  },
+  {
+    "id": "helmet_pro",
+    "slot": "head",
+    "name": "Pro Helmet",
+    "icon": "🎖",
+    "cost": 2000,
+    "protection": 28,
+    "desc": "Military-grade ballistic helmet."
+  },
+  {
+    "id": "vest_basic",
+    "slot": "chest",
+    "name": "Chest Pad",
+    "icon": "🦺",
+    "cost": 300,
+    "protection": 8,
+    "desc": "Soft chest protector."
+  },
+  {
+    "id": "vest_tactical",
+    "slot": "chest",
+    "name": "Tac Vest",
+    "icon": "🛡",
+    "cost": 1000,
+    "protection": 20,
+    "desc": "Multi-panel tactical vest."
+  },
+  {
+    "id": "vest_pro",
+    "slot": "chest",
+    "name": "Combat Plate",
+    "icon": "🔰",
+    "cost": 2500,
+    "protection": 35,
+    "desc": "Full ballistic plate carrier."
+  },
+  {
+    "id": "arms_basic",
+    "slot": "arms",
+    "name": "Arm Guards",
+    "icon": "🦾",
+    "cost": 150,
+    "protection": 4,
+    "desc": "Elbow and forearm protectors."
+  },
+  {
+    "id": "arms_tactical",
+    "slot": "arms",
+    "name": "Tac Sleeves",
+    "icon": "💪",
+    "cost": 600,
+    "protection": 12,
+    "desc": "Full arm tactical sleeves."
+  },
+  {
+    "id": "arms_pro",
+    "slot": "arms",
+    "name": "Combat Arms",
+    "icon": "🦿",
+    "cost": 1500,
+    "protection": 22,
+    "desc": "Heavy-duty arm armor."
+  },
+  {
+    "id": "legs_basic",
+    "slot": "legs",
+    "name": "Shin Guards",
+    "icon": "🦵",
+    "cost": 150,
+    "protection": 4,
+    "desc": "Classic shin guards."
+  },
+  {
+    "id": "legs_tactical",
+    "slot": "legs",
+    "name": "Tac Pants",
+    "icon": "👖",
+    "cost": 600,
+    "protection": 12,
+    "desc": "Padded tactical pants."
+  },
+  {
+    "id": "legs_pro",
+    "slot": "legs",
+    "name": "Combat Greaves",
+    "icon": "🩱",
+    "cost": 1500,
+    "protection": 22,
+    "desc": "Full leg armor."
+  },
+  {
+    "id": "boots_basic",
+    "slot": "feet",
+    "name": "Padded Boots",
+    "icon": "👟",
+    "cost": 100,
+    "protection": 2,
+    "desc": "Rubber-soled padded boots."
+  },
+  {
+    "id": "boots_pro",
+    "slot": "feet",
+    "name": "Combat Boots",
+    "icon": "🥾",
+    "cost": 500,
+    "protection": 8,
+    "desc": "Heavy-duty tactical boots."
+  },
+  {
+    "id": "gloves_basic",
+    "slot": "hands",
+    "name": "Padded Gloves",
+    "icon": "🧤",
+    "cost": 80,
+    "protection": 2,
+    "desc": "Knuckle-padded gloves."
+  },
+  {
+    "id": "gloves_pro",
+    "slot": "hands",
+    "name": "Combat Gloves",
+    "icon": "🥊",
+    "cost": 400,
+    "protection": 7,
+    "desc": "Full-finger tactical gloves."
+  }
+]
