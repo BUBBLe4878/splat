@@ -1,4 +1,4 @@
-
+let isTimerMode = false;
 // ════════════════════════════════════════════════════
 //  BLASTER DATA
 // ════════════════════════════════════════════════════
@@ -706,11 +706,12 @@ function clearRemoteClients() {
 // ════════════════════════════════════════════════════
 //  SPAWN SYSTEM  — FIX: uses player index
 // ════════════════════════════════════════════════════
-function getSpawn(index) {
+function getSpawn() {
     const sp = (getMapDef(hostSettings.mapId) || {}).spawns || [
         { x: 0, z: 0 },
     ];
-    return sp[index % sp.length];
+    const index = Math.floor(Math.random() * sp.length);
+    return sp[index];
 }
 function safeSpawnY(x, z) {
     let topY = 0;
@@ -1135,26 +1136,58 @@ function takeDmg(n) {
 function localPlayerDied() {
     if (!gs.running) return;
     if (conn.open) conn.send({ type: "player_dead", sid: mySid });
-    if (
-        hostSettings.gameType === "solo" ||
-        hostSettings.gameType === "pvp_1v1"
-    ) {
-        if (hostSettings.rounds > 1 && roundNum <= hostSettings.rounds)
-            endRound(null);
-        else gameOver(false);
-    } else {
+
+    if (isTimerMode) {
         gs.running = false;
         setAim(false);
-        if (!touchEnabled)
-            try {
-                document.exitPointerLock();
-            } catch (e) { }
-        document.getElementById("wave-ann").textContent = "ELIMINATED!";
+        document.getElementById("wave-ann").textContent = "ELIMINATED! Respawning...";
         document.getElementById("wave-ann").style.opacity = "1";
-        setTimeout(
-            () => (document.getElementById("wave-ann").style.opacity = "0"),
-            2500,
-        );
+
+        setTimeout(() => {
+            document.getElementById("wave-ann").style.opacity = "0";
+            respawnPlayer(true);
+            if (!touchEnabled) canvas.requestPointerLock();
+        }, 3000);
+    } else {
+        // original round-based death logic
+        if (hostSettings.gameType === "solo" || hostSettings.gameType === "pvp_1v1") {
+            if (hostSettings.rounds > 1 && roundNum <= hostSettings.rounds)
+                endRound(null);
+            else gameOver(false);
+        } else {
+            gs.running = false;
+            setAim(false);
+            if (!touchEnabled) try { document.exitPointerLock(); } catch (e) { }
+            document.getElementById("wave-ann").textContent = "ELIMINATED!";
+            document.getElementById("wave-ann").style.opacity = "1";
+            setTimeout(() => document.getElementById("wave-ann").style.opacity = "0", 2500);
+        }
+    }
+}
+
+function respawnPlayer(isLocal = true, sid = mySid) {
+    const sp = getSpawn();  // random spawn every time
+    const y = safeSpawnY(sp.x, sp.z);
+
+    if (isLocal) {
+        yawObj.position.set(sp.x, y, sp.z);
+        gs.health = 100;
+        gs.running = true;
+        gs.ammo = gs.maxAmmo;
+        updateHealthUI();
+        updateAmmoUI();
+        if (conn.open) {
+            conn.send({ type: "respawn", x: sp.x, z: sp.z });
+        }
+    } else {
+        const rc = remoteClients[sid];
+        if (rc) {
+            rc.mesh.position.set(sp.x, 0, sp.z);
+            rc.pos = { x: sp.x, y: 1.7, z: sp.z };
+            rc.health = 100;
+            rc.alive = true;
+            rc.mesh.visible = true;  // make sure they become visible again
+        }
     }
 }
 
@@ -1356,11 +1389,11 @@ function endRound(winnerSid) {
 }
 
 function checkRoundOver() {
+    if (isTimerMode) return;  // no round end in timed matches
+
     const gameType = hostSettings.gameType;
     if (gameType === "pvp_1v1" || gameType === "ffa") {
-        const remoteAlive = Object.entries(remoteClients).filter(
-            ([, rc]) => rc.alive,
-        );
+        const remoteAlive = Object.entries(remoteClients).filter(([, rc]) => rc.alive);
         const myAlive = gs.running;
         if (myAlive && remoteAlive.length === 0) {
             if (conn.open) conn.send({ type: "round_over", winnerSid: mySid });
@@ -1369,7 +1402,7 @@ function checkRoundOver() {
     } else if (gameType === "teams") {
         const myTeamAlive = gs.running;
         const otherAlive = Object.values(remoteClients).some(
-            (rc) => rc.team !== myTeam && rc.alive,
+            (rc) => rc.team !== myTeam && rc.alive
         );
         if (myTeamAlive && !otherAlive) {
             if (conn.open) conn.send({ type: "round_over", winnerSid: mySid });
@@ -1429,6 +1462,7 @@ async function initGame() {
     await _mapsReady;
     buildMap(hostSettings.mapId);
     matchTimeLeft = hostSettings.timeLimit || 0;
+    isTimerMode = hostSettings.timeLimit > 0;
     matchActive = true;
     document.getElementById("lobby").style.display = "none";
     document.getElementById("gameover").style.display = "none";
@@ -2377,15 +2411,65 @@ async function handleRelay(msg) {
         remoteClients[from].kills = msg.kills;
         updateScoreboard();
     } else if (msg.type === "pvp_hit") {
+        const targetSid = msg.target_sid;
+        if (targetSid !== mySid) return;
+
+        console.log(`[RECEIVER] Got hit! base=${msg.dmg}, armor=${_armorProt()}%`);  // ← debug line
+
+        const baseDmg = msg.dmg || 10;
         const prot = _armorProt() / 100;
-        takeDmg(Math.max(1, Math.round(msg.dmg * (1 - prot))));
-    } else if (msg.type === "player_dead") {
-        const rc = remoteClients[from];
-        if (rc) {
-            rc.alive = false;
-            if (rc.mesh) rc.mesh.visible = false;
-            checkRoundOver();
+        const actualDmg = Math.max(1, Math.round(baseDmg * (1 - prot)));
+
+        gs.health = Math.max(0, gs.health - actualDmg);
+        updateHealthUI();
+
+        const hf = document.getElementById("hit-flash");
+        if (hf) {
+            hf.style.opacity = "1";
+            setTimeout(() => (hf.style.opacity = "0"), 160);
         }
+
+        showHitmarker(false, true);
+
+        if (gs.health <= 0) {
+            console.log("[RECEIVER] Health reached 0 after armor — dying");
+            localPlayerDied();
+            if (conn.open) {
+                conn.send({
+                    type: "player_dead",
+                    sid: mySid,
+                    killer_sid: msg.from_sid
+                });
+            }
+        }
+    } else if (msg.type === "player_dead") {
+        const victimSid = msg.sid;
+        const killerSid = msg.killer_sid;
+
+        if (victimSid === mySid) {
+            // I died — already handled in localPlayerDied()
+            return;
+        }
+
+        const victim = remoteClients[victimSid];
+        if (victim) {
+            victim.alive = false;
+            if (victim.mesh) victim.mesh.visible = false;
+        }
+
+        // If I killed them → give me credit
+        if (killerSid === mySid) {
+            gs.kills++;
+            gs.score += 50;
+            updateScoreUI();
+            showHitmarker(true, true);
+            _streakCheck();
+            _kfAdd(playerName, victim?.name || "Enemy");
+            sndKill();
+            _shake = Math.max(_shake, 0.015);
+        }
+
+        checkRoundOver();
     } else if (msg.type === "round_over") {
         endRound(msg.winnerSid);
     } else if (msg.type === "round_start") {
@@ -3715,25 +3799,27 @@ function loop(ts) {
         if (hit) continue;
         for (const [sid, rc] of Object.entries(remoteClients)) {
             if (!rc.alive) continue;
-            if (hostSettings.gameType === "teams" && rc.team === myTeam)
-                continue;
+            if (hostSettings.gameType === "teams" && rc.team === myTeam) continue;
+
             const rp = rc.mesh.position;
-            if (
-                Math.sqrt((bx - rp.x) ** 2 + (by - 1.1) ** 2 + (bz - rp.z) ** 2) <
-                0.9
-            ) {
+            if (Math.sqrt((bx - rp.x) ** 2 + (by - 1.1) ** 2 + (bz - rp.z) ** 2) < 0.9) {
                 scene.remove(b.mesh);
                 b.life = 0;
+
+                console.log(`[SHOOTER] Hit ${sid} — sending dmg`);   // ← debug line
+
                 gs.score += 25;
                 updateScoreUI();
-                rc.health = Math.max(0, rc.health - 10);
-                conn.send({ type: "pvp_hit", dmg: 10, target_sid: sid });
-                if (rc.health <= 0) {
-                    rc.alive = false;
-                    conn.send({ type: "pvp_hit", dmg: 100, target_sid: sid });
-                    showHitmarker(true, true);
-                    checkRoundOver();
-                } else showHitmarker(false, true);
+
+                const baseDmg = 10;
+                conn.send({
+                    type: "pvp_hit",
+                    dmg: baseDmg,
+                    target_sid: sid,
+                    from_sid: mySid
+                });
+
+                showHitmarker(false, true);
                 break;
             }
         }
