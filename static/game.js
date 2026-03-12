@@ -1252,15 +1252,32 @@ function localPlayerDied(killerSid = null) {
     if (isTimerMode) {
         gs.running = false;
         setAim(false);
-        document.getElementById("wave-ann").textContent = "ELIMINATED! Respawning...";
-        document.getElementById("wave-ann").style.opacity = "1";
+        try { document.exitPointerLock(); } catch (e) { }
+        const ann = document.getElementById("wave-ann");
+        ann.textContent = "ELIMINATED! Respawning in 3...";
+        ann.style.opacity = "1";
 
-        setTimeout(() => {
-            document.getElementById("wave-ann").style.opacity = "0";
-            respawnPlayer(true);
-            console.log("Player respawned after death in timer mode.");
-            if (!touchEnabled) canvas.requestPointerLock();
-        }, 3000);
+        let cd = 3;
+        const cdInterval = setInterval(() => {
+            cd--;
+            if (cd > 0) {
+                ann.textContent = `ELIMINATED! Respawning in ${cd}...`;
+            } else {
+                clearInterval(cdInterval);
+                ann.style.opacity = "0";
+                const sp = getSpawn();
+                const y = safeSpawnY(sp.x, sp.z);
+                yawObj.position.set(sp.x, y, sp.z);
+                gs.health = 100;
+                gs.ammo = gs.maxAmmo;
+                gs.isReloading = false;
+                gs.running = true;
+                updateHealthUI();
+                updateAmmoUI();
+                if (conn.open) conn.send({ type: "respawn", x: sp.x, z: sp.z });
+                if (!touchEnabled) canvas.requestPointerLock();
+            }
+        }, 1000);
     } else {
         // original round-based death logic
         if (hostSettings.gameType === "solo" || hostSettings.gameType === "pvp_1v1") {
@@ -3781,7 +3798,7 @@ function loop(ts) {
         conn.send({
             type: "pos",
             x: yawObj.position.x,
-            y: yawObj.position.y,  
+            y: yawObj.position.y,
             z: yawObj.position.z,
             yaw: gs.yaw,
         });
