@@ -1,3 +1,8 @@
+let fireButtonPressed = false;
+
+let autoReload = true;  // ADD THIS
+let autoFire = false;   // ADD THIS
+
 let isTimerMode = false;
 // ════════════════════════════════════════════════════
 //  BLASTER DATA
@@ -16,6 +21,64 @@ const _blastersReady = (async () => {
         if (r.ok) BLASTERS = await r.json();
     } catch (e) { }
 })();
+
+// ════════════════════════════════════════════════════
+//  Fire button/touch
+// ════════════════════════════════════════════════════
+
+document
+    .getElementById("lobby-touch-tog")
+    .addEventListener("click", () => setTouch(!touchEnabled));
+document
+    .getElementById("touch-tog")
+    .addEventListener("click", () => setTouch(!touchEnabled));
+document
+    .getElementById("lobby-touch-tog")
+    .addEventListener("click", () => setTouch(!touchEnabled));
+
+// Add a delegated event listener for touch-tog2 since it might not exist yet
+document.addEventListener("click", (e) => {
+    if (e.target && e.target.id === "touch-tog2") {
+        setTouch(!touchEnabled);
+    }
+});
+
+document
+    .getElementById("fire-btn")
+    .addEventListener("pointerdown", (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        if (gs.running) {
+            if (autoFire) {
+                // Toggle mode: tap once to start, tap again to stop
+                fireButtonPressed = !fireButtonPressed;
+            } else {
+                // Hold mode: hold to fire
+                fireHeld = true;
+                shoot(); // Shoot once immediately
+            }
+        }
+    });
+
+document.getElementById("fire-btn").addEventListener("pointerup", (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (!autoFire) {
+        // Only clear fireHeld in normal (non-auto) mode
+        fireHeld = false;
+    }
+    // In auto-fire mode, do nothing on pointerup (button acts as toggle)
+});
+
+document
+    .getElementById("fire-btn")
+    .addEventListener("pointercancel", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        // Cancel always stops everything
+        fireButtonPressed = false;
+        fireHeld = false;
+    });
 
 // ════════════════════════════════════════════════════
 //  MAPS
@@ -182,6 +245,13 @@ function loadPersist() {
         }
         const sr = localStorage.getItem("splat_reserve");
         if (sr !== null) reserveAmmo = Math.max(0, parseInt(sr) || 0);
+
+        // ADD THESE:
+        const sar = localStorage.getItem("splat_auto_reload");
+        if (sar !== null) autoReload = sar === "1";
+
+        const saf = localStorage.getItem("splat_auto_fire");
+        if (saf !== null) autoFire = saf === "1";
     } catch (e) { }
 }
 function savePersist() {
@@ -189,6 +259,7 @@ function savePersist() {
         localStorage.setItem("splat_pb", pb);
         localStorage.setItem("splat_owned", JSON.stringify(ownedBlasters));
         localStorage.setItem("splat_codes", JSON.stringify(usedCodes));
+
         localStorage.setItem(
             "splat_equipped",
             equippedBlaster ? equippedBlaster.id : "basic",
@@ -206,6 +277,8 @@ function savePersist() {
             localStorage.setItem("splat_hpup", _hpUps);
             localStorage.setItem("splat_regen", _regenChip ? "1" : "0");
         }
+        localStorage.setItem("splat_auto_reload", autoReload ? "1" : "0");
+        localStorage.setItem("splat_auto_fire", autoFire ? "1" : "0");
     } catch (e) { }
 }
 loadPersist();
@@ -378,10 +451,12 @@ function buildMap(mapId) {
     (M.objects || []).forEach((obj) => {
         buildComplexObject(obj, mapObjects, obstacles);
     });
+
+
+
 }
 
 function buildComplexObject(obj, parent, obstacleList) {
-    console.log("buildComplexObject called:", obj.type, obj); // ← ADD THIS
     const col = hexToInt(obj.color || "#888888");
     const mat = (c) => new THREE.MeshLambertMaterial({ color: hexToInt(c || obj.color || "#888888") });
     const box = (w, h, d, x, y, z, c) => {
@@ -392,6 +467,18 @@ function buildComplexObject(obj, parent, obstacleList) {
         parent.add(m);
         return m;
     };
+
+    if (obj.type === "model") {
+        loadModelWithCollision(
+            obj.path,
+            obj.x,
+            obj.y || 0,
+            obj.z,
+            obj.scale || 1,
+            obj.rotation || 0
+        );
+        return;
+    }
 
     if (obj.type === "gate") {
         const postW = 0.5, postH = obj.h || 4, gateW = obj.w || 6;
@@ -485,24 +572,45 @@ function buildComplexObject(obj, parent, obstacleList) {
 // ════════════════════════════════════════════════════
 function playerHitsObs(x, z, py) {
     const feet = (py !== undefined ? py : yawObj.position.y) - 1.7;
-    for (const o of obstacles)
-        if (
-            Math.abs(x - o.x) < o.hwp &&
-            Math.abs(z - o.z) < o.hdp &&
-            feet < o.h - 0.08
-        )
-            return true;
+
+    for (const o of obstacles) {
+        const boxBottom = o.y || 0;
+        const boxTop = boxBottom + o.h;
+
+        // Check horizontal collision first
+        const xCollide = Math.abs(x - o.x) < o.hwp;
+        const zCollide = Math.abs(z - o.z) < o.hdp;
+
+        if (xCollide && zCollide) {
+            // We're horizontally inside the box, check vertical
+            const aboveBottom = feet >= boxBottom - 0.08;
+            const belowTop = feet < boxTop - 0.08;
+
+            // Debug logging when near a collision
+            if (aboveBottom && belowTop) {
+                console.log(`COLLISION! Feet at ${feet.toFixed(2)}, box: ${boxBottom.toFixed(2)} to ${boxTop.toFixed(2)}`);
+                return true;
+            } else if (xCollide && zCollide) {
+                console.log(`NO COLLISION - Feet at ${feet.toFixed(2)}, box: ${boxBottom.toFixed(2)} to ${boxTop.toFixed(2)}, above=${aboveBottom}, below=${belowTop}`);
+            }
+        }
+    }
     return false;
 }
+
 function bulletHitsObs(x, y, z) {
-    for (const o of obstacles)
+    for (const o of obstacles) {
+        const boxBottom = o.y || 0;
+        const boxTop = boxBottom + o.h;
+        
         if (
             Math.abs(x - o.x) < o.hw + 0.08 &&
             Math.abs(z - o.z) < o.hd + 0.08 &&
-            y < o.h + 0.1 &&
-            y > 0
+            y >= boxBottom &&
+            y <= boxTop + 0.1
         )
             return o;
+    }
     return null;
 }
 
@@ -514,10 +622,13 @@ function sweepBulletObs(px, py, pz, nx, ny, nz) {
     const r = 0.06;
     let best = null;
     for (const o of obstacles) {
+        const boxBottom = o.y || 0;  // ← ADD THIS
+        const boxTop = boxBottom + o.h;  // ← ADD THIS
+        
         const minX = o.x - o.hw - r,
             maxX = o.x + o.hw + r,
-            minY = -r,
-            maxY = o.h + r,
+            minY = boxBottom - r,  // ← CHANGE FROM -r
+            maxY = boxTop + r,     // ← CHANGE FROM o.h + r
             minZ = o.z - o.hd - r,
             maxZ = o.z + o.hd + r;
         let tmin = 0,
@@ -2633,29 +2744,36 @@ let ljT = null,
     ljDx = 0,
     ljDy = 0,
     ljC = { x: 0, y: 0 };
+
 ljZone.addEventListener("pointerdown", (e) => {
-    if (!touchEnabled || ljT) return;
+    if (!touchEnabled || ljT || !gs.running) return;
     e.preventDefault();
+    e.stopPropagation();
     ljT = { id: e.pointerId };
     ljC = { x: e.clientX, y: e.clientY };
-    ljBase.style.cssText += `;left:${e.clientX}px;top:${e.clientY}px;display:block`;
-    ljKnob.style.cssText += `;left:${e.clientX}px;top:${e.clientY}px;display:block`;
+    ljBase.style.cssText = `display:block;left:${e.clientX}px;top:${e.clientY}px;`;
+    ljKnob.style.cssText = `display:block;left:${e.clientX}px;top:${e.clientY}px;`;
 });
+
 ljZone.addEventListener("pointermove", (e) => {
     if (!ljT || e.pointerId !== ljT.id) return;
     e.preventDefault();
+    e.stopPropagation();
     const dx = e.clientX - ljC.x,
         dy = e.clientY - ljC.y,
         len = Math.sqrt(dx * dx + dy * dy) || 1,
-        R = 50,
+        R = 70,
         cl = Math.min(len, R);
     ljKnob.style.left = ljC.x + (dx / len) * cl + "px";
     ljKnob.style.top = ljC.y + (dy / len) * cl + "px";
     ljDx = (dx / len) * Math.min(len / R, 1);
     ljDy = (dy / len) * Math.min(len / R, 1);
 });
+
 function clearLJ(e) {
     if (ljT && e.pointerId === ljT.id) {
+        e.preventDefault();
+        e.stopPropagation();
         ljT = null;
         ljDx = 0;
         ljDy = 0;
@@ -2665,12 +2783,19 @@ function clearLJ(e) {
 }
 ljZone.addEventListener("pointerup", clearLJ);
 ljZone.addEventListener("pointercancel", clearLJ);
+ljZone.addEventListener("pointerleave", clearLJ);
+
 rjZone.addEventListener("pointerdown", (e) => {
-    if (!touchEnabled) return;
+    if (!touchEnabled || !gs.running) return;
+    e.preventDefault();
+    e.stopPropagation();
     rjT = { id: e.pointerId, lx: e.clientX, ly: e.clientY };
 });
+
 rjZone.addEventListener("pointermove", (e) => {
     if (!rjT || e.pointerId !== rjT.id) return;
+    e.preventDefault();
+    e.stopPropagation();
     const dx = e.clientX - rjT.lx,
         dy = e.clientY - rjT.ly;
     rjT.lx = e.clientX;
@@ -2682,87 +2807,108 @@ rjZone.addEventListener("pointermove", (e) => {
         Math.min(Math.PI / 3, gs.pitch - dy * s),
     );
 });
+
 function clearRJ(e) {
-    if (rjT && e.pointerId === rjT.id) rjT = null;
+    if (rjT && e.pointerId === rjT.id) {
+        e.preventDefault();
+        e.stopPropagation();
+        rjT = null;
+    }
 }
 rjZone.addEventListener("pointerup", clearRJ);
 rjZone.addEventListener("pointercancel", clearRJ);
+rjZone.addEventListener("pointerleave", clearRJ);
+
 document
     .getElementById("fire-btn")
     .addEventListener("pointerdown", (e) => {
         e.stopPropagation();
+        e.preventDefault();
         if (gs.running) {
-            fireHeld = true;
-            shoot();
+            if (autoFire) {
+                fireHeld = true;
+                fireButtonPressed = true;
+            } else {
+                fireHeld = true;
+                shoot();
+            }
         }
     });
+
 document.getElementById("fire-btn").addEventListener("pointerup", (e) => {
     e.stopPropagation();
-    fireHeld = false;
+    e.preventDefault();
+    if (!autoFire) {
+        fireHeld = false;
+    } else {
+        fireButtonPressed = false;
+        fireHeld = false;
+    }
 });
+
 document
     .getElementById("fire-btn")
-    .addEventListener("pointercancel", () => (fireHeld = false));
+    .addEventListener("pointercancel", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        fireButtonPressed = false;
+        fireHeld = false;
+    });
+
 document
     .getElementById("reload-btn-t")
     .addEventListener("pointerdown", (e) => {
         e.stopPropagation();
+        e.preventDefault();
         doReload();
     });
+
 document
     .getElementById("jump-btn")
     .addEventListener("pointerdown", (e) => {
         e.stopPropagation();
+        e.preventDefault();
         doJump();
     });
+
 document
     .getElementById("aim-btn")
     .addEventListener("pointerdown", (e) => {
         e.stopPropagation();
+        e.preventDefault();
         setAim(!isAiming);
     });
-
-function setTouch(on) {
-    touchEnabled = on;
-    document.getElementById("touch-tog").classList.toggle("on", on);
-    document.getElementById("lobby-touch-tog").classList.toggle("on", on);
-    if (gs.running) {
-        document.getElementById("touch-ui").style.display = on
-            ? "block"
-            : "none";
-        if (!on) {
-            document.getElementById("xhair").style.display = "block";
-            canvas.requestPointerLock();
-        } else {
-            document.getElementById("xhair").style.display = "none";
-            try {
-                document.exitPointerLock();
-            } catch (e) { }
-        }
-    }
-}
-document
-    .getElementById("touch-tog")
-    .addEventListener("click", () => setTouch(!touchEnabled));
-document
-    .getElementById("lobby-touch-tog")
-    .addEventListener("click", () => setTouch(!touchEnabled));
-
 // ════════════════════════════════════════════════════
 //  IN-GAME SETTINGS
 // ════════════════════════════════════════════════════
 const settBtn = document.getElementById("settings-btn"),
     settPanel = document.getElementById("settings-panel");
-settBtn.addEventListener(
-    "click",
-    () =>
-    (settPanel.style.display =
-        settPanel.style.display === "block" ? "none" : "block"),
-);
-document.addEventListener("click", (e) => {
-    if (!settPanel.contains(e.target) && e.target !== settBtn)
-        settPanel.style.display = "none";
+settBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const isOpen = settPanel.style.display === "block";
+    settPanel.style.display = isOpen ? "none" : "block";
+
+    // Exit pointer lock when opening settings
+    if (!isOpen && !touchEnabled) {
+        try {
+            document.exitPointerLock();
+        } catch (e) { }
+    }
 });
+
+document.addEventListener("click", (e) => {
+    if (!settPanel.contains(e.target) && e.target !== settBtn) {
+        const wasOpen = settPanel.style.display === "block";
+        settPanel.style.display = "none";
+
+        // Re-lock pointer when closing settings if game is running
+        if (wasOpen && gs.running && !touchEnabled) {
+            canvas.requestPointerLock();
+        }
+    }
+});
+
 document.getElementById("sens-sl").addEventListener("input", function () {
     sensitivity = +this.value;
     document.getElementById("sens-v").textContent = this.value;
@@ -3519,7 +3665,7 @@ function _mmDraw() {
 
     const M = getMapDef(hostSettings.mapId);
     const arenaSize = M.arenaSize || 80;
-    
+
     // Convert world coords to minimap coords (no rotation)
     const toMM = (wx, wz) => {
         const dx = wx - yawObj.position.x;
@@ -3550,10 +3696,10 @@ function _mmDraw() {
     (M.objects || []).forEach(obj => {
         const w = obj.w || 1, d = obj.d || w;
         const corners = [
-            toMM(obj.x - w/2, obj.z - d/2),
-            toMM(obj.x + w/2, obj.z - d/2),
-            toMM(obj.x + w/2, obj.z + d/2),
-            toMM(obj.x - w/2, obj.z + d/2),
+            toMM(obj.x - w / 2, obj.z - d / 2),
+            toMM(obj.x + w / 2, obj.z - d / 2),
+            toMM(obj.x + w / 2, obj.z + d / 2),
+            toMM(obj.x - w / 2, obj.z + d / 2),
         ];
         _mm.beginPath();
         _mm.moveTo(corners[0].x, corners[0].y);
@@ -3615,7 +3761,7 @@ function _mmDraw() {
             _mm.fillStyle = "#ffffff";
             _mm.fill();
         });
-    } catch(e) {}
+    } catch (e) { }
 
     // Player arrow at center, rotated to show direction
     const cx = W / 2, cy = W / 2;
@@ -3734,6 +3880,68 @@ requestAnimationFrame(_eLoop);
 // ════════════════════════════════════════════════════
 //  PATCH CORE FUNCTIONS (after all defs)
 // ════════════════════════════════════════════════════
+function toggleAutoReload(e) {
+    if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    autoReload = !autoReload;
+    const tog1 = document.getElementById("auto-reload-tog");
+    const tog2 = document.getElementById("pause-auto-reload-tog");
+    if (tog1) tog1.classList.toggle("on", autoReload);
+    if (tog2) tog2.classList.toggle("on", autoReload);
+    savePersist();
+}
+
+function toggleAutoFire(e) {
+    if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    autoFire = !autoFire;
+    const tog1 = document.getElementById("auto-fire-tog");
+    const tog2 = document.getElementById("pause-auto-fire-tog");
+    if (tog1) tog1.classList.toggle("on", autoFire);
+    if (tog2) tog2.classList.toggle("on", autoFire);
+    savePersist();
+}
+
+// Initialize toggles on page load
+document.addEventListener("DOMContentLoaded", () => {
+    const arTog = document.getElementById("auto-reload-tog");
+    const afTog = document.getElementById("auto-fire-tog");
+    if (arTog) arTog.classList.toggle("on", autoReload);
+    if (afTog) afTog.classList.toggle("on", autoFire);
+});
+
+function setTouch(on) {
+    touchEnabled = on;
+    document.getElementById("touch-tog").classList.toggle("on", on);
+    const lobbyTog = document.getElementById("lobby-touch-tog");
+    if (lobbyTog) lobbyTog.classList.toggle("on", on);
+    const tog2 = document.getElementById("touch-tog2");
+    if (tog2) tog2.classList.toggle("on", on);
+
+    // Hide reload button when touch is enabled (auto-reload handles it)
+    const reloadBtn = document.getElementById("reload-btn-t");
+    if (reloadBtn) reloadBtn.style.display = on ? "none" : "block";
+
+    if (gs.running) {
+        document.getElementById("touch-ui").style.display = on
+            ? "block"
+            : "none";
+        if (!on) {
+            document.getElementById("xhair").style.display = "block";
+            canvas.requestPointerLock();
+        } else {
+            document.getElementById("xhair").style.display = "none";
+            try {
+                document.exitPointerLock();
+            } catch (e) { }
+        }
+    }
+}
+
 const _origShoot = shoot;
 window.shoot = function () {
     if (gs.ammo <= 0 && !gs.isReloading && !hostSettings.infiniteAmmo) {
@@ -3805,15 +4013,33 @@ function loop(ts) {
     const px = yawObj.position.x,
         pz = yawObj.position.z,
         prevY = yawObj.position.y;
-    if (fireHeld && gs.running && (document.pointerLockElement || touchEnabled))
+
+    // UPDATED FIRE LOGIC:
+    // Auto-fire: fireButtonPressed acts as toggle
+    // Normal fire: fireHeld must be true
+    const shouldFire = autoFire ? fireButtonPressed : fireHeld;
+
+    if (shouldFire && gs.running && (document.pointerLockElement || touchEnabled)) {
         shoot();
+    }
+
+    // Auto-reload check
+    if (autoReload && gs.running && !gs.isReloading && gs.ammo === 0 && !hostSettings.infiniteAmmo) {
+        doReload();
+    }
+
+    // ... rest of your loop code stays the same
+
 
     // Gravity / Jump / Platform landing
     playerVY += -26 * dt;
     let ny = prevY + playerVY * dt;
     onGround = false;
     for (const o of obstacles) {
-        const platY = o.h + 1.7;
+        const boxBottom = o.y || 0;
+        const boxTop = boxBottom + o.h;
+        const platY = boxTop + 1.7;  // ← FIX: Use boxTop instead of o.h
+
         if (
             Math.abs(px - o.x) < o.hw + 0.15 &&
             Math.abs(pz - o.z) < o.hd + 0.15
@@ -4182,3 +4408,195 @@ console.log(
     "%cSPLAT! v2 — Multiplayer fixes applied ✅",
     "color:#ff6b35;font-weight:bold;font-size:14px",
 );
+
+const loader = new THREE.GLTFLoader();
+
+// Example: Load a blaster model
+/*
+function loadBlasterModel() {
+    loader.load(
+        '/static/models/blaster.glb',
+        function (gltf) {
+            const model = gltf.scene;
+            model.scale.set(0.5, 0.5, 0.5); // Scale it
+            model.position.set(0.45, 1.1, 0); // Position it
+            
+            // Add to your player mesh instead of the cylinder gun
+            yawObj.add(model);
+            
+            console.log('Blaster model loaded!');
+        },
+        function (xhr) {
+            console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+        },
+        function (error) {
+            console.error('Error loading model:', error);
+        }
+    );
+}
+    */
+
+// Add this near your other map building functions
+function loadMapModel(modelPath, x, y, z, scale = 1, rotation = 0) {
+    const loader = new THREE.GLTFLoader();
+
+    loader.load(modelPath, function (gltf) {
+        const model = gltf.scene;
+
+        // Scale the model
+        model.scale.set(scale, scale, scale);
+
+        // Position it
+        model.position.set(x, y, z);
+
+        // Rotate if needed (in radians)
+        if (rotation) {
+            model.rotation.y = rotation;
+        }
+
+        // Enable shadows
+        model.traverse(function (child) {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }
+        });
+
+        // Add to map objects group
+        mapObjects.add(model);
+
+        console.log('Model loaded:', modelPath);
+    }, undefined, function (error) {
+        console.error('Error loading model:', error);
+    });
+}
+
+// Example: Load a crate/box model for map objects
+function loadCrateModel(x, y, z) {
+    loader.load('/static/models/crate.glb', function (gltf) {
+        const model = gltf.scene;
+        model.position.set(x, y, z);
+        model.castShadow = true;
+        model.receiveShadow = true;
+        scene.add(model);
+    });
+}
+
+function loadModelObject(obj, parent, obstacleList) {
+    const loader = new THREE.GLTFLoader();
+
+    loader.load(
+        obj.path,
+        function (gltf) {
+            const model = gltf.scene;
+
+            // Apply scale
+            const scale = obj.scale || 1;
+            model.scale.set(scale, scale, scale);
+
+            // Apply position
+            model.position.set(obj.x, obj.y || 0, obj.z);
+
+            // Apply rotation
+            if (obj.rotation) {
+                model.rotation.y = obj.rotation;
+            }
+
+            // Enable shadows
+            model.traverse(function (child) {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                }
+            });
+
+            // Add to parent (mapObjects group)
+            parent.add(model);
+
+            // Add collision if specified
+            if (obj.collision && obj.collision.enabled) {
+                const w = obj.collision.w || 1;
+                const h = obj.collision.h || 1;
+                const d = obj.collision.d || 1;
+
+                obstacleList.push({
+                    x: obj.x,
+                    z: obj.z,
+                    hw: w / 2,
+                    hd: d / 2,
+                    h: h,
+                    hwp: w / 2 + 0.38,
+                    hdp: d / 2 + 0.38
+                });
+            }
+
+            console.log('Model loaded:', obj.path);
+        },
+        undefined,
+        function (error) {
+            console.error('Error loading model:', obj.path, error);
+        }
+    );
+}
+
+async function loadModelWithCollision(modelPath, x, y, z, scale = 1, rotation = 0) {
+    const loader = new THREE.GLTFLoader();
+
+    loader.load(modelPath, async function (gltf) {
+        const model = gltf.scene;
+        model.scale.set(scale, scale, scale);
+        model.position.set(x, y, z);
+        if (rotation) model.rotation.y = rotation;
+
+        model.traverse(child => {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }
+        });
+
+        mapObjects.add(model);
+
+        // Load collision data
+        const collisionPath = modelPath.replace('.glb', '.game.json');
+        try {
+            const response = await fetch(collisionPath);
+            const collisionData = await response.json();
+
+            console.log(`Loading collision for ${modelPath} at world position (${x}, ${y}, ${z})`);
+
+            // Add collision boxes to obstacles array
+            collisionData.collisions.forEach((col, idx) => {
+                // col.y is the CENTER of the box
+                const boxCenterY = y + col.y * scale;
+                const boxHeight = col.h * scale;
+                const boxBottomY = boxCenterY - (boxHeight / 2);
+                const boxTopY = boxBottomY + boxHeight;
+
+                const obstacle = {
+                    x: x + col.x * scale,
+                    y: boxBottomY,  // Store the BOTTOM of the box
+                    z: z + col.z * scale,
+                    hw: col.hw * scale,
+                    hd: col.hd * scale,
+                    h: boxHeight,
+                    hwp: col.hwp * scale,
+                    hdp: col.hdp * scale
+                };
+
+                obstacles.push(obstacle);
+
+                // Debug first few boxes
+                if (idx < 3) {
+                    console.log(`Box ${idx}: center Y=${col.y}, height=${col.h}, bottom=${boxBottomY.toFixed(2)}, top=${boxTopY.toFixed(2)}`);
+                }
+            });
+
+            console.log(`✓ Loaded ${collisionData.collisions.length} collision boxes`);
+        } catch (e) {
+            console.warn(`No collision data for ${modelPath}`, e);
+        }
+    });
+}
+
+
