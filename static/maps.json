@@ -282,6 +282,21 @@
                 "w": 3,
                 "h": 7,
                 "color": "#887766"
+            },
+            {
+                "type": "model",
+                "path": "/static/models/crate/crate.glb",
+                "x": 0,
+                "y": 0,
+                "z": 0,
+                "scale": 0.5,
+                "rotation": 0,
+                "collision": {
+                    "enabled": true,
+                    "w": 2,
+                    "h": 2,
+                    "d": 2
+                }
             }
         ]
     },
@@ -752,6 +767,388 @@
                 "h": 3,
                 "d": 4,
                 "color": "#887755"
+            }
+        ]
+    },
+    {
+        "id": "white",
+        "name": "all-white",
+        "icon": "🏟",
+        "description": "Very white, hard to see.",
+        "environment": {
+            "groundColor": "#FFFFFF",
+            "gridColor": "#FFFFFF",
+            "wallColor": "#FFFFFF",
+            "fogColor": "FFFFFF",
+            "ambientIntensity": 1,
+            "sunColor": "#FFFFFF"
+        },
+        "arenaSize": 60,
+        "spawns": [
+            {
+                "x": 0,
+                "z": 0
+            },
+            {
+                "x": -18,
+                "z": 0
+            },
+            {
+                "x": 18,
+                "z": 0
+            },
+            {
+                "x": 0,
+                "z": -18
+            },
+            {
+                "x": 0,
+                "z": 18
+            },
+            {
+                "x": -13,
+                "z": -13
+            },
+            {
+                "x": 13,
+                "z": -13
+            },
+            {
+                "x": -13,
+                "z": 13
+            },
+            {
+                "x": 13,
+                "z": 13
+            }
+        ],
+        "objects": [
+            {
+                "type": "cover_wall",
+                "x": 13,
+                "z": -9,
+                "w": 1,
+                "h": 3,
+                "d": 6,
+                "color": "#FFFFFF"
+            },
+            {
+                "type": "cover_wall",
+                "x": -13,
+                "z": -9,
+                "w": 1,
+                "h": 3,
+                "d": 6,
+                "color": "#FFFFFF"
+            },
+            {
+                "type": "cover_wall",
+                "x": 0,
+                "z": -22,
+                "w": 6,
+                "h": 3,
+                "d": 1,
+                "color": "#FFFFFF"
+            },
+            {
+                "type": "cover_wall",
+                "x": 0,
+                "z": 22,
+                "w": 6,
+                "h": 3,
+                "d": 1,
+                "color": "#FFFFFF"
+            },
+            {
+                "type": "cover_wall",
+                "x": 26,
+                "z": 0,
+                "w": 1,
+                "h": 3,
+                "d": 6,
+                "color": "#FFFFFF"
+            },
+            {
+                "type": "cover_wall",
+                "x": -26,
+                "z": 0,
+                "w": 1,
+                "h": 3,
+                "d": 6,
+                "color": "#FFFFFF"
+            },
+            {
+                "type": "pillar",
+                "x": 23,
+                "z": 19,
+                "w": 1.2,
+                "h": 4.5,
+                "d": 1.2,
+                "color": "#FFFFFF"
+            },
+            {
+                "type": "pillar",
+                "x": -23,
+                "z": 19,
+                "w": 1.2,
+                "h": 4.5,
+                "d": 1.2,
+                "color": "#FFFFFF"
+            },
+            {
+                "type": "pillar",
+                "x": 23,
+                "z": -19,
+                "w": 1.2,
+                "h": 4.5,
+                "d": 1.2,
+                "color": "#FFFFFF"
+            },
+            {
+                "type": "pillar",
+                "x": -23,
+                "z": -19,
+                "w": 1.2,
+                "h": 4.5,
+                "d": 1.2,
+                "color": "#FFFFFF"
+            },
+            {
+                "type": "crate",
+                "x": 9,
+                "z": 9,
+                "w": 3.5,
+                "h": 1.5,
+                "d": 3.5,
+                "color": "#FFFFFF"
+            },
+            {
+                "type": "crate",
+                "x": -9,
+                "z": 9,
+                "w": 3.5,
+                "h": 1.5,
+                "d": 3.5,
+                "color": "#FFFFFF"
+            },
+            {
+                "type": "crate",
+                "x": 0,
+                "z": -11,
+                "w": 4.5,
+                "h": 1.2,
+                "d": 4.5,
+                "color": "#FFFFFF"
+            },
+            {
+                "type": "crate",
+                "x": 0,
+                "z": 0,
+                "w": 3.5,
+                "h": 1.5,
+                "d": 3.5,
+                "color": "#FFFFFF"
+            },
+            {
+                "type": "platform",
+                "x": 18,
+                "z": 18,
+                "w": 6,
+                "h": 1.5,
+                "d": 6,
+                "color": "#FFFFFF"
+            },
+            {
+                "type": "platform",
+                "x": -18,
+                "z": 18,
+                "w": 6,
+                "h": 1.5,
+                "d": 6,
+                "color": "#FFFFFF"
+            },
+            {
+                "type": "platform",
+                "x": 18,
+                "z": -18,
+                "w": 6,
+                "h": 1.5,
+                "d": 6,
+                "color": "#FFFFFF"
+            },
+            {
+                "type": "platform",
+                "x": -18,
+                "z": -18,
+                "w": 6,
+                "h": 1.5,
+                "d": 6,
+                "color": "#FFFFFF"
+            },
+            {
+                "type": "platform",
+                "x": 31,
+                "z": 0,
+                "w": 5,
+                "h": 2,
+                "d": 5,
+                "color": "#FFFFFF"
+            },
+            {
+                "type": "platform",
+                "x": -31,
+                "z": 0,
+                "w": 5,
+                "h": 2,
+                "d": 5,
+                "color": "#FFFFFF"
+            },
+            {
+                "type": "platform",
+                "x": 0,
+                "z": 31,
+                "w": 5,
+                "h": 2,
+                "d": 5,
+                "color": "#FFFFFF"
+            },
+            {
+                "type": "platform",
+                "x": 0,
+                "z": -31,
+                "w": 5,
+                "h": 2,
+                "d": 5,
+                "color": "#FFFFFF"
+            },
+            {
+                "type": "gate",
+                "x": 0,
+                "z": -35,
+                "w": 6,
+                "h": 4.5,
+                "color": "#FFFFFF"
+            },
+            {
+                "type": "window_box",
+                "x": -32,
+                "z": 10,
+                "w": 3,
+                "h": 3,
+                "d": 0.7,
+                "color": "#FFFFFF"
+            },
+            {
+                "type": "arch",
+                "x": 5,
+                "z": 5,
+                "w": 5,
+                "h": 4,
+                "color": "#FFFFFF"
+            },
+            {
+                "type": "watchtower",
+                "x": 30,
+                "z": 28,
+                "w": 3,
+                "h": 7,
+                "color": "#FFFFFF"
+            }
+        ]
+    },
+    {
+        "id": "blocks",
+        "name": "Blocks",
+        "icon": "🏟",
+        "description": "Jump! Jump! Jump!",
+        "environment": {
+            "groundColor": "#4a7c3f",
+            "gridColor": "#3a6a2f",
+            "wallColor": "#d4b896",
+            "fogColor": "#87ceeb",
+            "ambientIntensity": 0.6,
+            "sunColor": "#fff5e0"
+        },
+        "arenaSize": 80,
+        "spawns": [
+            {
+                "x": 0,
+                "z": 0
+            },
+            {
+                "x": -18,
+                "z": 0
+            },
+            {
+                "x": 18,
+                "z": 0
+            },
+            {
+                "x": 0,
+                "z": -18
+            },
+            {
+                "x": 0,
+                "z": 18
+            },
+            {
+                "x": -13,
+                "z": -13
+            },
+            {
+                "x": 13,
+                "z": -13
+            },
+            {
+                "x": -13,
+                "z": 13
+            },
+            {
+                "x": 13,
+                "z": 13
+            }
+        ],
+        "objects": [
+            {
+                "type": "platform",
+                "x": 0,
+                "z": 0,
+                "w": 4,
+                "h": 1.5,
+                "d": 4,
+                "color": "#f0d878"
+            }
+        ]
+    },
+    {
+        "id": "model test",
+        "name": "modeltest",
+        "icon": "🏟",
+        "description": "test test test",
+        "environment": {
+            "groundColor": "#4a7c3f",
+            "gridColor": "#3a6a2f",
+            "wallColor": "#d4b896",
+            "fogColor": "#87ceeb",
+            "ambientIntensity": 0.6,
+            "sunColor": "#fff5e0"
+        },
+        "arenaSize": 80,
+        "spawns": [
+            {
+                "x": 0,
+                "z": 0
+            }
+        ],
+        "objects": [
+            {
+                "type": "model",
+                "path": "/static/models/cratewall/cratewall.glb",
+                "x": 10,
+                "y": 0,
+                "z": 10,
+                "scale": 1,
+                "rotation": 0
             }
         ]
     }
