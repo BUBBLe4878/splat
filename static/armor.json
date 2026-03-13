@@ -1,4 +1,4 @@
-[
+[/*
   {
     "id": "helmet_basic",
     "slot": "head",
@@ -143,4 +143,5 @@
     "protection": 7,
     "desc": "Full-finger tactical gloves."
   }
+  */
 ]
