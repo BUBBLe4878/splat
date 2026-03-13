@@ -914,8 +914,8 @@ body.xhair-kill #xhair-dot {
 
 #lj-base {
     position: absolute;
-    width: 96px;
-    height: 96px;
+    width: 180px;
+    height: 180px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.07);
     border: 2px solid rgba(255, 255, 255, 0.2);
@@ -926,8 +926,8 @@ body.xhair-kill #xhair-dot {
 
 #lj-knob {
     position: absolute;
-    width: 44px;
-    height: 44px;
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
     background: rgba(255, 107, 53, 0.7);
     border: 2px solid #ff6b35;
@@ -948,9 +948,9 @@ body.xhair-kill #xhair-dot {
 #fire-btn {
     position: absolute;
     bottom: 26px;
-    right: 26px;
-    width: 78px;
-    height: 78px;
+    right: 126px;
+    width: 130px;
+    height: 130px;
     border-radius: 50%;
     background: rgba(255, 107, 53, 0.85);
     border: 3px solid #ff6b35;
@@ -971,10 +971,10 @@ body.xhair-kill #xhair-dot {
 
 #aim-btn {
     position: absolute;
-    bottom: 30px;
-    right: 116px;
-    width: 54px;
-    height: 54px;
+    bottom: 170px;
+    right: 28px;
+    width: 70px;
+    height: 70px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.12);
     border: 2px solid rgba(255, 255, 255, 0.25);
@@ -995,10 +995,10 @@ body.xhair-kill #xhair-dot {
 
 #jump-btn {
     position: absolute;
-    bottom: 96px;
-    right: 26px;
-    width: 50px;
-    height: 50px;
+    bottom: 36px;
+    right: 36px;
+    width: 70px;
+    height: 70px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.12);
     border: 2px solid rgba(255, 255, 255, 0.25);
@@ -1013,10 +1013,10 @@ body.xhair-kill #xhair-dot {
 
 #reload-btn-t {
     position: absolute;
-    bottom: 96px;
-    right: 86px;
-    width: 42px;
-    height: 42px;
+    bottom: 176px;
+    right: 196px;
+    width: 70px;
+    height: 70px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.1);
     border: 2px solid rgba(255, 255, 255, 0.2);
@@ -1852,8 +1852,8 @@ body.xhair-kill #xhair-dot {
 
 #minimap-wrap {
     position: fixed;
-    bottom: 16px;
-    right: 16px;
+    top: 70px;  /* Move down from 15px to 70px */
+    right: 15px;
     z-index: 25;
     pointer-events: none;
     display: none;
