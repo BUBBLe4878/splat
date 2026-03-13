@@ -240,7 +240,7 @@
     "cost": 999000999,
     "ammo": 3200,
     "rateLimit": 0.06,
-    "speed": 200,
+    "speed": 160,
     "mode": "single",
     "dmg": 100,
     "reloadMs": 1500,
