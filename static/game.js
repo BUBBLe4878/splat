@@ -25,8 +25,8 @@ function hexToInt(hex) {
     if (typeof hex === "number" && hostSettings.mapId !== "blocks") return hex;
     return parseInt((hex || "0").replace("#", ""), 16);
 
-    
-    }
+
+}
 
 async function loadMaps() {
     try {
@@ -887,14 +887,28 @@ function spawnWave(wave) {
         hostSettings.botCount > 0 ? hostSettings.botCount * 2 : 99,
     );
     for (let i = 0; i < count; i++) {
-        let x,
-            z,
-            t = 0;
+        let x, z, attempts = 0;
+        const maxAttempts = 100;
+
+        // Keep trying until we find a valid spawn position
         do {
             x = (Math.random() - 0.5) * 60;
             z = (Math.random() - 0.5) * 60;
-            t++;
-        } while (Math.sqrt(x * x + z * z) < 14 && t < 60);
+            attempts++;
+
+            // Fallback: if we can't find a spot after many attempts, use a safe default
+            if (attempts >= maxAttempts) {
+                x = 0;
+                z = 0;
+                break;
+            }
+        } while (
+            // Too close to player
+            Math.sqrt(x * x + z * z) < 14 ||
+            // Collides with obstacles
+            playerHitsObs(x, z, 1.7)
+        );
+
         gs.enemies.push(makeEnemy(x, z));
     }
     const el = document.getElementById("wave-ann");
@@ -3489,6 +3503,7 @@ const _mmC = document.getElementById("minimap"),
     _mm = _mmC ? _mmC.getContext("2d") : null;
 const MMW = 148,
     MMR = 22;
+
 function _mmDraw() {
     if (!_mm || !gs.running) return;
     const W = MMW;
@@ -3504,23 +3519,23 @@ function _mmDraw() {
 
     const M = getMapDef(hostSettings.mapId);
     const arenaSize = M.arenaSize || 80;
+    
+    // Convert world coords to minimap coords (no rotation)
     const toMM = (wx, wz) => {
         const dx = wx - yawObj.position.x;
         const dz = wz - yawObj.position.z;
-        const a = -gs.yaw;
-        const rx = dx * Math.cos(a) - dz * Math.sin(a);
-        const rz = dx * Math.sin(a) + dz * Math.cos(a);
         return {
-            x: W / 2 + (rx / MMR) * (W / 2),
-            y: W / 2 + (rz / MMR) * (W / 2),
+            x: W / 2 + (dx / MMR) * (W / 2),
+            y: W / 2 + (dz / MMR) * (W / 2),
         };
     };
 
     // Draw arena border
-    const cornerTL = toMM(-arenaSize/2, -arenaSize/2);
-    const cornerBR = toMM(arenaSize/2, arenaSize/2);
-    const cornerTR = toMM(arenaSize/2, -arenaSize/2);
-    const cornerBL = toMM(-arenaSize/2, arenaSize/2);
+    const halfArena = arenaSize / 2;
+    const cornerTL = toMM(-halfArena, -halfArena);
+    const cornerTR = toMM(halfArena, -halfArena);
+    const cornerBR = toMM(halfArena, halfArena);
+    const cornerBL = toMM(-halfArena, halfArena);
     _mm.beginPath();
     _mm.moveTo(cornerTL.x, cornerTL.y);
     _mm.lineTo(cornerTR.x, cornerTR.y);
@@ -3567,7 +3582,7 @@ function _mmDraw() {
     (M.spawns || []).forEach(sp => {
         const p = toMM(sp.x, sp.z);
         _mm.beginPath();
-        _mm.arc(p.x, p.y, 2, 0, Math.PI * -2);
+        _mm.arc(p.x, p.y, 2, 0, Math.PI * 2);
         _mm.fillStyle = "rgba(255,255,100,0.25)";
         _mm.fill();
     });
@@ -3577,12 +3592,11 @@ function _mmDraw() {
         if (!e.alive) return;
         const p = toMM(e.x, e.z);
         _mm.beginPath();
-        _mm.arc(p.x, p.y, 3.5, 0, Math.PI * -2);
+        _mm.arc(p.x, p.y, 3.5, 0, Math.PI * 2);
         _mm.fillStyle = "#ff4444";
         _mm.fill();
-        // Little dot center
         _mm.beginPath();
-        _mm.arc(p.x, p.y, 1.2, 0, Math.PI * -2);
+        _mm.arc(p.x, p.y, 1.2, 0, Math.PI * 2);
         _mm.fillStyle = "#ff9999";
         _mm.fill();
     });
@@ -3593,21 +3607,21 @@ function _mmDraw() {
             if (!rc.alive || !rc.pos) return;
             const p = toMM(rc.pos.x, rc.pos.z);
             _mm.beginPath();
-            _mm.arc(p.x, p.y, 3.5, 0, Math.PI * -2);
+            _mm.arc(p.x, p.y, 3.5, 0, Math.PI * 2);
             _mm.fillStyle = rc.team === 0 ? "#ff8844" : "#44aaff";
             _mm.fill();
             _mm.beginPath();
-            _mm.arc(p.x, p.y, 1.2, 0, Math.PI * -2);
+            _mm.arc(p.x, p.y, 1.2, 0, Math.PI * 2);
             _mm.fillStyle = "#ffffff";
             _mm.fill();
         });
     } catch(e) {}
 
-    // Player arrow — always center, rotates with view (arrow always points "up" = forward)
+    // Player arrow at center, rotated to show direction
     const cx = W / 2, cy = W / 2;
     _mm.save();
     _mm.translate(cx, cy);
-    // No rotation needed — map rotates around player so forward is always up
+    _mm.rotate(gs.yaw); // Rotate arrow based on player's yaw
     _mm.beginPath();
     _mm.moveTo(0, -8);
     _mm.lineTo(5, 5);
