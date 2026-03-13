@@ -99,6 +99,24 @@
           >
         </div>
       </div>
+      <!-- ADD THESE TWO ROWS HERE: -->
+      <div class="srow">
+        <span class="srow-lbl">🔄 Auto Reload</span>
+        <div
+          class="toggle on"
+          id="auto-reload-tog"
+          onclick="toggleAutoReload(event)"
+        >
+          <div class="tknob"></div>
+        </div>
+      </div>
+      <div class="srow">
+        <span class="srow-lbl">🔥 Auto Fire</span>
+          <div class="toggle" id="auto-fire-tog" onclick="toggleAutoFire(event)">
+          <div class="tknob"></div>
+        </div>
+      </div>
+      <!-- END OF NEW ROWS -->
       <div
         class="srow"
         style="font-size: 11px; opacity: 0.35; padding-top: 10px; border: none"
@@ -574,6 +592,7 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script src="static/game.js"></script>
   </body>
