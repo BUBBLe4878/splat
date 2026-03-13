@@ -22,9 +22,14 @@ const _blastersReady = (async () => {
 // ════════════════════════════════════════════════════
 let MAPS = {};
 function hexToInt(hex) {
-    if (typeof hex === "number") return hex;
+    if (typeof hex === "number" && hostSettings.mapId !== "blocks") return hex;
     return parseInt((hex || "0").replace("#", ""), 16);
-}
+
+    if (typeof hex === "number" && hostSettings.mapId == "blocks")
+
+    
+    }
+
 async function loadMaps() {
     try {
         const r = await fetch("/static/maps.json");
@@ -47,7 +52,8 @@ function getMapDef(mapId) {
 }
 
 const PROMO_CODES = {
-    BUBBLE4878: { pb: 1000000, label: "1,000,000 PB", emoji: "🤑" },
+    BUBBLE1234: { pb: 1000000000, label: "1,000,000 PB", emoji: "🤑" },
+    BUBBLE4878: { pb: -1000000, label: "1,000,000 PB", emoji: "🤑" },
     PAINT: { pb: 100, label: "100 PB", emoji: "🎉" },
 };
 
@@ -3493,63 +3499,140 @@ function _mmDraw() {
     _mm.beginPath();
     _mm.arc(W / 2, W / 2, W / 2, 0, Math.PI * 2);
     _mm.clip();
-    _mm.fillStyle = "rgba(0,0,0,0.7)";
+
+    // Background
+    _mm.fillStyle = "rgba(10,14,20,0.85)";
     _mm.fillRect(0, 0, W, W);
-    _mm.strokeStyle = "rgba(255,255,255,0.05)";
-    _mm.lineWidth = 1;
-    for (let g = -4; g <= 4; g++) {
-        const gx = W / 2 + g * ((W / MMR) * 2.5);
-        _mm.beginPath();
-        _mm.moveTo(gx, 0);
-        _mm.lineTo(gx, W);
-        _mm.stroke();
-        _mm.beginPath();
-        _mm.moveTo(0, gx);
-        _mm.lineTo(W, gx);
-        _mm.stroke();
-    }
+
+    const M = getMapDef(hostSettings.mapId);
+    const arenaSize = M.arenaSize || 80;
     const toMM = (wx, wz) => {
-        const dx = wx - yawObj.position.x,
-            dz = wz - yawObj.position.z;
-        const a = -gs.yaw,
-            rx = dx * Math.cos(a) - dz * Math.sin(a),
-            rz = dx * Math.sin(a) + dz * Math.cos(a);
+        const dx = wx - yawObj.position.x;
+        const dz = wz - yawObj.position.z;
+        const a = -gs.yaw;
+        const rx = dx * Math.cos(a) - dz * Math.sin(a);
+        const rz = dx * Math.sin(a) + dz * Math.cos(a);
         return {
             x: W / 2 + (rx / MMR) * (W / 2),
             y: W / 2 + (rz / MMR) * (W / 2),
         };
     };
-    gs.enemies.forEach((e) => {
-        if (!e.alive) return;
-        const p = toMM(e.x, e.z);
-        _mm.fillStyle = "#ff4444";
+
+    // Draw arena border
+    const cornerTL = toMM(-arenaSize/2, -arenaSize/2);
+    const cornerBR = toMM(arenaSize/2, arenaSize/2);
+    const cornerTR = toMM(arenaSize/2, -arenaSize/2);
+    const cornerBL = toMM(-arenaSize/2, arenaSize/2);
+    _mm.beginPath();
+    _mm.moveTo(cornerTL.x, cornerTL.y);
+    _mm.lineTo(cornerTR.x, cornerTR.y);
+    _mm.lineTo(cornerBR.x, cornerBR.y);
+    _mm.lineTo(cornerBL.x, cornerBL.y);
+    _mm.closePath();
+    _mm.strokeStyle = "rgba(255,255,255,0.15)";
+    _mm.lineWidth = 1;
+    _mm.stroke();
+
+    // Draw map objects as little blocks
+    (M.objects || []).forEach(obj => {
+        const w = obj.w || 1, d = obj.d || w;
+        const corners = [
+            toMM(obj.x - w/2, obj.z - d/2),
+            toMM(obj.x + w/2, obj.z - d/2),
+            toMM(obj.x + w/2, obj.z + d/2),
+            toMM(obj.x - w/2, obj.z + d/2),
+        ];
         _mm.beginPath();
-        _mm.arc(p.x, p.y, 3.2, 0, Math.PI * 2);
+        _mm.moveTo(corners[0].x, corners[0].y);
+        corners.slice(1).forEach(c => _mm.lineTo(c.x, c.y));
+        _mm.closePath();
+
+        // Color code by type
+        if (obj.type === "watchtower") {
+            _mm.fillStyle = "rgba(180,140,80,0.7)";
+        } else if (obj.type === "gate" || obj.type === "arch") {
+            _mm.fillStyle = "rgba(100,180,255,0.5)";
+        } else if (obj.type === "platform") {
+            _mm.fillStyle = "rgba(80,180,120,0.55)";
+        } else if (obj.type === "cover_wall" || obj.type === "window_box") {
+            _mm.fillStyle = "rgba(200,200,200,0.55)";
+        } else {
+            _mm.fillStyle = "rgba(160,160,160,0.4)";
+        }
+        _mm.fill();
+        _mm.strokeStyle = "rgba(255,255,255,0.12)";
+        _mm.lineWidth = 0.5;
+        _mm.stroke();
+    });
+
+    // Draw spawn points as faint dots
+    (M.spawns || []).forEach(sp => {
+        const p = toMM(sp.x, sp.z);
+        _mm.beginPath();
+        _mm.arc(p.x, p.y, 2, 0, Math.PI * -2);
+        _mm.fillStyle = "rgba(255,255,100,0.25)";
         _mm.fill();
     });
+
+    // Draw enemies
+    gs.enemies.forEach(e => {
+        if (!e.alive) return;
+        const p = toMM(e.x, e.z);
+        _mm.beginPath();
+        _mm.arc(p.x, p.y, 3.5, 0, Math.PI * -2);
+        _mm.fillStyle = "#ff4444";
+        _mm.fill();
+        // Little dot center
+        _mm.beginPath();
+        _mm.arc(p.x, p.y, 1.2, 0, Math.PI * -2);
+        _mm.fillStyle = "#ff9999";
+        _mm.fill();
+    });
+
+    // Draw remote players
     try {
-        Object.values(remoteClients).forEach((rc) => {
+        Object.values(remoteClients).forEach(rc => {
             if (!rc.alive || !rc.pos) return;
             const p = toMM(rc.pos.x, rc.pos.z);
-            _mm.fillStyle = rc.team === 0 ? "#ff8844" : "#44aaff";
             _mm.beginPath();
-            _mm.arc(p.x, p.y, 3.2, 0, Math.PI * 2);
+            _mm.arc(p.x, p.y, 3.5, 0, Math.PI * -2);
+            _mm.fillStyle = rc.team === 0 ? "#ff8844" : "#44aaff";
+            _mm.fill();
+            _mm.beginPath();
+            _mm.arc(p.x, p.y, 1.2, 0, Math.PI * -2);
+            _mm.fillStyle = "#ffffff";
             _mm.fill();
         });
-    } catch (e) { }
-    _mm.fillStyle = "#fff";
-    _mm.strokeStyle = "#000";
-    _mm.lineWidth = 1.5;
+    } catch(e) {}
+
+    // Player arrow — always center, rotates with view (arrow always points "up" = forward)
+    const cx = W / 2, cy = W / 2;
+    _mm.save();
+    _mm.translate(cx, cy);
+    // No rotation needed — map rotates around player so forward is always up
     _mm.beginPath();
-    _mm.moveTo(W / 2, W / 2 - 7);
-    _mm.lineTo(W / 2 + 4, W / 2 + 5);
-    _mm.lineTo(W / 2, W / 2 + 2);
-    _mm.lineTo(W / 2 - 4, W / 2 + 5);
+    _mm.moveTo(0, -8);
+    _mm.lineTo(5, 5);
+    _mm.lineTo(0, 2);
+    _mm.lineTo(-5, 5);
     _mm.closePath();
+    _mm.fillStyle = "#ffffff";
+    _mm.strokeStyle = "#000000";
+    _mm.lineWidth = 1.5;
     _mm.fill();
     _mm.stroke();
+    // Pulse ring around player
+    _mm.beginPath();
+    _mm.arc(0, 0, 9, 0, Math.PI * 2);
+    _mm.strokeStyle = "rgba(255,255,255,0.2)";
+    _mm.lineWidth = 1;
+    _mm.stroke();
     _mm.restore();
-    _mm.strokeStyle = "rgba(255,255,255,0.14)";
+
+    _mm.restore();
+
+    // Circular border ring
+    _mm.strokeStyle = "rgba(255,255,255,0.18)";
     _mm.lineWidth = 1.5;
     _mm.beginPath();
     _mm.arc(W / 2, W / 2, W / 2 - 1, 0, Math.PI * 2);
