@@ -588,10 +588,10 @@ function playerHitsObs(x, z, py) {
 
             // Debug logging when near a collision
             if (aboveBottom && belowTop) {
-                console.log(`COLLISION! Feet at ${feet.toFixed(2)}, box: ${boxBottom.toFixed(2)} to ${boxTop.toFixed(2)}`);
+                
                 return true;
             } else if (xCollide && zCollide) {
-                console.log(`NO COLLISION - Feet at ${feet.toFixed(2)}, box: ${boxBottom.toFixed(2)} to ${boxTop.toFixed(2)}, above=${aboveBottom}, below=${belowTop}`);
+               
             }
         }
     }
