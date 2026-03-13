@@ -1,4 +1,4 @@
-[
+[/*
   {
     "id": "bandage",
     "type": "consumable",
@@ -109,4 +109,5 @@
     "effect": "1HP/3s passive",
     "desc": "Passive health regen forever."
   }
+    */
 ]
