@@ -25,8 +25,6 @@ function hexToInt(hex) {
     if (typeof hex === "number" && hostSettings.mapId !== "blocks") return hex;
     return parseInt((hex || "0").replace("#", ""), 16);
 
-    if (typeof hex === "number" && hostSettings.mapId == "blocks")
-
     
     }
 
